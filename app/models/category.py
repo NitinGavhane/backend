@@ -1,22 +1,22 @@
 import uuid
-from sqlalchemy import Column, String, Integer
+from datetime import datetime, timezone
+
+from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
 
 
 class Category(Base):
     __tablename__ = "categories"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = Column(String(100), nullable=False, unique=True)
-    icon = Column(String(100), nullable=True)
-    color = Column(String(50), nullable=True)
-    product_count = Column(Integer, default=0)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    description: Mapped[str] = mapped_column(String(500), nullable=True)
+    image_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "icon": self.icon or "checkroom",
-            "color": self.color or "#1A1A2E",
-            "productCount": self.product_count,
-        }
+    products = relationship("Product", back_populates="category")

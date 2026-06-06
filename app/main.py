@@ -1,31 +1,68 @@
+import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import get_settings
-from app.core.database import Base, engine
-from app.api import (
-    auth, products, categories, cart, orders,
-    addresses, users, wishlist, wallet, reviews, notifications,
-)
+from sqlalchemy.orm import Session
 
-settings = get_settings()
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+
+from app.api import admin, auth, cart, categories, orders, payments, products, referral, wallet
+from app.core.config import settings
+from app.core.database import Base, SessionLocal, engine
+from app.core.security import hash_password
+from app.models.user import User
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
+    try:
+        Base.metadata.create_all(bind=engine)
+        db: Session = SessionLocal()
+        try:
+            admin_user = db.query(User).filter(User.role == "admin").first()
+            if not admin_user:
+                admin_user = User(
+                    full_name="Admin",
+                    email="admin@garment.com",
+                    password_hash=hash_password("Admin@1234"),
+                    role="admin",
+                    referral_code="ADMIN000",
+                    is_verified=True,
+                )
+                db.add(admin_user)
+                db.commit()
+                print("Admin user seeded: admin@garment.com / Admin@1234")
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"DB init skipped (first request will retry): {e}")
     yield
 
 
 app = FastAPI(
-    title=settings.app_name,
-    version="1.0.0",
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    description="Backend API for Garment E-commerce Platform — User & Admin endpoints",
+    docs_url="/docs",
+    redoc_url="/redoc",
     lifespan=lifespan,
+    openapi_tags=[
+        {"name": "Admin", "description": "Admin operations — dashboard, user management, product & category CRUD"},
+        {"name": "Authentication", "description": "User login, registration, token refresh"},
+        {"name": "Products", "description": "Product listing and retrieval"},
+        {"name": "Categories", "description": "Category listing and retrieval"},
+        {"name": "Cart", "description": "Cart management — add, update, remove items"},
+        {"name": "Orders", "description": "Order creation and history"},
+        {"name": "Payments", "description": "Payment processing and verification"},
+        {"name": "Referral", "description": "Referral code and earnings management"},
+        {"name": "Wallet", "description": "Wallet balance and transactions"},
+    ],
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[settings.CORS_ORIGINS],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,52 +73,17 @@ app.include_router(products.router)
 app.include_router(categories.router)
 app.include_router(cart.router)
 app.include_router(orders.router)
-app.include_router(addresses.router)
-app.include_router(users.router)
-app.include_router(wishlist.router)
+app.include_router(payments.router)
+app.include_router(referral.router)
 app.include_router(wallet.router)
-app.include_router(reviews.router)
-app.include_router(notifications.router)
+app.include_router(admin.router)
 
 
-@app.get("/api/health")
-def health_check():
-    return {"status": "ok", "service": settings.app_name}
+@app.get("/")
+def root():
+    return {"message": "Garment E-commerce Platform API", "version": settings.APP_VERSION, "docs": "/docs"}
 
 
-@app.get("/api/banners")
-def get_banners():
-    return {
-        "banners": [
-            {
-                "title": "Summer Collection",
-                "subtitle": "Up to 50% Off",
-                "tag": "Trending Now",
-            },
-            {
-                "title": "New Arrivals",
-                "subtitle": "Spring 2026 Styles",
-                "tag": "Fresh Drops",
-            },
-            {
-                "title": "Festival Edit",
-                "subtitle": "Ethnic Wear Sale",
-                "tag": "Limited Time",
-            },
-        ]
-    }
-
-
-@app.get("/api/payment-methods")
-def get_payment_methods():
-    return {
-        "paymentMethods": [
-            {"name": "Google Pay", "isPopular": True},
-            {"name": "PhonePe", "isPopular": True},
-            {"name": "Paytm", "isPopular": True},
-            {"name": "Credit Card", "isPopular": False},
-            {"name": "Debit Card", "isPopular": False},
-            {"name": "Net Banking", "isPopular": False},
-            {"name": "Cash on Delivery", "isPopular": False},
-        ]
-    }
+@app.get("/health")
+def health():
+    return {"status": "healthy"}

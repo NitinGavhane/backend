@@ -1,28 +1,23 @@
 import uuid
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, JSON
-from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
+
+from sqlalchemy import DateTime, ForeignKey, Integer
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
 
 
 class CartItem(Base):
     __tablename__ = "cart_items"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    product_id = Column(String, ForeignKey("products.id"), nullable=False)
-    quantity = Column(Integer, default=1)
-    selected_size = Column(String(50), nullable=False)
-    selected_color = Column(String(100), nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
+    variant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("product_variants.id"), nullable=True)
+    quantity: Mapped[int] = mapped_column(Integer, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
-    user = relationship("User", backref="cart_items")
+    user = relationship("User", back_populates="cart_items")
     product = relationship("Product")
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "product": self.product.to_dict() if self.product else None,
-            "quantity": self.quantity,
-            "selectedSize": self.selected_size,
-            "selectedColor": self.selected_color,
-            "totalPrice": round((self.product.price if self.product else 0) * self.quantity, 2),
-        }
+    variant = relationship("ProductVariant")

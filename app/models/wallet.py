@@ -1,27 +1,23 @@
 import uuid
-from sqlalchemy import Column, String, Float, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
+
+from sqlalchemy import DateTime, Enum, Float, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
 
 
 class WalletTransaction(Base):
     __tablename__ = "wallet_transactions"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    amount = Column(Float, nullable=False)
-    type = Column(String(50), nullable=False)
-    description = Column(String(500), nullable=True)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    transaction_type: Mapped[str] = mapped_column(Enum("credit", "debit", name="transaction_type"), nullable=False)
+    amount: Mapped[float] = mapped_column(Float, nullable=False)
+    source: Mapped[str] = mapped_column(String(100), nullable=True)
+    reference_id: Mapped[str] = mapped_column(String(255), nullable=True)
+    description: Mapped[str] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
-    user = relationship("User", backref="wallet_transactions")
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "amount": self.amount,
-            "type": self.type,
-            "description": self.description or "",
-            "createdAt": self.created_at.isoformat() if self.created_at else None,
-        }
+    user = relationship("User", back_populates="wallet_transactions")

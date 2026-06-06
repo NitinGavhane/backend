@@ -1,0 +1,15 @@
+{
+  "buildCommand": null,
+  "outputDirectory": null,
+  "devCommand": null,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index.py" }
+  ],
+  "functions": {
+    "api/index.py": {
+      "memory": 512,
+      "maxDuration": 30
+    }
+  }
+}

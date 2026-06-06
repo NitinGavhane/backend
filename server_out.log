@@ -1,0 +1,1185 @@
+2026-06-05 11:56:57,929 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-06-05 11:56:57,930 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-06-05 11:56:57,938 INFO sqlalchemy.engine.Engine select current_schema()
+2026-06-05 11:56:57,939 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-06-05 11:56:57,945 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-06-05 11:56:57,946 INFO sqlalchemy.engine.Engine [raw sql] {}
+2026-06-05 11:56:57,948 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 11:56:57,952 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,954 INFO sqlalchemy.engine.Engine [generated in 0.00162s] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,965 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,966 INFO sqlalchemy.engine.Engine [cached since 0.01369s ago] {'table_name': 'orders', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,967 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,967 INFO sqlalchemy.engine.Engine [cached since 0.01479s ago] {'table_name': 'order_items', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,968 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,968 INFO sqlalchemy.engine.Engine [cached since 0.01578s ago] {'table_name': 'products', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,969 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,969 INFO sqlalchemy.engine.Engine [cached since 0.0167s ago] {'table_name': 'product_variants', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,969 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,971 INFO sqlalchemy.engine.Engine [cached since 0.01869s ago] {'table_name': 'product_images', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,972 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,972 INFO sqlalchemy.engine.Engine [cached since 0.02008s ago] {'table_name': 'cart_items', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,973 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,973 INFO sqlalchemy.engine.Engine [cached since 0.02112s ago] {'table_name': 'referral_earnings', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,974 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,974 INFO sqlalchemy.engine.Engine [cached since 0.02213s ago] {'table_name': 'wallet_transactions', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,975 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,975 INFO sqlalchemy.engine.Engine [cached since 0.02311s ago] {'table_name': 'categories', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,976 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,976 INFO sqlalchemy.engine.Engine [cached since 0.02416s ago] {'table_name': 'payments', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,978 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,979 INFO sqlalchemy.engine.Engine [cached since 0.02653s ago] {'table_name': 'gst_invoices', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,980 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,981 INFO sqlalchemy.engine.Engine [generated in 0.00031s] {'typname_1': 'user_role', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,982 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,982 INFO sqlalchemy.engine.Engine [cached since 0.001645s ago] {'typname_1': 'order_status', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,983 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,983 INFO sqlalchemy.engine.Engine [cached since 0.002844s ago] {'typname_1': 'payment_status', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,984 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,984 INFO sqlalchemy.engine.Engine [cached since 0.004029s ago] {'typname_1': 'reward_status', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,985 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,985 INFO sqlalchemy.engine.Engine [cached since 0.005199s ago] {'typname_1': 'transaction_type', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,986 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = %(typname_1)s AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2026-06-05 11:56:57,987 INFO sqlalchemy.engine.Engine [cached since 0.006397s ago] {'typname_1': 'payment_status_enum', 'nspname_1': 'pg_catalog'}
+2026-06-05 11:56:57,987 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 11:56:58,015 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 11:56:58,017 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.role = %(role_1)s 
+ LIMIT %(param_1)s
+2026-06-05 11:56:58,017 INFO sqlalchemy.engine.Engine [generated in 0.00040s] {'role_1': 'admin', 'param_1': 1}
+2026-06-05 11:56:58,288 INFO sqlalchemy.engine.Engine INSERT INTO users (id, full_name, email, phone, password_hash, role, referral_code, referred_by, wallet_balance, is_verified, created_at, updated_at) VALUES (%(id)s::UUID, %(full_name)s, %(email)s, %(phone)s, %(password_hash)s, %(role)s, %(referral_code)s, %(referred_by)s, %(wallet_balance)s, %(is_verified)s, %(created_at)s, %(updated_at)s)
+2026-06-05 11:56:58,289 INFO sqlalchemy.engine.Engine [generated in 0.00054s] {'id': UUID('5e791e67-d90e-4c4c-b424-700bec16b1d1'), 'full_name': 'Admin', 'email': 'admin@garment.com', 'phone': None, 'password_hash': '$2b$12$uxwD1v.17bC5zSJqNUZWOOIjFZDEAsZV50iCILMMNbWBsOGAWDKWy', 'role': 'admin', 'referral_code': 'ADMIN000', 'referred_by': None, 'wallet_balance': 0.0, 'is_verified': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 26, 58, 288849, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 26, 58, 288852, tzinfo=datetime.timezone.utc)}
+2026-06-05 11:56:58,302 INFO sqlalchemy.engine.Engine COMMIT
+Admin user seeded: admin@garment.com / Admin@1234
+INFO:     127.0.0.1:53073 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53073 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53073 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53073 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62696 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62696 - "GET /openapi.json HTTP/1.1" 200 OK
+2026-06-05 12:05:02,722 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:02,723 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:05:02,724 INFO sqlalchemy.engine.Engine [generated in 0.00050s] {'email_1': 'admin@garment.com', 'param_1': 1}
+2026-06-05 12:05:03,012 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:63277 - "POST /api/v1/admin/login HTTP/1.1" 200 OK
+2026-06-05 12:05:43,090 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:43,090 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:05:43,091 INFO sqlalchemy.engine.Engine [cached since 40.37s ago] {'email_1': 'testuser_oqwo@example.com', 'param_1': 1}
+2026-06-05 12:05:43,314 INFO sqlalchemy.engine.Engine INSERT INTO users (id, full_name, email, phone, password_hash, role, referral_code, referred_by, wallet_balance, is_verified, created_at, updated_at) VALUES (%(id)s::UUID, %(full_name)s, %(email)s, %(phone)s, %(password_hash)s, %(role)s, %(referral_code)s, %(referred_by)s, %(wallet_balance)s, %(is_verified)s, %(created_at)s, %(updated_at)s)
+2026-06-05 12:05:43,326 INFO sqlalchemy.engine.Engine [generated in 0.01227s] {'id': UUID('e6922435-8c64-429a-927a-815ae0d655f0'), 'full_name': 'Test User oqwo', 'email': 'testuser_oqwo@example.com', 'phone': '99999oqwo', 'password_hash': '$2b$12$VU1y6zhBQhK9nwoRf1MQEOt5k9b9sRqcwp1PboGTXSPEEek.HFD4C', 'role': 'customer', 'referral_code': 'GARMWJIVJZ', 'referred_by': None, 'wallet_balance': 0.0, 'is_verified': False, 'created_at': datetime.datetime(2026, 6, 5, 6, 35, 43, 314632, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 35, 43, 314634, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:05:43,328 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:43,330 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:43,331 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.phone, users.password_hash, users.role, users.referral_code, users.referred_by, users.wallet_balance, users.is_verified, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(pk_1)s::UUID
+2026-06-05 12:05:43,331 INFO sqlalchemy.engine.Engine [generated in 0.00034s] {'pk_1': UUID('e6922435-8c64-429a-927a-815ae0d655f0')}
+2026-06-05 12:05:43,334 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59077 - "POST /api/v1/auth/register HTTP/1.1" 200 OK
+2026-06-05 12:05:43,791 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:43,801 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:05:43,801 INFO sqlalchemy.engine.Engine [cached since 41.08s ago] {'email_1': 'testuser_oqwo@example.com', 'param_1': 1}
+2026-06-05 12:05:43,803 INFO sqlalchemy.engine.Engine UPDATE users SET is_verified=%(is_verified)s, updated_at=%(updated_at)s WHERE users.id = %(users_id)s::UUID
+2026-06-05 12:05:43,804 INFO sqlalchemy.engine.Engine [generated in 0.00038s] {'is_verified': True, 'updated_at': datetime.datetime(2026, 6, 5, 6, 35, 43, 803714, tzinfo=datetime.timezone.utc), 'users_id': UUID('e6922435-8c64-429a-927a-815ae0d655f0')}
+2026-06-05 12:05:43,813 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:59078 - "POST /api/v1/auth/verify-otp HTTP/1.1" 200 OK
+2026-06-05 12:05:44,291 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:44,295 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:05:44,295 INFO sqlalchemy.engine.Engine [cached since 41.57s ago] {'email_1': 'testuser_oqwo@example.com', 'param_1': 1}
+2026-06-05 12:05:44,520 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59079 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+2026-06-05 12:05:44,991 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:44,992 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:44,993 INFO sqlalchemy.engine.Engine [generated in 0.00056s] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:44,994 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59080 - "GET /api/v1/auth/me HTTP/1.1" 200 OK
+2026-06-05 12:05:45,448 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:45,462 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:45,463 INFO sqlalchemy.engine.Engine [cached since 0.4707s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:45,465 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59081 - "POST /api/v1/auth/refresh-token HTTP/1.1" 200 OK
+2026-06-05 12:05:45,931 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:45,938 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.is_active = true
+2026-06-05 12:05:45,938 INFO sqlalchemy.engine.Engine [generated in 0.00043s] {}
+2026-06-05 12:05:45,946 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59082 - "GET /api/v1/categories HTTP/1.1" 200 OK
+2026-06-05 12:05:46,401 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:46,413 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at, categories_1.id AS categories_1_id, categories_1.name AS categories_1_name, categories_1.slug AS categories_1_slug, categories_1.description AS categories_1_description, categories_1.image_url AS categories_1_image_url, categories_1.is_active AS categories_1_is_active, categories_1.created_at AS categories_1_created_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price, product_images_1.id AS product_images_1_id, product_images_1.product_id AS product_images_1_product_id, product_images_1.image_url AS product_images_1_image_url, product_images_1.is_primary AS product_images_1_is_primary 
+FROM products LEFT OUTER JOIN categories AS categories_1 ON categories_1.id = products.category_id LEFT OUTER JOIN product_variants AS product_variants_1 ON products.id = product_variants_1.product_id LEFT OUTER JOIN product_images AS product_images_1 ON products.id = product_images_1.product_id 
+WHERE products.is_active = true ORDER BY products.created_at DESC
+2026-06-05 12:05:46,413 INFO sqlalchemy.engine.Engine [generated in 0.00043s] {}
+2026-06-05 12:05:46,432 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59083 - "GET /api/v1/products HTTP/1.1" 200 OK
+2026-06-05 12:05:46,932 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:46,933 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:05:46,933 INFO sqlalchemy.engine.Engine [cached since 44.21s ago] {'email_1': 'admin@garment.com', 'param_1': 1}
+2026-06-05 12:05:47,161 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59084 - "POST /api/v1/admin/login HTTP/1.1" 200 OK
+2026-06-05 12:05:47,619 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:47,626 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:47,626 INFO sqlalchemy.engine.Engine [cached since 2.634s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:47,630 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users) AS anon_1
+2026-06-05 12:05:47,630 INFO sqlalchemy.engine.Engine [generated in 0.00034s] {}
+2026-06-05 12:05:47,639 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products) AS anon_1
+2026-06-05 12:05:47,640 INFO sqlalchemy.engine.Engine [generated in 0.00044s] {}
+2026-06-05 12:05:47,643 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders) AS anon_1
+2026-06-05 12:05:47,643 INFO sqlalchemy.engine.Engine [generated in 0.00035s] {}
+2026-06-05 12:05:47,648 INFO sqlalchemy.engine.Engine SELECT orders.final_amount AS orders_final_amount 
+FROM orders 
+WHERE orders.payment_status = %(payment_status_1)s
+2026-06-05 12:05:47,648 INFO sqlalchemy.engine.Engine [generated in 0.00033s] {'payment_status_1': 'paid'}
+2026-06-05 12:05:47,650 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders 
+WHERE orders.order_status = %(order_status_1)s) AS anon_1
+2026-06-05 12:05:47,651 INFO sqlalchemy.engine.Engine [generated in 0.00035s] {'order_status_1': 'placed'}
+2026-06-05 12:05:47,652 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59085 - "GET /api/v1/admin/dashboard HTTP/1.1" 200 OK
+2026-06-05 12:05:48,118 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:48,132 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:48,132 INFO sqlalchemy.engine.Engine [cached since 3.14s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:48,135 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users ORDER BY users.created_at DESC
+2026-06-05 12:05:48,135 INFO sqlalchemy.engine.Engine [generated in 0.00032s] {}
+2026-06-05 12:05:48,139 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59086 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
+2026-06-05 12:05:48,603 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:48,605 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:48,605 INFO sqlalchemy.engine.Engine [cached since 3.613s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:48,607 INFO sqlalchemy.engine.Engine SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders ORDER BY orders.created_at DESC
+2026-06-05 12:05:48,608 INFO sqlalchemy.engine.Engine [generated in 0.00036s] {}
+2026-06-05 12:05:48,609 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59087 - "GET /api/v1/admin/orders HTTP/1.1" 200 OK
+2026-06-05 12:05:49,056 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:49,061 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:49,062 INFO sqlalchemy.engine.Engine [cached since 4.07s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:49,064 INFO sqlalchemy.engine.Engine SELECT referral_earnings.id AS referral_earnings_id, referral_earnings.referrer_user_id AS referral_earnings_referrer_user_id, referral_earnings.referred_user_id AS referral_earnings_referred_user_id, referral_earnings.order_id AS referral_earnings_order_id, referral_earnings.referral_code AS referral_earnings_referral_code, referral_earnings.commission_amount AS referral_earnings_commission_amount, referral_earnings.status AS referral_earnings_status, referral_earnings.created_at AS referral_earnings_created_at 
+FROM referral_earnings ORDER BY referral_earnings.created_at DESC
+2026-06-05 12:05:49,064 INFO sqlalchemy.engine.Engine [generated in 0.00034s] {}
+2026-06-05 12:05:49,068 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59088 - "GET /api/v1/admin/referrals HTTP/1.1" 200 OK
+2026-06-05 12:05:49,541 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:49,541 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:49,542 INFO sqlalchemy.engine.Engine [cached since 4.55s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:49,545 INFO sqlalchemy.engine.Engine INSERT INTO categories (id, name, slug, description, image_url, is_active, created_at) VALUES (%(id)s::UUID, %(name)s, %(slug)s, %(description)s, %(image_url)s, %(is_active)s, %(created_at)s)
+2026-06-05 12:05:49,546 INFO sqlalchemy.engine.Engine [generated in 0.00044s] {'id': UUID('a13d15f7-274d-4a57-aa6a-f9a9c0d5249f'), 'name': 'Test Category oqwo', 'slug': 'test-cat-oqwo', 'description': 'Created by test script', 'image_url': None, 'is_active': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 35, 49, 545774, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:05:49,550 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:49,551 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:49,552 INFO sqlalchemy.engine.Engine SELECT categories.id, categories.name, categories.slug, categories.description, categories.image_url, categories.is_active, categories.created_at 
+FROM categories 
+WHERE categories.id = %(pk_1)s::UUID
+2026-06-05 12:05:49,552 INFO sqlalchemy.engine.Engine [generated in 0.00030s] {'pk_1': UUID('a13d15f7-274d-4a57-aa6a-f9a9c0d5249f')}
+2026-06-05 12:05:49,554 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59089 - "POST /api/v1/admin/categories HTTP/1.1" 200 OK
+2026-06-05 12:05:50,025 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:50,027 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:50,028 INFO sqlalchemy.engine.Engine [cached since 5.036s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:50,031 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:50,032 INFO sqlalchemy.engine.Engine [generated in 0.00034s] {'id_1': 'a13d15f7-274d-4a57-aa6a-f9a9c0d5249f', 'param_1': 1}
+2026-06-05 12:05:50,033 INFO sqlalchemy.engine.Engine UPDATE categories SET name=%(name)s, description=%(description)s WHERE categories.id = %(categories_id)s::UUID
+2026-06-05 12:05:50,033 INFO sqlalchemy.engine.Engine [generated in 0.00030s] {'name': 'Updated Category oqwo', 'description': 'Updated description', 'categories_id': UUID('a13d15f7-274d-4a57-aa6a-f9a9c0d5249f')}
+2026-06-05 12:05:50,034 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:50,035 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:50,035 INFO sqlalchemy.engine.Engine SELECT categories.id, categories.name, categories.slug, categories.description, categories.image_url, categories.is_active, categories.created_at 
+FROM categories 
+WHERE categories.id = %(pk_1)s::UUID
+2026-06-05 12:05:50,035 INFO sqlalchemy.engine.Engine [cached since 0.4835s ago] {'pk_1': UUID('a13d15f7-274d-4a57-aa6a-f9a9c0d5249f')}
+2026-06-05 12:05:50,036 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59090 - "PUT /api/v1/admin/categories/a13d15f7-274d-4a57-aa6a-f9a9c0d5249f HTTP/1.1" 200 OK
+2026-06-05 12:05:50,494 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:50,498 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:50,498 INFO sqlalchemy.engine.Engine [cached since 5.506s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:50,500 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:50,500 INFO sqlalchemy.engine.Engine [cached since 0.4691s ago] {'id_1': 'a13d15f7-274d-4a57-aa6a-f9a9c0d5249f', 'param_1': 1}
+2026-06-05 12:05:50,502 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE %(param_1)s::UUID = products.category_id
+2026-06-05 12:05:50,502 INFO sqlalchemy.engine.Engine [generated in 0.00026s] {'param_1': UUID('a13d15f7-274d-4a57-aa6a-f9a9c0d5249f')}
+2026-06-05 12:05:50,503 INFO sqlalchemy.engine.Engine DELETE FROM categories WHERE categories.id = %(id)s::UUID
+2026-06-05 12:05:50,504 INFO sqlalchemy.engine.Engine [generated in 0.00024s] {'id': UUID('a13d15f7-274d-4a57-aa6a-f9a9c0d5249f')}
+2026-06-05 12:05:50,508 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:59091 - "DELETE /api/v1/admin/categories/a13d15f7-274d-4a57-aa6a-f9a9c0d5249f HTTP/1.1" 200 OK
+2026-06-05 12:05:50,962 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:50,964 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:50,964 INFO sqlalchemy.engine.Engine [cached since 5.972s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:50,966 INFO sqlalchemy.engine.Engine INSERT INTO categories (id, name, slug, description, image_url, is_active, created_at) VALUES (%(id)s::UUID, %(name)s, %(slug)s, %(description)s, %(image_url)s, %(is_active)s, %(created_at)s)
+2026-06-05 12:05:50,966 INFO sqlalchemy.engine.Engine [cached since 1.421s ago] {'id': UUID('a44e35b4-dd2c-4fd6-abe0-54ac7f495d0b'), 'name': 'Test Category oqwo', 'slug': 'test-cat-oqwo-recreated', 'description': 'Recreated for product tests', 'image_url': None, 'is_active': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 35, 50, 966259, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:05:50,967 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:50,967 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:50,968 INFO sqlalchemy.engine.Engine SELECT categories.id, categories.name, categories.slug, categories.description, categories.image_url, categories.is_active, categories.created_at 
+FROM categories 
+WHERE categories.id = %(pk_1)s::UUID
+2026-06-05 12:05:50,968 INFO sqlalchemy.engine.Engine [cached since 1.416s ago] {'pk_1': UUID('a44e35b4-dd2c-4fd6-abe0-54ac7f495d0b')}
+2026-06-05 12:05:50,969 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59092 - "POST /api/v1/admin/categories HTTP/1.1" 200 OK
+2026-06-05 12:05:51,416 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:51,418 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:51,418 INFO sqlalchemy.engine.Engine [cached since 6.426s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:51,423 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:51,423 INFO sqlalchemy.engine.Engine [cached since 1.392s ago] {'id_1': 'a44e35b4-dd2c-4fd6-abe0-54ac7f495d0b', 'param_1': 1}
+2026-06-05 12:05:51,424 INFO sqlalchemy.engine.Engine INSERT INTO products (id, category_id, title, description, brand, sku, price, discount_price, gst_percentage, stock, featured, is_active, created_at, updated_at) VALUES (%(id)s::UUID, %(category_id)s::UUID, %(title)s, %(description)s, %(brand)s, %(sku)s, %(price)s, %(discount_price)s, %(gst_percentage)s, %(stock)s, %(featured)s, %(is_active)s, %(created_at)s, %(updated_at)s)
+2026-06-05 12:05:51,425 INFO sqlalchemy.engine.Engine [generated in 0.00039s] {'id': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd'), 'category_id': 'a44e35b4-dd2c-4fd6-abe0-54ac7f495d0b', 'title': 'Test Product oqwo', 'description': 'Test product description', 'brand': 'TestBrand', 'sku': 'SKU-oqwo', 'price': 999.0, 'discount_price': 799.0, 'gst_percentage': 18.0, 'stock': 100, 'featured': True, 'is_active': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 35, 51, 424884, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 35, 51, 424886, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:05:51,431 INFO sqlalchemy.engine.Engine INSERT INTO product_images (id, product_id, image_url, is_primary) VALUES (%(id)s::UUID, %(product_id)s::UUID, %(image_url)s, %(is_primary)s)
+2026-06-05 12:05:51,431 INFO sqlalchemy.engine.Engine [generated in 0.00052s] {'id': UUID('843f00f1-a06d-4a75-b58b-59e357e252a2'), 'product_id': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd'), 'image_url': 'https://example.com/img1.jpg', 'is_primary': True}
+2026-06-05 12:05:51,434 INFO sqlalchemy.engine.Engine INSERT INTO product_variants (id, product_id, size, color, stock, price) VALUES (%(id__0)s::UUID, %(product_id__0)s::UUID, %(size__0)s, %(color__0)s, %(stock__0)s, %(price__0)s), (%(id__1)s::UUID, %(product_id__1)s::UUID, %(size__1)s, %(color__1)s, %(stock__1)s, %(price__1)s)
+2026-06-05 12:05:51,434 INFO sqlalchemy.engine.Engine [generated in 0.00011s (insertmanyvalues) 1/1 (unordered)] {'size__0': 'M', 'stock__0': 50, 'color__0': 'Red', 'product_id__0': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd'), 'price__0': 799.0, 'id__0': UUID('02e4f78c-184d-41ed-963f-e70b0f2c3178'), 'size__1': 'L', 'stock__1': 30, 'color__1': 'Blue', 'product_id__1': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd'), 'price__1': 799.0, 'id__1': UUID('63d477aa-baf4-4197-bb20-31e1af215279')}
+2026-06-05 12:05:51,437 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:51,438 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:51,439 INFO sqlalchemy.engine.Engine SELECT products.id, products.category_id, products.title, products.description, products.brand, products.sku, products.price, products.discount_price, products.gst_percentage, products.stock, products.featured, products.is_active, products.created_at, products.updated_at 
+FROM products 
+WHERE products.id = %(pk_1)s::UUID
+2026-06-05 12:05:51,439 INFO sqlalchemy.engine.Engine [generated in 0.00030s] {'pk_1': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd')}
+2026-06-05 12:05:51,445 INFO sqlalchemy.engine.Engine SELECT anon_1.products_id AS anon_1_products_id, anon_1.products_category_id AS anon_1_products_category_id, anon_1.products_title AS anon_1_products_title, anon_1.products_description AS anon_1_products_description, anon_1.products_brand AS anon_1_products_brand, anon_1.products_sku AS anon_1_products_sku, anon_1.products_price AS anon_1_products_price, anon_1.products_discount_price AS anon_1_products_discount_price, anon_1.products_gst_percentage AS anon_1_products_gst_percentage, anon_1.products_stock AS anon_1_products_stock, anon_1.products_featured AS anon_1_products_featured, anon_1.products_is_active AS anon_1_products_is_active, anon_1.products_created_at AS anon_1_products_created_at, anon_1.products_updated_at AS anon_1_products_updated_at, categories_1.id AS categories_1_id, categories_1.name AS categories_1_name, categories_1.slug AS categories_1_slug, categories_1.description AS categories_1_description, categories_1.image_url AS categories_1_image_url, categories_1.is_active AS categories_1_is_active, categories_1.created_at AS categories_1_created_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price, product_images_1.id AS product_images_1_id, product_images_1.product_id AS product_images_1_product_id, product_images_1.image_url AS product_images_1_image_url, product_images_1.is_primary AS product_images_1_is_primary 
+FROM (SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN categories AS categories_1 ON categories_1.id = anon_1.products_category_id LEFT OUTER JOIN product_variants AS product_variants_1 ON anon_1.products_id = product_variants_1.product_id LEFT OUTER JOIN product_images AS product_images_1 ON anon_1.products_id = product_images_1.product_id
+2026-06-05 12:05:51,446 INFO sqlalchemy.engine.Engine [generated in 0.00057s] {'id_1': '65ff9c3b-e47e-4c61-b52a-121efcba25cd', 'param_1': 1}
+2026-06-05 12:05:51,448 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59093 - "POST /api/v1/admin/products HTTP/1.1" 200 OK
+2026-06-05 12:05:51,901 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:51,914 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:51,914 INFO sqlalchemy.engine.Engine [cached since 6.922s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:51,921 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:51,922 INFO sqlalchemy.engine.Engine [generated in 0.00043s] {'id_1': '65ff9c3b-e47e-4c61-b52a-121efcba25cd', 'param_1': 1}
+2026-06-05 12:05:51,923 INFO sqlalchemy.engine.Engine UPDATE products SET price=%(price)s, stock=%(stock)s, updated_at=%(updated_at)s WHERE products.id = %(products_id)s::UUID
+2026-06-05 12:05:51,923 INFO sqlalchemy.engine.Engine [generated in 0.00038s] {'price': 899.0, 'stock': 80, 'updated_at': datetime.datetime(2026, 6, 5, 6, 35, 51, 923586, tzinfo=datetime.timezone.utc), 'products_id': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd')}
+2026-06-05 12:05:51,924 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:51,925 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:51,925 INFO sqlalchemy.engine.Engine SELECT products.id, products.category_id, products.title, products.description, products.brand, products.sku, products.price, products.discount_price, products.gst_percentage, products.stock, products.featured, products.is_active, products.created_at, products.updated_at 
+FROM products 
+WHERE products.id = %(pk_1)s::UUID
+2026-06-05 12:05:51,926 INFO sqlalchemy.engine.Engine [cached since 0.4871s ago] {'pk_1': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd')}
+2026-06-05 12:05:51,927 INFO sqlalchemy.engine.Engine SELECT anon_1.products_id AS anon_1_products_id, anon_1.products_category_id AS anon_1_products_category_id, anon_1.products_title AS anon_1_products_title, anon_1.products_description AS anon_1_products_description, anon_1.products_brand AS anon_1_products_brand, anon_1.products_sku AS anon_1_products_sku, anon_1.products_price AS anon_1_products_price, anon_1.products_discount_price AS anon_1_products_discount_price, anon_1.products_gst_percentage AS anon_1_products_gst_percentage, anon_1.products_stock AS anon_1_products_stock, anon_1.products_featured AS anon_1_products_featured, anon_1.products_is_active AS anon_1_products_is_active, anon_1.products_created_at AS anon_1_products_created_at, anon_1.products_updated_at AS anon_1_products_updated_at, categories_1.id AS categories_1_id, categories_1.name AS categories_1_name, categories_1.slug AS categories_1_slug, categories_1.description AS categories_1_description, categories_1.image_url AS categories_1_image_url, categories_1.is_active AS categories_1_is_active, categories_1.created_at AS categories_1_created_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price, product_images_1.id AS product_images_1_id, product_images_1.product_id AS product_images_1_product_id, product_images_1.image_url AS product_images_1_image_url, product_images_1.is_primary AS product_images_1_is_primary 
+FROM (SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN categories AS categories_1 ON categories_1.id = anon_1.products_category_id LEFT OUTER JOIN product_variants AS product_variants_1 ON anon_1.products_id = product_variants_1.product_id LEFT OUTER JOIN product_images AS product_images_1 ON anon_1.products_id = product_images_1.product_id
+2026-06-05 12:05:51,927 INFO sqlalchemy.engine.Engine [cached since 0.4823s ago] {'id_1': '65ff9c3b-e47e-4c61-b52a-121efcba25cd', 'param_1': 1}
+2026-06-05 12:05:51,929 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59094 - "PUT /api/v1/admin/products/65ff9c3b-e47e-4c61-b52a-121efcba25cd HTTP/1.1" 200 OK
+2026-06-05 12:05:52,384 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:52,396 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:52,396 INFO sqlalchemy.engine.Engine [cached since 7.404s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:52,398 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:52,398 INFO sqlalchemy.engine.Engine [cached since 0.4768s ago] {'id_1': '65ff9c3b-e47e-4c61-b52a-121efcba25cd', 'param_1': 1}
+2026-06-05 12:05:52,400 INFO sqlalchemy.engine.Engine SELECT product_variants.id AS product_variants_id, product_variants.product_id AS product_variants_product_id, product_variants.size AS product_variants_size, product_variants.color AS product_variants_color, product_variants.stock AS product_variants_stock, product_variants.price AS product_variants_price 
+FROM product_variants 
+WHERE %(param_1)s::UUID = product_variants.product_id
+2026-06-05 12:05:52,400 INFO sqlalchemy.engine.Engine [generated in 0.00043s] {'param_1': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd')}
+2026-06-05 12:05:52,402 INFO sqlalchemy.engine.Engine SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.image_url AS product_images_image_url, product_images.is_primary AS product_images_is_primary 
+FROM product_images 
+WHERE %(param_1)s::UUID = product_images.product_id
+2026-06-05 12:05:52,402 INFO sqlalchemy.engine.Engine [generated in 0.00031s] {'param_1': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd')}
+2026-06-05 12:05:52,404 INFO sqlalchemy.engine.Engine DELETE FROM product_images WHERE product_images.id = %(id)s::UUID
+2026-06-05 12:05:52,404 INFO sqlalchemy.engine.Engine [generated in 0.00030s] {'id': UUID('843f00f1-a06d-4a75-b58b-59e357e252a2')}
+2026-06-05 12:05:52,405 INFO sqlalchemy.engine.Engine DELETE FROM product_variants WHERE product_variants.id = %(id)s::UUID
+2026-06-05 12:05:52,405 INFO sqlalchemy.engine.Engine [generated in 0.00030s] [{'id': UUID('02e4f78c-184d-41ed-963f-e70b0f2c3178')}, {'id': UUID('63d477aa-baf4-4197-bb20-31e1af215279')}]
+2026-06-05 12:05:52,411 INFO sqlalchemy.engine.Engine DELETE FROM products WHERE products.id = %(id)s::UUID
+2026-06-05 12:05:52,411 INFO sqlalchemy.engine.Engine [generated in 0.00043s] {'id': UUID('65ff9c3b-e47e-4c61-b52a-121efcba25cd')}
+2026-06-05 12:05:52,412 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:59095 - "DELETE /api/v1/admin/products/65ff9c3b-e47e-4c61-b52a-121efcba25cd HTTP/1.1" 200 OK
+2026-06-05 12:05:52,869 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:52,894 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:52,894 INFO sqlalchemy.engine.Engine [cached since 7.902s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:52,896 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:52,896 INFO sqlalchemy.engine.Engine [cached since 2.865s ago] {'id_1': 'a44e35b4-dd2c-4fd6-abe0-54ac7f495d0b', 'param_1': 1}
+2026-06-05 12:05:52,897 INFO sqlalchemy.engine.Engine INSERT INTO products (id, category_id, title, description, brand, sku, price, discount_price, gst_percentage, stock, featured, is_active, created_at, updated_at) VALUES (%(id)s::UUID, %(category_id)s::UUID, %(title)s, %(description)s, %(brand)s, %(sku)s, %(price)s, %(discount_price)s, %(gst_percentage)s, %(stock)s, %(featured)s, %(is_active)s, %(created_at)s, %(updated_at)s)
+2026-06-05 12:05:52,897 INFO sqlalchemy.engine.Engine [cached since 1.473s ago] {'id': UUID('ea7cca2e-13f2-4286-b910-7b8f8e641a30'), 'category_id': 'a44e35b4-dd2c-4fd6-abe0-54ac7f495d0b', 'title': 'Test Product oqwo', 'description': 'Test product for ordering', 'brand': 'TestBrand', 'sku': 'SKU-oqwo-2', 'price': 500.0, 'discount_price': None, 'gst_percentage': 18.0, 'stock': 50, 'featured': False, 'is_active': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 35, 52, 897305, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 35, 52, 897307, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:05:52,898 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:52,899 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:52,899 INFO sqlalchemy.engine.Engine SELECT products.id, products.category_id, products.title, products.description, products.brand, products.sku, products.price, products.discount_price, products.gst_percentage, products.stock, products.featured, products.is_active, products.created_at, products.updated_at 
+FROM products 
+WHERE products.id = %(pk_1)s::UUID
+2026-06-05 12:05:52,900 INFO sqlalchemy.engine.Engine [cached since 1.461s ago] {'pk_1': UUID('ea7cca2e-13f2-4286-b910-7b8f8e641a30')}
+2026-06-05 12:05:52,901 INFO sqlalchemy.engine.Engine SELECT anon_1.products_id AS anon_1_products_id, anon_1.products_category_id AS anon_1_products_category_id, anon_1.products_title AS anon_1_products_title, anon_1.products_description AS anon_1_products_description, anon_1.products_brand AS anon_1_products_brand, anon_1.products_sku AS anon_1_products_sku, anon_1.products_price AS anon_1_products_price, anon_1.products_discount_price AS anon_1_products_discount_price, anon_1.products_gst_percentage AS anon_1_products_gst_percentage, anon_1.products_stock AS anon_1_products_stock, anon_1.products_featured AS anon_1_products_featured, anon_1.products_is_active AS anon_1_products_is_active, anon_1.products_created_at AS anon_1_products_created_at, anon_1.products_updated_at AS anon_1_products_updated_at, categories_1.id AS categories_1_id, categories_1.name AS categories_1_name, categories_1.slug AS categories_1_slug, categories_1.description AS categories_1_description, categories_1.image_url AS categories_1_image_url, categories_1.is_active AS categories_1_is_active, categories_1.created_at AS categories_1_created_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price, product_images_1.id AS product_images_1_id, product_images_1.product_id AS product_images_1_product_id, product_images_1.image_url AS product_images_1_image_url, product_images_1.is_primary AS product_images_1_is_primary 
+FROM (SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN categories AS categories_1 ON categories_1.id = anon_1.products_category_id LEFT OUTER JOIN product_variants AS product_variants_1 ON anon_1.products_id = product_variants_1.product_id LEFT OUTER JOIN product_images AS product_images_1 ON anon_1.products_id = product_images_1.product_id
+2026-06-05 12:05:52,901 INFO sqlalchemy.engine.Engine [cached since 1.456s ago] {'id_1': 'ea7cca2e-13f2-4286-b910-7b8f8e641a30', 'param_1': 1}
+2026-06-05 12:05:52,903 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59096 - "POST /api/v1/admin/products HTTP/1.1" 200 OK
+2026-06-05 12:05:53,354 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:53,355 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:53,355 INFO sqlalchemy.engine.Engine [cached since 8.363s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:53,358 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID AND products.is_active = true 
+ LIMIT %(param_1)s
+2026-06-05 12:05:53,359 INFO sqlalchemy.engine.Engine [generated in 0.00039s] {'id_1': 'ea7cca2e-13f2-4286-b910-7b8f8e641a30', 'param_1': 1}
+2026-06-05 12:05:53,361 INFO sqlalchemy.engine.Engine SELECT cart_items.id AS cart_items_id, cart_items.user_id AS cart_items_user_id, cart_items.product_id AS cart_items_product_id, cart_items.variant_id AS cart_items_variant_id, cart_items.quantity AS cart_items_quantity, cart_items.created_at AS cart_items_created_at 
+FROM cart_items 
+WHERE cart_items.user_id = %(user_id_1)s::UUID AND cart_items.product_id = %(product_id_1)s::UUID AND cart_items.variant_id IS NULL 
+ LIMIT %(param_1)s
+2026-06-05 12:05:53,361 INFO sqlalchemy.engine.Engine [generated in 0.00034s] {'user_id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'product_id_1': 'ea7cca2e-13f2-4286-b910-7b8f8e641a30', 'param_1': 1}
+2026-06-05 12:05:53,362 INFO sqlalchemy.engine.Engine INSERT INTO cart_items (id, user_id, product_id, variant_id, quantity, created_at) VALUES (%(id)s::UUID, %(user_id)s::UUID, %(product_id)s::UUID, %(variant_id)s::UUID, %(quantity)s, %(created_at)s)
+2026-06-05 12:05:53,362 INFO sqlalchemy.engine.Engine [generated in 0.00035s] {'id': UUID('d5bcacfe-f40c-48bb-b63c-16b14541b9a9'), 'user_id': 'e6922435-8c64-429a-927a-815ae0d655f0', 'product_id': 'ea7cca2e-13f2-4286-b910-7b8f8e641a30', 'variant_id': None, 'quantity': 2, 'created_at': datetime.datetime(2026, 6, 5, 6, 35, 53, 362620, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:05:53,364 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:53,372 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:53,375 INFO sqlalchemy.engine.Engine SELECT cart_items.id AS cart_items_id, cart_items.user_id AS cart_items_user_id, cart_items.product_id AS cart_items_product_id, cart_items.variant_id AS cart_items_variant_id, cart_items.quantity AS cart_items_quantity, cart_items.created_at AS cart_items_created_at, products_1.id AS products_1_id, products_1.category_id AS products_1_category_id, products_1.title AS products_1_title, products_1.description AS products_1_description, products_1.brand AS products_1_brand, products_1.sku AS products_1_sku, products_1.price AS products_1_price, products_1.discount_price AS products_1_discount_price, products_1.gst_percentage AS products_1_gst_percentage, products_1.stock AS products_1_stock, products_1.featured AS products_1_featured, products_1.is_active AS products_1_is_active, products_1.created_at AS products_1_created_at, products_1.updated_at AS products_1_updated_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price 
+FROM cart_items LEFT OUTER JOIN products AS products_1 ON products_1.id = cart_items.product_id LEFT OUTER JOIN product_variants AS product_variants_1 ON product_variants_1.id = cart_items.variant_id 
+WHERE cart_items.user_id = %(user_id_1)s::UUID
+2026-06-05 12:05:53,375 INFO sqlalchemy.engine.Engine [generated in 0.00034s] {'user_id_1': 'e6922435-8c64-429a-927a-815ae0d655f0'}
+2026-06-05 12:05:53,377 INFO sqlalchemy.engine.Engine SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.image_url AS product_images_image_url, product_images.is_primary AS product_images_is_primary 
+FROM product_images 
+WHERE product_images.product_id = %(product_id_1)s::UUID AND product_images.is_primary = true 
+ LIMIT %(param_1)s
+2026-06-05 12:05:53,377 INFO sqlalchemy.engine.Engine [generated in 0.00030s] {'product_id_1': UUID('ea7cca2e-13f2-4286-b910-7b8f8e641a30'), 'param_1': 1}
+2026-06-05 12:05:53,379 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59097 - "POST /api/v1/cart/add HTTP/1.1" 200 OK
+2026-06-05 12:05:53,837 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:53,839 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:53,840 INFO sqlalchemy.engine.Engine [cached since 8.848s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:53,842 INFO sqlalchemy.engine.Engine SELECT cart_items.id AS cart_items_id, cart_items.user_id AS cart_items_user_id, cart_items.product_id AS cart_items_product_id, cart_items.variant_id AS cart_items_variant_id, cart_items.quantity AS cart_items_quantity, cart_items.created_at AS cart_items_created_at, products_1.id AS products_1_id, products_1.category_id AS products_1_category_id, products_1.title AS products_1_title, products_1.description AS products_1_description, products_1.brand AS products_1_brand, products_1.sku AS products_1_sku, products_1.price AS products_1_price, products_1.discount_price AS products_1_discount_price, products_1.gst_percentage AS products_1_gst_percentage, products_1.stock AS products_1_stock, products_1.featured AS products_1_featured, products_1.is_active AS products_1_is_active, products_1.created_at AS products_1_created_at, products_1.updated_at AS products_1_updated_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price 
+FROM cart_items LEFT OUTER JOIN products AS products_1 ON products_1.id = cart_items.product_id LEFT OUTER JOIN product_variants AS product_variants_1 ON product_variants_1.id = cart_items.variant_id 
+WHERE cart_items.user_id = %(user_id_1)s::UUID
+2026-06-05 12:05:53,842 INFO sqlalchemy.engine.Engine [cached since 0.4672s ago] {'user_id_1': 'e6922435-8c64-429a-927a-815ae0d655f0'}
+2026-06-05 12:05:53,843 INFO sqlalchemy.engine.Engine SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.image_url AS product_images_image_url, product_images.is_primary AS product_images_is_primary 
+FROM product_images 
+WHERE product_images.product_id = %(product_id_1)s::UUID AND product_images.is_primary = true 
+ LIMIT %(param_1)s
+2026-06-05 12:05:53,844 INFO sqlalchemy.engine.Engine [cached since 0.4664s ago] {'product_id_1': UUID('ea7cca2e-13f2-4286-b910-7b8f8e641a30'), 'param_1': 1}
+2026-06-05 12:05:53,845 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59098 - "GET /api/v1/cart HTTP/1.1" 200 OK
+2026-06-05 12:05:54,291 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:54,293 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:54,293 INFO sqlalchemy.engine.Engine [cached since 9.301s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:54,297 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59099 - "PUT /api/v1/cart/update HTTP/1.1" 422 Unprocessable Content
+2026-06-05 12:05:54,744 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:54,756 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:54,756 INFO sqlalchemy.engine.Engine [cached since 9.764s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:54,759 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:54,759 INFO sqlalchemy.engine.Engine [cached since 9.767s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:54,760 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID AND products.is_active = true 
+ LIMIT %(param_1)s
+2026-06-05 12:05:54,761 INFO sqlalchemy.engine.Engine [cached since 1.402s ago] {'id_1': 'ea7cca2e-13f2-4286-b910-7b8f8e641a30', 'param_1': 1}
+2026-06-05 12:05:54,762 INFO sqlalchemy.engine.Engine INSERT INTO orders (id, user_id, order_number, subtotal, gst_amount, discount_amount, final_amount, order_status, payment_status, shipping_address, estimated_delivery, created_at, updated_at) VALUES (%(id)s::UUID, %(user_id)s::UUID, %(order_number)s, %(subtotal)s, %(gst_amount)s, %(discount_amount)s, %(final_amount)s, %(order_status)s, %(payment_status)s, %(shipping_address)s, %(estimated_delivery)s, %(created_at)s, %(updated_at)s)
+2026-06-05 12:05:54,763 INFO sqlalchemy.engine.Engine [generated in 0.00043s] {'id': UUID('9d391533-ab1a-442c-b4eb-221a061283c1'), 'user_id': 'e6922435-8c64-429a-927a-815ae0d655f0', 'order_number': 'ORD-20260605-C6E7KJ', 'subtotal': 500.0, 'gst_amount': 90.0, 'discount_amount': 0.0, 'final_amount': 590.0, 'order_status': 'placed', 'payment_status': 'pending', 'shipping_address': '123 Test Street, Test City, 123456', 'estimated_delivery': datetime.datetime(2026, 6, 12, 6, 35, 54, 761828, tzinfo=datetime.timezone.utc), 'created_at': datetime.datetime(2026, 6, 5, 6, 35, 54, 762796, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 35, 54, 762798, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:05:54,764 INFO sqlalchemy.engine.Engine UPDATE products SET stock=%(stock)s, updated_at=%(updated_at)s WHERE products.id = %(products_id)s::UUID
+2026-06-05 12:05:54,765 INFO sqlalchemy.engine.Engine [generated in 0.00027s] {'stock': 49, 'updated_at': datetime.datetime(2026, 6, 5, 6, 35, 54, 764747, tzinfo=datetime.timezone.utc), 'products_id': UUID('ea7cca2e-13f2-4286-b910-7b8f8e641a30')}
+2026-06-05 12:05:54,766 INFO sqlalchemy.engine.Engine INSERT INTO order_items (id, order_id, product_id, variant_id, product_name, quantity, price) VALUES (%(id)s::UUID, %(order_id)s::UUID, %(product_id)s::UUID, %(variant_id)s::UUID, %(product_name)s, %(quantity)s, %(price)s)
+2026-06-05 12:05:54,766 INFO sqlalchemy.engine.Engine [generated in 0.00039s] {'id': UUID('00906916-2be3-4f5a-bc76-05641902ec1b'), 'order_id': UUID('9d391533-ab1a-442c-b4eb-221a061283c1'), 'product_id': UUID('ea7cca2e-13f2-4286-b910-7b8f8e641a30'), 'variant_id': None, 'product_name': 'Test Product oqwo', 'quantity': 1, 'price': 500.0}
+2026-06-05 12:05:54,767 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:54,768 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:54,769 INFO sqlalchemy.engine.Engine SELECT orders.id, orders.user_id, orders.order_number, orders.subtotal, orders.gst_amount, orders.discount_amount, orders.final_amount, orders.order_status, orders.payment_status, orders.shipping_address, orders.estimated_delivery, orders.created_at, orders.updated_at 
+FROM orders 
+WHERE orders.id = %(pk_1)s::UUID
+2026-06-05 12:05:54,769 INFO sqlalchemy.engine.Engine [generated in 0.00029s] {'pk_1': UUID('9d391533-ab1a-442c-b4eb-221a061283c1')}
+2026-06-05 12:05:54,773 INFO sqlalchemy.engine.Engine SELECT anon_1.orders_id AS anon_1_orders_id, anon_1.orders_user_id AS anon_1_orders_user_id, anon_1.orders_order_number AS anon_1_orders_order_number, anon_1.orders_subtotal AS anon_1_orders_subtotal, anon_1.orders_gst_amount AS anon_1_orders_gst_amount, anon_1.orders_discount_amount AS anon_1_orders_discount_amount, anon_1.orders_final_amount AS anon_1_orders_final_amount, anon_1.orders_order_status AS anon_1_orders_order_status, anon_1.orders_payment_status AS anon_1_orders_payment_status, anon_1.orders_shipping_address AS anon_1_orders_shipping_address, anon_1.orders_estimated_delivery AS anon_1_orders_estimated_delivery, anon_1.orders_created_at AS anon_1_orders_created_at, anon_1.orders_updated_at AS anon_1_orders_updated_at, order_items_1.id AS order_items_1_id, order_items_1.order_id AS order_items_1_order_id, order_items_1.product_id AS order_items_1_product_id, order_items_1.variant_id AS order_items_1_variant_id, order_items_1.product_name AS order_items_1_product_name, order_items_1.quantity AS order_items_1_quantity, order_items_1.price AS order_items_1_price 
+FROM (SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders 
+WHERE orders.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN order_items AS order_items_1 ON anon_1.orders_id = order_items_1.order_id
+2026-06-05 12:05:54,774 INFO sqlalchemy.engine.Engine [generated in 0.00031s] {'id_1': '9d391533-ab1a-442c-b4eb-221a061283c1', 'param_1': 1}
+2026-06-05 12:05:54,776 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59100 - "POST /api/v1/orders HTTP/1.1" 200 OK
+2026-06-05 12:05:55,227 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:55,229 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:55,229 INFO sqlalchemy.engine.Engine [cached since 10.24s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:55,233 INFO sqlalchemy.engine.Engine SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at, order_items_1.id AS order_items_1_id, order_items_1.order_id AS order_items_1_order_id, order_items_1.product_id AS order_items_1_product_id, order_items_1.variant_id AS order_items_1_variant_id, order_items_1.product_name AS order_items_1_product_name, order_items_1.quantity AS order_items_1_quantity, order_items_1.price AS order_items_1_price 
+FROM orders LEFT OUTER JOIN order_items AS order_items_1 ON orders.id = order_items_1.order_id 
+WHERE orders.user_id = %(user_id_1)s::UUID ORDER BY orders.created_at DESC
+2026-06-05 12:05:55,233 INFO sqlalchemy.engine.Engine [generated in 0.00035s] {'user_id_1': 'e6922435-8c64-429a-927a-815ae0d655f0'}
+2026-06-05 12:05:55,234 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59101 - "GET /api/v1/orders HTTP/1.1" 200 OK
+2026-06-05 12:05:55,680 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:55,682 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:55,683 INFO sqlalchemy.engine.Engine [cached since 10.69s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:55,684 INFO sqlalchemy.engine.Engine SELECT anon_1.orders_id AS anon_1_orders_id, anon_1.orders_user_id AS anon_1_orders_user_id, anon_1.orders_order_number AS anon_1_orders_order_number, anon_1.orders_subtotal AS anon_1_orders_subtotal, anon_1.orders_gst_amount AS anon_1_orders_gst_amount, anon_1.orders_discount_amount AS anon_1_orders_discount_amount, anon_1.orders_final_amount AS anon_1_orders_final_amount, anon_1.orders_order_status AS anon_1_orders_order_status, anon_1.orders_payment_status AS anon_1_orders_payment_status, anon_1.orders_shipping_address AS anon_1_orders_shipping_address, anon_1.orders_estimated_delivery AS anon_1_orders_estimated_delivery, anon_1.orders_created_at AS anon_1_orders_created_at, anon_1.orders_updated_at AS anon_1_orders_updated_at, order_items_1.id AS order_items_1_id, order_items_1.order_id AS order_items_1_order_id, order_items_1.product_id AS order_items_1_product_id, order_items_1.variant_id AS order_items_1_variant_id, order_items_1.product_name AS order_items_1_product_name, order_items_1.quantity AS order_items_1_quantity, order_items_1.price AS order_items_1_price 
+FROM (SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders 
+WHERE orders.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN order_items AS order_items_1 ON anon_1.orders_id = order_items_1.order_id
+2026-06-05 12:05:55,684 INFO sqlalchemy.engine.Engine [cached since 0.9108s ago] {'id_1': '9d391533-ab1a-442c-b4eb-221a061283c1', 'param_1': 1}
+2026-06-05 12:05:55,685 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59102 - "GET /api/v1/orders/9d391533-ab1a-442c-b4eb-221a061283c1 HTTP/1.1" 200 OK
+2026-06-05 12:05:56,134 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:56,137 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:56,137 INFO sqlalchemy.engine.Engine [cached since 11.14s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:05:56,140 INFO sqlalchemy.engine.Engine SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders 
+WHERE orders.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:56,140 INFO sqlalchemy.engine.Engine [generated in 0.00036s] {'id_1': '9d391533-ab1a-442c-b4eb-221a061283c1', 'param_1': 1}
+2026-06-05 12:05:56,141 INFO sqlalchemy.engine.Engine UPDATE orders SET order_status=%(order_status)s, updated_at=%(updated_at)s WHERE orders.id = %(orders_id)s::UUID
+2026-06-05 12:05:56,141 INFO sqlalchemy.engine.Engine [generated in 0.00032s] {'order_status': 'processing', 'updated_at': datetime.datetime(2026, 6, 5, 6, 35, 56, 141598, tzinfo=datetime.timezone.utc), 'orders_id': UUID('9d391533-ab1a-442c-b4eb-221a061283c1')}
+2026-06-05 12:05:56,142 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:05:56,143 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:56,143 INFO sqlalchemy.engine.Engine SELECT orders.id, orders.user_id, orders.order_number, orders.subtotal, orders.gst_amount, orders.discount_amount, orders.final_amount, orders.order_status, orders.payment_status, orders.shipping_address, orders.estimated_delivery, orders.created_at, orders.updated_at 
+FROM orders 
+WHERE orders.id = %(pk_1)s::UUID
+2026-06-05 12:05:56,144 INFO sqlalchemy.engine.Engine [cached since 1.374s ago] {'pk_1': UUID('9d391533-ab1a-442c-b4eb-221a061283c1')}
+2026-06-05 12:05:56,145 INFO sqlalchemy.engine.Engine SELECT order_items.id AS order_items_id, order_items.order_id AS order_items_order_id, order_items.product_id AS order_items_product_id, order_items.variant_id AS order_items_variant_id, order_items.product_name AS order_items_product_name, order_items.quantity AS order_items_quantity, order_items.price AS order_items_price 
+FROM order_items 
+WHERE %(param_1)s::UUID = order_items.order_id
+2026-06-05 12:05:56,146 INFO sqlalchemy.engine.Engine [generated in 0.00033s] {'param_1': UUID('9d391533-ab1a-442c-b4eb-221a061283c1')}
+2026-06-05 12:05:56,147 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59103 - "PUT /api/v1/orders/9d391533-ab1a-442c-b4eb-221a061283c1/status HTTP/1.1" 200 OK
+2026-06-05 12:05:56,604 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:56,606 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:56,607 INFO sqlalchemy.engine.Engine [cached since 11.61s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:56,608 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:56,609 INFO sqlalchemy.engine.Engine [cached since 11.62s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:56,610 INFO sqlalchemy.engine.Engine SELECT referral_earnings.id AS referral_earnings_id, referral_earnings.referrer_user_id AS referral_earnings_referrer_user_id, referral_earnings.referred_user_id AS referral_earnings_referred_user_id, referral_earnings.order_id AS referral_earnings_order_id, referral_earnings.referral_code AS referral_earnings_referral_code, referral_earnings.commission_amount AS referral_earnings_commission_amount, referral_earnings.status AS referral_earnings_status, referral_earnings.created_at AS referral_earnings_created_at 
+FROM referral_earnings 
+WHERE referral_earnings.referrer_user_id = %(referrer_user_id_1)s::UUID
+2026-06-05 12:05:56,610 INFO sqlalchemy.engine.Engine [generated in 0.00032s] {'referrer_user_id_1': 'e6922435-8c64-429a-927a-815ae0d655f0'}
+2026-06-05 12:05:56,611 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59104 - "GET /api/v1/referral/me HTTP/1.1" 200 OK
+2026-06-05 12:05:57,088 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:57,090 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:57,090 INFO sqlalchemy.engine.Engine [cached since 12.1s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:57,094 INFO sqlalchemy.engine.Engine SELECT referral_earnings.id AS referral_earnings_id, referral_earnings.referrer_user_id AS referral_earnings_referrer_user_id, referral_earnings.referred_user_id AS referral_earnings_referred_user_id, referral_earnings.order_id AS referral_earnings_order_id, referral_earnings.referral_code AS referral_earnings_referral_code, referral_earnings.commission_amount AS referral_earnings_commission_amount, referral_earnings.status AS referral_earnings_status, referral_earnings.created_at AS referral_earnings_created_at, users_1.id AS users_1_id, users_1.full_name AS users_1_full_name, users_1.email AS users_1_email, users_1.phone AS users_1_phone, users_1.password_hash AS users_1_password_hash, users_1.role AS users_1_role, users_1.referral_code AS users_1_referral_code, users_1.referred_by AS users_1_referred_by, users_1.wallet_balance AS users_1_wallet_balance, users_1.is_verified AS users_1_is_verified, users_1.created_at AS users_1_created_at, users_1.updated_at AS users_1_updated_at 
+FROM referral_earnings LEFT OUTER JOIN users AS users_1 ON users_1.id = referral_earnings.referrer_user_id 
+WHERE referral_earnings.referrer_user_id = %(referrer_user_id_1)s::UUID ORDER BY referral_earnings.created_at DESC
+2026-06-05 12:05:57,094 INFO sqlalchemy.engine.Engine [generated in 0.00040s] {'referrer_user_id_1': 'e6922435-8c64-429a-927a-815ae0d655f0'}
+2026-06-05 12:05:57,095 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59105 - "GET /api/v1/referral/history HTTP/1.1" 200 OK
+2026-06-05 12:05:57,540 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:57,542 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:57,543 INFO sqlalchemy.engine.Engine [cached since 12.55s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:57,544 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:57,545 INFO sqlalchemy.engine.Engine [cached since 12.55s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:57,546 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59106 - "GET /api/v1/wallet/balance HTTP/1.1" 200 OK
+2026-06-05 12:05:57,994 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:05:57,996 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:05:57,996 INFO sqlalchemy.engine.Engine [cached since 13s ago] {'id_1': 'e6922435-8c64-429a-927a-815ae0d655f0', 'param_1': 1}
+2026-06-05 12:05:57,999 INFO sqlalchemy.engine.Engine SELECT wallet_transactions.id AS wallet_transactions_id, wallet_transactions.user_id AS wallet_transactions_user_id, wallet_transactions.transaction_type AS wallet_transactions_transaction_type, wallet_transactions.amount AS wallet_transactions_amount, wallet_transactions.source AS wallet_transactions_source, wallet_transactions.reference_id AS wallet_transactions_reference_id, wallet_transactions.description AS wallet_transactions_description, wallet_transactions.created_at AS wallet_transactions_created_at 
+FROM wallet_transactions 
+WHERE wallet_transactions.user_id = %(user_id_1)s::UUID ORDER BY wallet_transactions.created_at DESC
+2026-06-05 12:05:57,999 INFO sqlalchemy.engine.Engine [generated in 0.00039s] {'user_id_1': 'e6922435-8c64-429a-927a-815ae0d655f0'}
+2026-06-05 12:05:58,002 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59107 - "GET /api/v1/wallet/transactions HTTP/1.1" 200 OK
+2026-06-05 12:06:16,147 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:16,171 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:06:16,171 INFO sqlalchemy.engine.Engine [cached since 73.45s ago] {'email_1': 'testuser_yhtw@example.com', 'param_1': 1}
+2026-06-05 12:06:16,394 INFO sqlalchemy.engine.Engine INSERT INTO users (id, full_name, email, phone, password_hash, role, referral_code, referred_by, wallet_balance, is_verified, created_at, updated_at) VALUES (%(id)s::UUID, %(full_name)s, %(email)s, %(phone)s, %(password_hash)s, %(role)s, %(referral_code)s, %(referred_by)s, %(wallet_balance)s, %(is_verified)s, %(created_at)s, %(updated_at)s)
+2026-06-05 12:06:16,407 INFO sqlalchemy.engine.Engine [cached since 33.09s ago] {'id': UUID('a6b828a1-d888-41a5-a3d4-bb098d2e91c3'), 'full_name': 'Test User yhtw', 'email': 'testuser_yhtw@example.com', 'phone': '99999yhtw', 'password_hash': '$2b$12$oO2EyITmr57Yc2ruJk/INuZc//0Yc5BJD1.jRzUPkvvQLPkaD7uTa', 'role': 'customer', 'referral_code': 'GARMFP88ND', 'referred_by': None, 'wallet_balance': 0.0, 'is_verified': False, 'created_at': datetime.datetime(2026, 6, 5, 6, 36, 16, 394746, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 36, 16, 394748, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:06:16,408 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:16,409 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:16,410 INFO sqlalchemy.engine.Engine SELECT users.id, users.full_name, users.email, users.phone, users.password_hash, users.role, users.referral_code, users.referred_by, users.wallet_balance, users.is_verified, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = %(pk_1)s::UUID
+2026-06-05 12:06:16,410 INFO sqlalchemy.engine.Engine [cached since 33.08s ago] {'pk_1': UUID('a6b828a1-d888-41a5-a3d4-bb098d2e91c3')}
+2026-06-05 12:06:16,411 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59109 - "POST /api/v1/auth/register HTTP/1.1" 200 OK
+2026-06-05 12:06:16,884 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:16,911 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:06:16,911 INFO sqlalchemy.engine.Engine [cached since 74.19s ago] {'email_1': 'testuser_yhtw@example.com', 'param_1': 1}
+2026-06-05 12:06:16,912 INFO sqlalchemy.engine.Engine UPDATE users SET is_verified=%(is_verified)s, updated_at=%(updated_at)s WHERE users.id = %(users_id)s::UUID
+2026-06-05 12:06:16,913 INFO sqlalchemy.engine.Engine [cached since 33.11s ago] {'is_verified': True, 'updated_at': datetime.datetime(2026, 6, 5, 6, 36, 16, 912819, tzinfo=datetime.timezone.utc), 'users_id': UUID('a6b828a1-d888-41a5-a3d4-bb098d2e91c3')}
+2026-06-05 12:06:16,913 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:59110 - "POST /api/v1/auth/verify-otp HTTP/1.1" 200 OK
+2026-06-05 12:06:17,368 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:17,392 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:06:17,393 INFO sqlalchemy.engine.Engine [cached since 74.67s ago] {'email_1': 'testuser_yhtw@example.com', 'param_1': 1}
+2026-06-05 12:06:17,617 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59111 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+2026-06-05 12:06:18,105 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:18,125 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:18,126 INFO sqlalchemy.engine.Engine [cached since 33.13s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:18,127 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59112 - "GET /api/v1/auth/me HTTP/1.1" 200 OK
+2026-06-05 12:06:18,573 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:18,580 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:18,580 INFO sqlalchemy.engine.Engine [cached since 33.59s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:18,582 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59113 - "POST /api/v1/auth/refresh-token HTTP/1.1" 200 OK
+2026-06-05 12:06:19,024 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:19,027 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.is_active = true
+2026-06-05 12:06:19,027 INFO sqlalchemy.engine.Engine [cached since 33.09s ago] {}
+2026-06-05 12:06:19,028 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59114 - "GET /api/v1/categories HTTP/1.1" 200 OK
+2026-06-05 12:06:19,469 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:19,489 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at, categories_1.id AS categories_1_id, categories_1.name AS categories_1_name, categories_1.slug AS categories_1_slug, categories_1.description AS categories_1_description, categories_1.image_url AS categories_1_image_url, categories_1.is_active AS categories_1_is_active, categories_1.created_at AS categories_1_created_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price, product_images_1.id AS product_images_1_id, product_images_1.product_id AS product_images_1_product_id, product_images_1.image_url AS product_images_1_image_url, product_images_1.is_primary AS product_images_1_is_primary 
+FROM products LEFT OUTER JOIN categories AS categories_1 ON categories_1.id = products.category_id LEFT OUTER JOIN product_variants AS product_variants_1 ON products.id = product_variants_1.product_id LEFT OUTER JOIN product_images AS product_images_1 ON products.id = product_images_1.product_id 
+WHERE products.is_active = true ORDER BY products.created_at DESC
+2026-06-05 12:06:19,489 INFO sqlalchemy.engine.Engine [cached since 33.08s ago] {}
+2026-06-05 12:06:19,491 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59115 - "GET /api/v1/products HTTP/1.1" 200 OK
+2026-06-05 12:06:19,953 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:19,965 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 12:06:19,965 INFO sqlalchemy.engine.Engine [cached since 77.24s ago] {'email_1': 'admin@garment.com', 'param_1': 1}
+2026-06-05 12:06:20,189 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59116 - "POST /api/v1/admin/login HTTP/1.1" 200 OK
+2026-06-05 12:06:20,666 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:20,688 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:20,688 INFO sqlalchemy.engine.Engine [cached since 35.7s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:20,690 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users) AS anon_1
+2026-06-05 12:06:20,690 INFO sqlalchemy.engine.Engine [cached since 33.06s ago] {}
+2026-06-05 12:06:20,691 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products) AS anon_1
+2026-06-05 12:06:20,691 INFO sqlalchemy.engine.Engine [cached since 33.05s ago] {}
+2026-06-05 12:06:20,692 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders) AS anon_1
+2026-06-05 12:06:20,692 INFO sqlalchemy.engine.Engine [cached since 33.05s ago] {}
+2026-06-05 12:06:20,693 INFO sqlalchemy.engine.Engine SELECT orders.final_amount AS orders_final_amount 
+FROM orders 
+WHERE orders.payment_status = %(payment_status_1)s
+2026-06-05 12:06:20,694 INFO sqlalchemy.engine.Engine [cached since 33.05s ago] {'payment_status_1': 'paid'}
+2026-06-05 12:06:20,695 INFO sqlalchemy.engine.Engine SELECT count(*) AS count_1 
+FROM (SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders 
+WHERE orders.order_status = %(order_status_1)s) AS anon_1
+2026-06-05 12:06:20,695 INFO sqlalchemy.engine.Engine [cached since 33.04s ago] {'order_status_1': 'placed'}
+2026-06-05 12:06:20,696 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59117 - "GET /api/v1/admin/dashboard HTTP/1.1" 200 OK
+2026-06-05 12:06:21,149 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:21,156 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:21,156 INFO sqlalchemy.engine.Engine [cached since 36.16s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:21,158 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users ORDER BY users.created_at DESC
+2026-06-05 12:06:21,158 INFO sqlalchemy.engine.Engine [cached since 33.02s ago] {}
+2026-06-05 12:06:21,159 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59118 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
+2026-06-05 12:06:21,603 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:21,619 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:21,620 INFO sqlalchemy.engine.Engine [cached since 36.63s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:21,621 INFO sqlalchemy.engine.Engine SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders ORDER BY orders.created_at DESC
+2026-06-05 12:06:21,621 INFO sqlalchemy.engine.Engine [cached since 33.01s ago] {}
+2026-06-05 12:06:21,622 INFO sqlalchemy.engine.Engine SELECT order_items.id AS order_items_id, order_items.order_id AS order_items_order_id, order_items.product_id AS order_items_product_id, order_items.variant_id AS order_items_variant_id, order_items.product_name AS order_items_product_name, order_items.quantity AS order_items_quantity, order_items.price AS order_items_price 
+FROM order_items 
+WHERE %(param_1)s::UUID = order_items.order_id
+2026-06-05 12:06:21,623 INFO sqlalchemy.engine.Engine [cached since 25.48s ago] {'param_1': UUID('9d391533-ab1a-442c-b4eb-221a061283c1')}
+2026-06-05 12:06:21,624 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59119 - "GET /api/v1/admin/orders HTTP/1.1" 200 OK
+2026-06-05 12:06:22,104 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:22,118 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:22,118 INFO sqlalchemy.engine.Engine [cached since 37.13s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:22,120 INFO sqlalchemy.engine.Engine SELECT referral_earnings.id AS referral_earnings_id, referral_earnings.referrer_user_id AS referral_earnings_referrer_user_id, referral_earnings.referred_user_id AS referral_earnings_referred_user_id, referral_earnings.order_id AS referral_earnings_order_id, referral_earnings.referral_code AS referral_earnings_referral_code, referral_earnings.commission_amount AS referral_earnings_commission_amount, referral_earnings.status AS referral_earnings_status, referral_earnings.created_at AS referral_earnings_created_at 
+FROM referral_earnings ORDER BY referral_earnings.created_at DESC
+2026-06-05 12:06:22,120 INFO sqlalchemy.engine.Engine [cached since 33.06s ago] {}
+2026-06-05 12:06:22,121 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59120 - "GET /api/v1/admin/referrals HTTP/1.1" 200 OK
+2026-06-05 12:06:22,572 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:22,588 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:22,588 INFO sqlalchemy.engine.Engine [cached since 37.6s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:22,590 INFO sqlalchemy.engine.Engine INSERT INTO categories (id, name, slug, description, image_url, is_active, created_at) VALUES (%(id)s::UUID, %(name)s, %(slug)s, %(description)s, %(image_url)s, %(is_active)s, %(created_at)s)
+2026-06-05 12:06:22,591 INFO sqlalchemy.engine.Engine [cached since 33.05s ago] {'id': UUID('b7754730-c07e-4362-b320-19182b59ae9b'), 'name': 'Test Category yhtw', 'slug': 'test-cat-yhtw', 'description': 'Created by test script', 'image_url': None, 'is_active': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 36, 22, 590951, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:06:22,592 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:22,592 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:22,593 INFO sqlalchemy.engine.Engine SELECT categories.id, categories.name, categories.slug, categories.description, categories.image_url, categories.is_active, categories.created_at 
+FROM categories 
+WHERE categories.id = %(pk_1)s::UUID
+2026-06-05 12:06:22,593 INFO sqlalchemy.engine.Engine [cached since 33.04s ago] {'pk_1': UUID('b7754730-c07e-4362-b320-19182b59ae9b')}
+2026-06-05 12:06:22,594 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59121 - "POST /api/v1/admin/categories HTTP/1.1" 200 OK
+2026-06-05 12:06:23,056 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:23,164 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:23,414 INFO sqlalchemy.engine.Engine [cached since 38.42s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:23,563 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:23,685 INFO sqlalchemy.engine.Engine [cached since 33.65s ago] {'id_1': 'b7754730-c07e-4362-b320-19182b59ae9b', 'param_1': 1}
+2026-06-05 12:06:23,812 INFO sqlalchemy.engine.Engine UPDATE categories SET name=%(name)s, description=%(description)s WHERE categories.id = %(categories_id)s::UUID
+2026-06-05 12:06:23,934 INFO sqlalchemy.engine.Engine [cached since 33.9s ago] {'name': 'Updated Category yhtw', 'description': 'Updated description', 'categories_id': UUID('b7754730-c07e-4362-b320-19182b59ae9b')}
+2026-06-05 12:06:24,057 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:24,272 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:24,461 INFO sqlalchemy.engine.Engine SELECT categories.id, categories.name, categories.slug, categories.description, categories.image_url, categories.is_active, categories.created_at 
+FROM categories 
+WHERE categories.id = %(pk_1)s::UUID
+2026-06-05 12:06:24,960 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'pk_1': UUID('b7754730-c07e-4362-b320-19182b59ae9b')}
+2026-06-05 12:06:25,141 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59122 - "PUT /api/v1/admin/categories/b7754730-c07e-4362-b320-19182b59ae9b HTTP/1.1" 200 OK
+2026-06-05 12:06:25,854 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:25,859 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:25,859 INFO sqlalchemy.engine.Engine [cached since 40.87s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:25,861 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:25,861 INFO sqlalchemy.engine.Engine [cached since 35.83s ago] {'id_1': 'b7754730-c07e-4362-b320-19182b59ae9b', 'param_1': 1}
+2026-06-05 12:06:25,862 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE %(param_1)s::UUID = products.category_id
+2026-06-05 12:06:25,862 INFO sqlalchemy.engine.Engine [cached since 35.36s ago] {'param_1': UUID('b7754730-c07e-4362-b320-19182b59ae9b')}
+2026-06-05 12:06:25,862 INFO sqlalchemy.engine.Engine DELETE FROM categories WHERE categories.id = %(id)s::UUID
+2026-06-05 12:06:25,863 INFO sqlalchemy.engine.Engine [cached since 35.36s ago] {'id': UUID('b7754730-c07e-4362-b320-19182b59ae9b')}
+2026-06-05 12:06:25,863 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:59124 - "DELETE /api/v1/admin/categories/b7754730-c07e-4362-b320-19182b59ae9b HTTP/1.1" 200 OK
+2026-06-05 12:06:26,333 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:26,339 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:26,339 INFO sqlalchemy.engine.Engine [cached since 41.35s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:26,341 INFO sqlalchemy.engine.Engine INSERT INTO categories (id, name, slug, description, image_url, is_active, created_at) VALUES (%(id)s::UUID, %(name)s, %(slug)s, %(description)s, %(image_url)s, %(is_active)s, %(created_at)s)
+2026-06-05 12:06:26,341 INFO sqlalchemy.engine.Engine [cached since 36.8s ago] {'id': UUID('44b880b9-dacb-425f-be00-fc6cd8464a22'), 'name': 'Test Category yhtw', 'slug': 'test-cat-yhtw-recreated', 'description': 'Recreated for product tests', 'image_url': None, 'is_active': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 36, 26, 341251, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:06:26,342 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:26,342 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:26,343 INFO sqlalchemy.engine.Engine SELECT categories.id, categories.name, categories.slug, categories.description, categories.image_url, categories.is_active, categories.created_at 
+FROM categories 
+WHERE categories.id = %(pk_1)s::UUID
+2026-06-05 12:06:26,343 INFO sqlalchemy.engine.Engine [cached since 36.79s ago] {'pk_1': UUID('44b880b9-dacb-425f-be00-fc6cd8464a22')}
+2026-06-05 12:06:26,344 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59125 - "POST /api/v1/admin/categories HTTP/1.1" 200 OK
+2026-06-05 12:06:26,787 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:26,810 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:26,810 INFO sqlalchemy.engine.Engine [cached since 41.82s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:26,812 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:26,812 INFO sqlalchemy.engine.Engine [cached since 36.78s ago] {'id_1': '44b880b9-dacb-425f-be00-fc6cd8464a22', 'param_1': 1}
+2026-06-05 12:06:26,813 INFO sqlalchemy.engine.Engine INSERT INTO products (id, category_id, title, description, brand, sku, price, discount_price, gst_percentage, stock, featured, is_active, created_at, updated_at) VALUES (%(id)s::UUID, %(category_id)s::UUID, %(title)s, %(description)s, %(brand)s, %(sku)s, %(price)s, %(discount_price)s, %(gst_percentage)s, %(stock)s, %(featured)s, %(is_active)s, %(created_at)s, %(updated_at)s)
+2026-06-05 12:06:26,814 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'id': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3'), 'category_id': '44b880b9-dacb-425f-be00-fc6cd8464a22', 'title': 'Test Product yhtw', 'description': 'Test product description', 'brand': 'TestBrand', 'sku': 'SKU-yhtw', 'price': 999.0, 'discount_price': 799.0, 'gst_percentage': 18.0, 'stock': 100, 'featured': True, 'is_active': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 36, 26, 813665, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 36, 26, 813667, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:06:26,815 INFO sqlalchemy.engine.Engine INSERT INTO product_images (id, product_id, image_url, is_primary) VALUES (%(id)s::UUID, %(product_id)s::UUID, %(image_url)s, %(is_primary)s)
+2026-06-05 12:06:26,815 INFO sqlalchemy.engine.Engine [cached since 35.38s ago] {'id': UUID('841ac234-0826-4679-81e9-7a01c9139772'), 'product_id': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3'), 'image_url': 'https://example.com/img1.jpg', 'is_primary': True}
+2026-06-05 12:06:26,844 INFO sqlalchemy.engine.Engine INSERT INTO product_variants (id, product_id, size, color, stock, price) VALUES (%(id__0)s::UUID, %(product_id__0)s::UUID, %(size__0)s, %(color__0)s, %(stock__0)s, %(price__0)s), (%(id__1)s::UUID, %(product_id__1)s::UUID, %(size__1)s, %(color__1)s, %(stock__1)s, %(price__1)s)
+2026-06-05 12:06:26,845 INFO sqlalchemy.engine.Engine [cached since 35.41s ago (insertmanyvalues) 1/1 (unordered)] {'size__0': 'M', 'stock__0': 50, 'color__0': 'Red', 'product_id__0': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3'), 'price__0': 799.0, 'id__0': UUID('ad64eb55-eed7-4efb-a35f-688e4aa1ee7f'), 'size__1': 'L', 'stock__1': 30, 'color__1': 'Blue', 'product_id__1': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3'), 'price__1': 799.0, 'id__1': UUID('224c49c0-fa6a-4835-8d13-ba38f01bdaee')}
+2026-06-05 12:06:26,845 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:26,846 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:26,847 INFO sqlalchemy.engine.Engine SELECT products.id, products.category_id, products.title, products.description, products.brand, products.sku, products.price, products.discount_price, products.gst_percentage, products.stock, products.featured, products.is_active, products.created_at, products.updated_at 
+FROM products 
+WHERE products.id = %(pk_1)s::UUID
+2026-06-05 12:06:26,847 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'pk_1': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3')}
+2026-06-05 12:06:26,848 INFO sqlalchemy.engine.Engine SELECT anon_1.products_id AS anon_1_products_id, anon_1.products_category_id AS anon_1_products_category_id, anon_1.products_title AS anon_1_products_title, anon_1.products_description AS anon_1_products_description, anon_1.products_brand AS anon_1_products_brand, anon_1.products_sku AS anon_1_products_sku, anon_1.products_price AS anon_1_products_price, anon_1.products_discount_price AS anon_1_products_discount_price, anon_1.products_gst_percentage AS anon_1_products_gst_percentage, anon_1.products_stock AS anon_1_products_stock, anon_1.products_featured AS anon_1_products_featured, anon_1.products_is_active AS anon_1_products_is_active, anon_1.products_created_at AS anon_1_products_created_at, anon_1.products_updated_at AS anon_1_products_updated_at, categories_1.id AS categories_1_id, categories_1.name AS categories_1_name, categories_1.slug AS categories_1_slug, categories_1.description AS categories_1_description, categories_1.image_url AS categories_1_image_url, categories_1.is_active AS categories_1_is_active, categories_1.created_at AS categories_1_created_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price, product_images_1.id AS product_images_1_id, product_images_1.product_id AS product_images_1_product_id, product_images_1.image_url AS product_images_1_image_url, product_images_1.is_primary AS product_images_1_is_primary 
+FROM (SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN categories AS categories_1 ON categories_1.id = anon_1.products_category_id LEFT OUTER JOIN product_variants AS product_variants_1 ON anon_1.products_id = product_variants_1.product_id LEFT OUTER JOIN product_images AS product_images_1 ON anon_1.products_id = product_images_1.product_id
+2026-06-05 12:06:26,848 INFO sqlalchemy.engine.Engine [cached since 35.4s ago] {'id_1': 'e44299bc-27e7-4b90-80bf-3be5af169ed3', 'param_1': 1}
+2026-06-05 12:06:26,850 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59126 - "POST /api/v1/admin/products HTTP/1.1" 200 OK
+2026-06-05 12:06:27,306 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:27,327 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:27,327 INFO sqlalchemy.engine.Engine [cached since 42.34s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:27,329 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:27,329 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'id_1': 'e44299bc-27e7-4b90-80bf-3be5af169ed3', 'param_1': 1}
+2026-06-05 12:06:27,330 INFO sqlalchemy.engine.Engine UPDATE products SET price=%(price)s, stock=%(stock)s, updated_at=%(updated_at)s WHERE products.id = %(products_id)s::UUID
+2026-06-05 12:06:27,330 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'price': 899.0, 'stock': 80, 'updated_at': datetime.datetime(2026, 6, 5, 6, 36, 27, 330590, tzinfo=datetime.timezone.utc), 'products_id': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3')}
+2026-06-05 12:06:27,331 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:27,332 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:27,332 INFO sqlalchemy.engine.Engine SELECT products.id, products.category_id, products.title, products.description, products.brand, products.sku, products.price, products.discount_price, products.gst_percentage, products.stock, products.featured, products.is_active, products.created_at, products.updated_at 
+FROM products 
+WHERE products.id = %(pk_1)s::UUID
+2026-06-05 12:06:27,333 INFO sqlalchemy.engine.Engine [cached since 35.89s ago] {'pk_1': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3')}
+2026-06-05 12:06:27,334 INFO sqlalchemy.engine.Engine SELECT anon_1.products_id AS anon_1_products_id, anon_1.products_category_id AS anon_1_products_category_id, anon_1.products_title AS anon_1_products_title, anon_1.products_description AS anon_1_products_description, anon_1.products_brand AS anon_1_products_brand, anon_1.products_sku AS anon_1_products_sku, anon_1.products_price AS anon_1_products_price, anon_1.products_discount_price AS anon_1_products_discount_price, anon_1.products_gst_percentage AS anon_1_products_gst_percentage, anon_1.products_stock AS anon_1_products_stock, anon_1.products_featured AS anon_1_products_featured, anon_1.products_is_active AS anon_1_products_is_active, anon_1.products_created_at AS anon_1_products_created_at, anon_1.products_updated_at AS anon_1_products_updated_at, categories_1.id AS categories_1_id, categories_1.name AS categories_1_name, categories_1.slug AS categories_1_slug, categories_1.description AS categories_1_description, categories_1.image_url AS categories_1_image_url, categories_1.is_active AS categories_1_is_active, categories_1.created_at AS categories_1_created_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price, product_images_1.id AS product_images_1_id, product_images_1.product_id AS product_images_1_product_id, product_images_1.image_url AS product_images_1_image_url, product_images_1.is_primary AS product_images_1_is_primary 
+FROM (SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN categories AS categories_1 ON categories_1.id = anon_1.products_category_id LEFT OUTER JOIN product_variants AS product_variants_1 ON anon_1.products_id = product_variants_1.product_id LEFT OUTER JOIN product_images AS product_images_1 ON anon_1.products_id = product_images_1.product_id
+2026-06-05 12:06:27,334 INFO sqlalchemy.engine.Engine [cached since 35.89s ago] {'id_1': 'e44299bc-27e7-4b90-80bf-3be5af169ed3', 'param_1': 1}
+2026-06-05 12:06:27,336 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59127 - "PUT /api/v1/admin/products/e44299bc-27e7-4b90-80bf-3be5af169ed3 HTTP/1.1" 200 OK
+2026-06-05 12:06:27,791 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:27,808 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:27,809 INFO sqlalchemy.engine.Engine [cached since 42.82s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:27,811 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:27,811 INFO sqlalchemy.engine.Engine [cached since 35.89s ago] {'id_1': 'e44299bc-27e7-4b90-80bf-3be5af169ed3', 'param_1': 1}
+2026-06-05 12:06:27,812 INFO sqlalchemy.engine.Engine SELECT product_variants.id AS product_variants_id, product_variants.product_id AS product_variants_product_id, product_variants.size AS product_variants_size, product_variants.color AS product_variants_color, product_variants.stock AS product_variants_stock, product_variants.price AS product_variants_price 
+FROM product_variants 
+WHERE %(param_1)s::UUID = product_variants.product_id
+2026-06-05 12:06:27,812 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'param_1': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3')}
+2026-06-05 12:06:27,813 INFO sqlalchemy.engine.Engine SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.image_url AS product_images_image_url, product_images.is_primary AS product_images_is_primary 
+FROM product_images 
+WHERE %(param_1)s::UUID = product_images.product_id
+2026-06-05 12:06:27,813 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'param_1': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3')}
+2026-06-05 12:06:27,814 INFO sqlalchemy.engine.Engine DELETE FROM product_images WHERE product_images.id = %(id)s::UUID
+2026-06-05 12:06:27,815 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'id': UUID('841ac234-0826-4679-81e9-7a01c9139772')}
+2026-06-05 12:06:27,815 INFO sqlalchemy.engine.Engine DELETE FROM product_variants WHERE product_variants.id = %(id)s::UUID
+2026-06-05 12:06:27,815 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] [{'id': UUID('224c49c0-fa6a-4835-8d13-ba38f01bdaee')}, {'id': UUID('ad64eb55-eed7-4efb-a35f-688e4aa1ee7f')}]
+2026-06-05 12:06:27,816 INFO sqlalchemy.engine.Engine DELETE FROM products WHERE products.id = %(id)s::UUID
+2026-06-05 12:06:27,817 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'id': UUID('e44299bc-27e7-4b90-80bf-3be5af169ed3')}
+2026-06-05 12:06:27,818 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:59128 - "DELETE /api/v1/admin/products/e44299bc-27e7-4b90-80bf-3be5af169ed3 HTTP/1.1" 200 OK
+2026-06-05 12:06:28,275 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:28,278 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:28,278 INFO sqlalchemy.engine.Engine [cached since 43.29s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:28,280 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:28,280 INFO sqlalchemy.engine.Engine [cached since 38.25s ago] {'id_1': '44b880b9-dacb-425f-be00-fc6cd8464a22', 'param_1': 1}
+2026-06-05 12:06:28,281 INFO sqlalchemy.engine.Engine INSERT INTO products (id, category_id, title, description, brand, sku, price, discount_price, gst_percentage, stock, featured, is_active, created_at, updated_at) VALUES (%(id)s::UUID, %(category_id)s::UUID, %(title)s, %(description)s, %(brand)s, %(sku)s, %(price)s, %(discount_price)s, %(gst_percentage)s, %(stock)s, %(featured)s, %(is_active)s, %(created_at)s, %(updated_at)s)
+2026-06-05 12:06:28,281 INFO sqlalchemy.engine.Engine [cached since 36.86s ago] {'id': UUID('45db2cd0-9878-45ce-9c80-afdee64fba11'), 'category_id': '44b880b9-dacb-425f-be00-fc6cd8464a22', 'title': 'Test Product yhtw', 'description': 'Test product for ordering', 'brand': 'TestBrand', 'sku': 'SKU-yhtw-2', 'price': 500.0, 'discount_price': None, 'gst_percentage': 18.0, 'stock': 50, 'featured': False, 'is_active': True, 'created_at': datetime.datetime(2026, 6, 5, 6, 36, 28, 281647, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 36, 28, 281649, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:06:28,282 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:28,283 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:28,284 INFO sqlalchemy.engine.Engine SELECT products.id, products.category_id, products.title, products.description, products.brand, products.sku, products.price, products.discount_price, products.gst_percentage, products.stock, products.featured, products.is_active, products.created_at, products.updated_at 
+FROM products 
+WHERE products.id = %(pk_1)s::UUID
+2026-06-05 12:06:28,284 INFO sqlalchemy.engine.Engine [cached since 36.85s ago] {'pk_1': UUID('45db2cd0-9878-45ce-9c80-afdee64fba11')}
+2026-06-05 12:06:28,285 INFO sqlalchemy.engine.Engine SELECT anon_1.products_id AS anon_1_products_id, anon_1.products_category_id AS anon_1_products_category_id, anon_1.products_title AS anon_1_products_title, anon_1.products_description AS anon_1_products_description, anon_1.products_brand AS anon_1_products_brand, anon_1.products_sku AS anon_1_products_sku, anon_1.products_price AS anon_1_products_price, anon_1.products_discount_price AS anon_1_products_discount_price, anon_1.products_gst_percentage AS anon_1_products_gst_percentage, anon_1.products_stock AS anon_1_products_stock, anon_1.products_featured AS anon_1_products_featured, anon_1.products_is_active AS anon_1_products_is_active, anon_1.products_created_at AS anon_1_products_created_at, anon_1.products_updated_at AS anon_1_products_updated_at, categories_1.id AS categories_1_id, categories_1.name AS categories_1_name, categories_1.slug AS categories_1_slug, categories_1.description AS categories_1_description, categories_1.image_url AS categories_1_image_url, categories_1.is_active AS categories_1_is_active, categories_1.created_at AS categories_1_created_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price, product_images_1.id AS product_images_1_id, product_images_1.product_id AS product_images_1_product_id, product_images_1.image_url AS product_images_1_image_url, product_images_1.is_primary AS product_images_1_is_primary 
+FROM (SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN categories AS categories_1 ON categories_1.id = anon_1.products_category_id LEFT OUTER JOIN product_variants AS product_variants_1 ON anon_1.products_id = product_variants_1.product_id LEFT OUTER JOIN product_images AS product_images_1 ON anon_1.products_id = product_images_1.product_id
+2026-06-05 12:06:28,285 INFO sqlalchemy.engine.Engine [cached since 36.84s ago] {'id_1': '45db2cd0-9878-45ce-9c80-afdee64fba11', 'param_1': 1}
+2026-06-05 12:06:28,287 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59129 - "POST /api/v1/admin/products HTTP/1.1" 200 OK
+2026-06-05 12:06:28,744 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:28,746 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:28,747 INFO sqlalchemy.engine.Engine [cached since 43.75s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:28,748 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID AND products.is_active = true 
+ LIMIT %(param_1)s
+2026-06-05 12:06:28,749 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'id_1': '45db2cd0-9878-45ce-9c80-afdee64fba11', 'param_1': 1}
+2026-06-05 12:06:28,750 INFO sqlalchemy.engine.Engine SELECT cart_items.id AS cart_items_id, cart_items.user_id AS cart_items_user_id, cart_items.product_id AS cart_items_product_id, cart_items.variant_id AS cart_items_variant_id, cart_items.quantity AS cart_items_quantity, cart_items.created_at AS cart_items_created_at 
+FROM cart_items 
+WHERE cart_items.user_id = %(user_id_1)s::UUID AND cart_items.product_id = %(product_id_1)s::UUID AND cart_items.variant_id IS NULL 
+ LIMIT %(param_1)s
+2026-06-05 12:06:28,750 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'product_id_1': '45db2cd0-9878-45ce-9c80-afdee64fba11', 'param_1': 1}
+2026-06-05 12:06:28,751 INFO sqlalchemy.engine.Engine INSERT INTO cart_items (id, user_id, product_id, variant_id, quantity, created_at) VALUES (%(id)s::UUID, %(user_id)s::UUID, %(product_id)s::UUID, %(variant_id)s::UUID, %(quantity)s, %(created_at)s)
+2026-06-05 12:06:28,751 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'id': UUID('5f1420ec-7746-4a64-858f-1d3ef3443a96'), 'user_id': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'product_id': '45db2cd0-9878-45ce-9c80-afdee64fba11', 'variant_id': None, 'quantity': 2, 'created_at': datetime.datetime(2026, 6, 5, 6, 36, 28, 751168, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:06:28,752 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:28,753 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:28,753 INFO sqlalchemy.engine.Engine SELECT cart_items.id AS cart_items_id, cart_items.user_id AS cart_items_user_id, cart_items.product_id AS cart_items_product_id, cart_items.variant_id AS cart_items_variant_id, cart_items.quantity AS cart_items_quantity, cart_items.created_at AS cart_items_created_at, products_1.id AS products_1_id, products_1.category_id AS products_1_category_id, products_1.title AS products_1_title, products_1.description AS products_1_description, products_1.brand AS products_1_brand, products_1.sku AS products_1_sku, products_1.price AS products_1_price, products_1.discount_price AS products_1_discount_price, products_1.gst_percentage AS products_1_gst_percentage, products_1.stock AS products_1_stock, products_1.featured AS products_1_featured, products_1.is_active AS products_1_is_active, products_1.created_at AS products_1_created_at, products_1.updated_at AS products_1_updated_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price 
+FROM cart_items LEFT OUTER JOIN products AS products_1 ON products_1.id = cart_items.product_id LEFT OUTER JOIN product_variants AS product_variants_1 ON product_variants_1.id = cart_items.variant_id 
+WHERE cart_items.user_id = %(user_id_1)s::UUID
+2026-06-05 12:06:28,753 INFO sqlalchemy.engine.Engine [cached since 35.38s ago] {'user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3'}
+2026-06-05 12:06:28,755 INFO sqlalchemy.engine.Engine SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.image_url AS product_images_image_url, product_images.is_primary AS product_images_is_primary 
+FROM product_images 
+WHERE product_images.product_id = %(product_id_1)s::UUID AND product_images.is_primary = true 
+ LIMIT %(param_1)s
+2026-06-05 12:06:28,755 INFO sqlalchemy.engine.Engine [cached since 35.38s ago] {'product_id_1': UUID('45db2cd0-9878-45ce-9c80-afdee64fba11'), 'param_1': 1}
+2026-06-05 12:06:28,756 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59130 - "POST /api/v1/cart/add HTTP/1.1" 200 OK
+2026-06-05 12:06:29,213 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:29,215 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:29,216 INFO sqlalchemy.engine.Engine [cached since 44.22s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:29,217 INFO sqlalchemy.engine.Engine SELECT cart_items.id AS cart_items_id, cart_items.user_id AS cart_items_user_id, cart_items.product_id AS cart_items_product_id, cart_items.variant_id AS cart_items_variant_id, cart_items.quantity AS cart_items_quantity, cart_items.created_at AS cart_items_created_at, products_1.id AS products_1_id, products_1.category_id AS products_1_category_id, products_1.title AS products_1_title, products_1.description AS products_1_description, products_1.brand AS products_1_brand, products_1.sku AS products_1_sku, products_1.price AS products_1_price, products_1.discount_price AS products_1_discount_price, products_1.gst_percentage AS products_1_gst_percentage, products_1.stock AS products_1_stock, products_1.featured AS products_1_featured, products_1.is_active AS products_1_is_active, products_1.created_at AS products_1_created_at, products_1.updated_at AS products_1_updated_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price 
+FROM cart_items LEFT OUTER JOIN products AS products_1 ON products_1.id = cart_items.product_id LEFT OUTER JOIN product_variants AS product_variants_1 ON product_variants_1.id = cart_items.variant_id 
+WHERE cart_items.user_id = %(user_id_1)s::UUID
+2026-06-05 12:06:29,217 INFO sqlalchemy.engine.Engine [cached since 35.84s ago] {'user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3'}
+2026-06-05 12:06:29,219 INFO sqlalchemy.engine.Engine SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.image_url AS product_images_image_url, product_images.is_primary AS product_images_is_primary 
+FROM product_images 
+WHERE product_images.product_id = %(product_id_1)s::UUID AND product_images.is_primary = true 
+ LIMIT %(param_1)s
+2026-06-05 12:06:29,219 INFO sqlalchemy.engine.Engine [cached since 35.84s ago] {'product_id_1': UUID('45db2cd0-9878-45ce-9c80-afdee64fba11'), 'param_1': 1}
+2026-06-05 12:06:29,220 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59131 - "GET /api/v1/cart HTTP/1.1" 200 OK
+2026-06-05 12:06:29,682 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:29,683 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:29,683 INFO sqlalchemy.engine.Engine [cached since 44.69s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:29,685 INFO sqlalchemy.engine.Engine SELECT cart_items.id AS cart_items_id, cart_items.user_id AS cart_items_user_id, cart_items.product_id AS cart_items_product_id, cart_items.variant_id AS cart_items_variant_id, cart_items.quantity AS cart_items_quantity, cart_items.created_at AS cart_items_created_at 
+FROM cart_items 
+WHERE cart_items.id = %(id_1)s::UUID AND cart_items.user_id = %(user_id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:29,685 INFO sqlalchemy.engine.Engine [generated in 0.00042s] {'id_1': '5f1420ec-7746-4a64-858f-1d3ef3443a96', 'user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:29,687 INFO sqlalchemy.engine.Engine UPDATE cart_items SET quantity=%(quantity)s WHERE cart_items.id = %(cart_items_id)s::UUID
+2026-06-05 12:06:29,687 INFO sqlalchemy.engine.Engine [generated in 0.00035s] {'quantity': 3, 'cart_items_id': UUID('5f1420ec-7746-4a64-858f-1d3ef3443a96')}
+2026-06-05 12:06:29,688 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:29,689 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:29,689 INFO sqlalchemy.engine.Engine SELECT cart_items.id AS cart_items_id, cart_items.user_id AS cart_items_user_id, cart_items.product_id AS cart_items_product_id, cart_items.variant_id AS cart_items_variant_id, cart_items.quantity AS cart_items_quantity, cart_items.created_at AS cart_items_created_at, products_1.id AS products_1_id, products_1.category_id AS products_1_category_id, products_1.title AS products_1_title, products_1.description AS products_1_description, products_1.brand AS products_1_brand, products_1.sku AS products_1_sku, products_1.price AS products_1_price, products_1.discount_price AS products_1_discount_price, products_1.gst_percentage AS products_1_gst_percentage, products_1.stock AS products_1_stock, products_1.featured AS products_1_featured, products_1.is_active AS products_1_is_active, products_1.created_at AS products_1_created_at, products_1.updated_at AS products_1_updated_at, product_variants_1.id AS product_variants_1_id, product_variants_1.product_id AS product_variants_1_product_id, product_variants_1.size AS product_variants_1_size, product_variants_1.color AS product_variants_1_color, product_variants_1.stock AS product_variants_1_stock, product_variants_1.price AS product_variants_1_price 
+FROM cart_items LEFT OUTER JOIN products AS products_1 ON products_1.id = cart_items.product_id LEFT OUTER JOIN product_variants AS product_variants_1 ON product_variants_1.id = cart_items.variant_id 
+WHERE cart_items.user_id = %(user_id_1)s::UUID
+2026-06-05 12:06:29,689 INFO sqlalchemy.engine.Engine [cached since 36.31s ago] {'user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3'}
+2026-06-05 12:06:29,691 INFO sqlalchemy.engine.Engine SELECT product_images.id AS product_images_id, product_images.product_id AS product_images_product_id, product_images.image_url AS product_images_image_url, product_images.is_primary AS product_images_is_primary 
+FROM product_images 
+WHERE product_images.product_id = %(product_id_1)s::UUID AND product_images.is_primary = true 
+ LIMIT %(param_1)s
+2026-06-05 12:06:29,692 INFO sqlalchemy.engine.Engine [cached since 36.31s ago] {'product_id_1': UUID('45db2cd0-9878-45ce-9c80-afdee64fba11'), 'param_1': 1}
+2026-06-05 12:06:29,693 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59132 - "PUT /api/v1/cart/update HTTP/1.1" 200 OK
+2026-06-05 12:06:30,150 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:30,152 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:30,152 INFO sqlalchemy.engine.Engine [cached since 45.16s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:30,154 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:30,154 INFO sqlalchemy.engine.Engine [cached since 45.16s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:30,155 INFO sqlalchemy.engine.Engine SELECT products.id AS products_id, products.category_id AS products_category_id, products.title AS products_title, products.description AS products_description, products.brand AS products_brand, products.sku AS products_sku, products.price AS products_price, products.discount_price AS products_discount_price, products.gst_percentage AS products_gst_percentage, products.stock AS products_stock, products.featured AS products_featured, products.is_active AS products_is_active, products.created_at AS products_created_at, products.updated_at AS products_updated_at 
+FROM products 
+WHERE products.id = %(id_1)s::UUID AND products.is_active = true 
+ LIMIT %(param_1)s
+2026-06-05 12:06:30,156 INFO sqlalchemy.engine.Engine [cached since 36.8s ago] {'id_1': '45db2cd0-9878-45ce-9c80-afdee64fba11', 'param_1': 1}
+2026-06-05 12:06:30,157 INFO sqlalchemy.engine.Engine INSERT INTO orders (id, user_id, order_number, subtotal, gst_amount, discount_amount, final_amount, order_status, payment_status, shipping_address, estimated_delivery, created_at, updated_at) VALUES (%(id)s::UUID, %(user_id)s::UUID, %(order_number)s, %(subtotal)s, %(gst_amount)s, %(discount_amount)s, %(final_amount)s, %(order_status)s, %(payment_status)s, %(shipping_address)s, %(estimated_delivery)s, %(created_at)s, %(updated_at)s)
+2026-06-05 12:06:30,157 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'id': UUID('43742aa9-48b6-45d3-baf4-64d025fd21f4'), 'user_id': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'order_number': 'ORD-20260605-E0H0ES', 'subtotal': 500.0, 'gst_amount': 90.0, 'discount_amount': 0.0, 'final_amount': 590.0, 'order_status': 'placed', 'payment_status': 'pending', 'shipping_address': '123 Test Street, Test City, 123456', 'estimated_delivery': datetime.datetime(2026, 6, 12, 6, 36, 30, 156882, tzinfo=datetime.timezone.utc), 'created_at': datetime.datetime(2026, 6, 5, 6, 36, 30, 157308, tzinfo=datetime.timezone.utc), 'updated_at': datetime.datetime(2026, 6, 5, 6, 36, 30, 157309, tzinfo=datetime.timezone.utc)}
+2026-06-05 12:06:30,158 INFO sqlalchemy.engine.Engine UPDATE products SET stock=%(stock)s, updated_at=%(updated_at)s WHERE products.id = %(products_id)s::UUID
+2026-06-05 12:06:30,158 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'stock': 49, 'updated_at': datetime.datetime(2026, 6, 5, 6, 36, 30, 158375, tzinfo=datetime.timezone.utc), 'products_id': UUID('45db2cd0-9878-45ce-9c80-afdee64fba11')}
+2026-06-05 12:06:30,159 INFO sqlalchemy.engine.Engine INSERT INTO order_items (id, order_id, product_id, variant_id, product_name, quantity, price) VALUES (%(id)s::UUID, %(order_id)s::UUID, %(product_id)s::UUID, %(variant_id)s::UUID, %(product_name)s, %(quantity)s, %(price)s)
+2026-06-05 12:06:30,159 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'id': UUID('f82b589e-fcb4-429c-a868-9f39d3fc1067'), 'order_id': UUID('43742aa9-48b6-45d3-baf4-64d025fd21f4'), 'product_id': UUID('45db2cd0-9878-45ce-9c80-afdee64fba11'), 'variant_id': None, 'product_name': 'Test Product yhtw', 'quantity': 1, 'price': 500.0}
+2026-06-05 12:06:30,160 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:30,161 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:30,161 INFO sqlalchemy.engine.Engine SELECT orders.id, orders.user_id, orders.order_number, orders.subtotal, orders.gst_amount, orders.discount_amount, orders.final_amount, orders.order_status, orders.payment_status, orders.shipping_address, orders.estimated_delivery, orders.created_at, orders.updated_at 
+FROM orders 
+WHERE orders.id = %(pk_1)s::UUID
+2026-06-05 12:06:30,162 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'pk_1': UUID('43742aa9-48b6-45d3-baf4-64d025fd21f4')}
+2026-06-05 12:06:30,163 INFO sqlalchemy.engine.Engine SELECT anon_1.orders_id AS anon_1_orders_id, anon_1.orders_user_id AS anon_1_orders_user_id, anon_1.orders_order_number AS anon_1_orders_order_number, anon_1.orders_subtotal AS anon_1_orders_subtotal, anon_1.orders_gst_amount AS anon_1_orders_gst_amount, anon_1.orders_discount_amount AS anon_1_orders_discount_amount, anon_1.orders_final_amount AS anon_1_orders_final_amount, anon_1.orders_order_status AS anon_1_orders_order_status, anon_1.orders_payment_status AS anon_1_orders_payment_status, anon_1.orders_shipping_address AS anon_1_orders_shipping_address, anon_1.orders_estimated_delivery AS anon_1_orders_estimated_delivery, anon_1.orders_created_at AS anon_1_orders_created_at, anon_1.orders_updated_at AS anon_1_orders_updated_at, order_items_1.id AS order_items_1_id, order_items_1.order_id AS order_items_1_order_id, order_items_1.product_id AS order_items_1_product_id, order_items_1.variant_id AS order_items_1_variant_id, order_items_1.product_name AS order_items_1_product_name, order_items_1.quantity AS order_items_1_quantity, order_items_1.price AS order_items_1_price 
+FROM (SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders 
+WHERE orders.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN order_items AS order_items_1 ON anon_1.orders_id = order_items_1.order_id
+2026-06-05 12:06:30,163 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'id_1': '43742aa9-48b6-45d3-baf4-64d025fd21f4', 'param_1': 1}
+2026-06-05 12:06:30,165 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59133 - "POST /api/v1/orders HTTP/1.1" 200 OK
+2026-06-05 12:06:30,620 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:30,623 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:30,623 INFO sqlalchemy.engine.Engine [cached since 45.63s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:30,625 INFO sqlalchemy.engine.Engine SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at, order_items_1.id AS order_items_1_id, order_items_1.order_id AS order_items_1_order_id, order_items_1.product_id AS order_items_1_product_id, order_items_1.variant_id AS order_items_1_variant_id, order_items_1.product_name AS order_items_1_product_name, order_items_1.quantity AS order_items_1_quantity, order_items_1.price AS order_items_1_price 
+FROM orders LEFT OUTER JOIN order_items AS order_items_1 ON orders.id = order_items_1.order_id 
+WHERE orders.user_id = %(user_id_1)s::UUID ORDER BY orders.created_at DESC
+2026-06-05 12:06:30,625 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3'}
+2026-06-05 12:06:30,626 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59134 - "GET /api/v1/orders HTTP/1.1" 200 OK
+2026-06-05 12:06:31,072 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:31,074 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:31,074 INFO sqlalchemy.engine.Engine [cached since 46.08s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:31,076 INFO sqlalchemy.engine.Engine SELECT anon_1.orders_id AS anon_1_orders_id, anon_1.orders_user_id AS anon_1_orders_user_id, anon_1.orders_order_number AS anon_1_orders_order_number, anon_1.orders_subtotal AS anon_1_orders_subtotal, anon_1.orders_gst_amount AS anon_1_orders_gst_amount, anon_1.orders_discount_amount AS anon_1_orders_discount_amount, anon_1.orders_final_amount AS anon_1_orders_final_amount, anon_1.orders_order_status AS anon_1_orders_order_status, anon_1.orders_payment_status AS anon_1_orders_payment_status, anon_1.orders_shipping_address AS anon_1_orders_shipping_address, anon_1.orders_estimated_delivery AS anon_1_orders_estimated_delivery, anon_1.orders_created_at AS anon_1_orders_created_at, anon_1.orders_updated_at AS anon_1_orders_updated_at, order_items_1.id AS order_items_1_id, order_items_1.order_id AS order_items_1_order_id, order_items_1.product_id AS order_items_1_product_id, order_items_1.variant_id AS order_items_1_variant_id, order_items_1.product_name AS order_items_1_product_name, order_items_1.quantity AS order_items_1_quantity, order_items_1.price AS order_items_1_price 
+FROM (SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders 
+WHERE orders.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s) AS anon_1 LEFT OUTER JOIN order_items AS order_items_1 ON anon_1.orders_id = order_items_1.order_id
+2026-06-05 12:06:31,077 INFO sqlalchemy.engine.Engine [cached since 36.3s ago] {'id_1': '43742aa9-48b6-45d3-baf4-64d025fd21f4', 'param_1': 1}
+2026-06-05 12:06:31,078 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59135 - "GET /api/v1/orders/43742aa9-48b6-45d3-baf4-64d025fd21f4 HTTP/1.1" 200 OK
+2026-06-05 12:06:31,540 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:31,542 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:31,543 INFO sqlalchemy.engine.Engine [cached since 46.55s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 12:06:31,544 INFO sqlalchemy.engine.Engine SELECT orders.id AS orders_id, orders.user_id AS orders_user_id, orders.order_number AS orders_order_number, orders.subtotal AS orders_subtotal, orders.gst_amount AS orders_gst_amount, orders.discount_amount AS orders_discount_amount, orders.final_amount AS orders_final_amount, orders.order_status AS orders_order_status, orders.payment_status AS orders_payment_status, orders.shipping_address AS orders_shipping_address, orders.estimated_delivery AS orders_estimated_delivery, orders.created_at AS orders_created_at, orders.updated_at AS orders_updated_at 
+FROM orders 
+WHERE orders.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:31,545 INFO sqlalchemy.engine.Engine [cached since 35.41s ago] {'id_1': '43742aa9-48b6-45d3-baf4-64d025fd21f4', 'param_1': 1}
+2026-06-05 12:06:31,546 INFO sqlalchemy.engine.Engine UPDATE orders SET order_status=%(order_status)s, updated_at=%(updated_at)s WHERE orders.id = %(orders_id)s::UUID
+2026-06-05 12:06:31,546 INFO sqlalchemy.engine.Engine [cached since 35.4s ago] {'order_status': 'processing', 'updated_at': datetime.datetime(2026, 6, 5, 6, 36, 31, 546124, tzinfo=datetime.timezone.utc), 'orders_id': UUID('43742aa9-48b6-45d3-baf4-64d025fd21f4')}
+2026-06-05 12:06:31,546 INFO sqlalchemy.engine.Engine COMMIT
+2026-06-05 12:06:31,547 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:31,548 INFO sqlalchemy.engine.Engine SELECT orders.id, orders.user_id, orders.order_number, orders.subtotal, orders.gst_amount, orders.discount_amount, orders.final_amount, orders.order_status, orders.payment_status, orders.shipping_address, orders.estimated_delivery, orders.created_at, orders.updated_at 
+FROM orders 
+WHERE orders.id = %(pk_1)s::UUID
+2026-06-05 12:06:31,548 INFO sqlalchemy.engine.Engine [cached since 36.78s ago] {'pk_1': UUID('43742aa9-48b6-45d3-baf4-64d025fd21f4')}
+2026-06-05 12:06:31,549 INFO sqlalchemy.engine.Engine SELECT order_items.id AS order_items_id, order_items.order_id AS order_items_order_id, order_items.product_id AS order_items_product_id, order_items.variant_id AS order_items_variant_id, order_items.product_name AS order_items_product_name, order_items.quantity AS order_items_quantity, order_items.price AS order_items_price 
+FROM order_items 
+WHERE %(param_1)s::UUID = order_items.order_id
+2026-06-05 12:06:31,549 INFO sqlalchemy.engine.Engine [cached since 35.4s ago] {'param_1': UUID('43742aa9-48b6-45d3-baf4-64d025fd21f4')}
+2026-06-05 12:06:31,550 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59136 - "PUT /api/v1/orders/43742aa9-48b6-45d3-baf4-64d025fd21f4/status HTTP/1.1" 200 OK
+2026-06-05 12:06:31,993 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:31,995 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:31,996 INFO sqlalchemy.engine.Engine [cached since 47s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:31,997 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:31,997 INFO sqlalchemy.engine.Engine [cached since 47.01s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:31,998 INFO sqlalchemy.engine.Engine SELECT referral_earnings.id AS referral_earnings_id, referral_earnings.referrer_user_id AS referral_earnings_referrer_user_id, referral_earnings.referred_user_id AS referral_earnings_referred_user_id, referral_earnings.order_id AS referral_earnings_order_id, referral_earnings.referral_code AS referral_earnings_referral_code, referral_earnings.commission_amount AS referral_earnings_commission_amount, referral_earnings.status AS referral_earnings_status, referral_earnings.created_at AS referral_earnings_created_at 
+FROM referral_earnings 
+WHERE referral_earnings.referrer_user_id = %(referrer_user_id_1)s::UUID
+2026-06-05 12:06:31,998 INFO sqlalchemy.engine.Engine [cached since 35.39s ago] {'referrer_user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3'}
+2026-06-05 12:06:31,999 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59137 - "GET /api/v1/referral/me HTTP/1.1" 200 OK
+2026-06-05 12:06:32,448 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:32,450 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:32,450 INFO sqlalchemy.engine.Engine [cached since 47.46s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:32,452 INFO sqlalchemy.engine.Engine SELECT referral_earnings.id AS referral_earnings_id, referral_earnings.referrer_user_id AS referral_earnings_referrer_user_id, referral_earnings.referred_user_id AS referral_earnings_referred_user_id, referral_earnings.order_id AS referral_earnings_order_id, referral_earnings.referral_code AS referral_earnings_referral_code, referral_earnings.commission_amount AS referral_earnings_commission_amount, referral_earnings.status AS referral_earnings_status, referral_earnings.created_at AS referral_earnings_created_at, users_1.id AS users_1_id, users_1.full_name AS users_1_full_name, users_1.email AS users_1_email, users_1.phone AS users_1_phone, users_1.password_hash AS users_1_password_hash, users_1.role AS users_1_role, users_1.referral_code AS users_1_referral_code, users_1.referred_by AS users_1_referred_by, users_1.wallet_balance AS users_1_wallet_balance, users_1.is_verified AS users_1_is_verified, users_1.created_at AS users_1_created_at, users_1.updated_at AS users_1_updated_at 
+FROM referral_earnings LEFT OUTER JOIN users AS users_1 ON users_1.id = referral_earnings.referrer_user_id 
+WHERE referral_earnings.referrer_user_id = %(referrer_user_id_1)s::UUID ORDER BY referral_earnings.created_at DESC
+2026-06-05 12:06:32,452 INFO sqlalchemy.engine.Engine [cached since 35.36s ago] {'referrer_user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3'}
+2026-06-05 12:06:32,454 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59138 - "GET /api/v1/referral/history HTTP/1.1" 200 OK
+2026-06-05 12:06:32,900 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:32,902 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:32,903 INFO sqlalchemy.engine.Engine [cached since 47.91s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:32,904 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:32,905 INFO sqlalchemy.engine.Engine [cached since 47.91s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:32,906 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59139 - "GET /api/v1/wallet/balance HTTP/1.1" 200 OK
+2026-06-05 12:06:33,369 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 12:06:33,372 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 12:06:33,372 INFO sqlalchemy.engine.Engine [cached since 48.38s ago] {'id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3', 'param_1': 1}
+2026-06-05 12:06:33,373 INFO sqlalchemy.engine.Engine SELECT wallet_transactions.id AS wallet_transactions_id, wallet_transactions.user_id AS wallet_transactions_user_id, wallet_transactions.transaction_type AS wallet_transactions_transaction_type, wallet_transactions.amount AS wallet_transactions_amount, wallet_transactions.source AS wallet_transactions_source, wallet_transactions.reference_id AS wallet_transactions_reference_id, wallet_transactions.description AS wallet_transactions_description, wallet_transactions.created_at AS wallet_transactions_created_at 
+FROM wallet_transactions 
+WHERE wallet_transactions.user_id = %(user_id_1)s::UUID ORDER BY wallet_transactions.created_at DESC
+2026-06-05 12:06:33,374 INFO sqlalchemy.engine.Engine [cached since 35.38s ago] {'user_id_1': 'a6b828a1-d888-41a5-a3d4-bb098d2e91c3'}
+2026-06-05 12:06:33,375 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:59140 - "GET /api/v1/wallet/transactions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49332 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49332 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49332 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49332 - "GET /openapi.json HTTP/1.1" 200 OK
+2026-06-05 22:17:19,809 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 22:17:19,843 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s
+2026-06-05 22:17:19,846 INFO sqlalchemy.engine.Engine [cached since 3.674e+04s ago] {'email_1': 'admin@garment.com', 'param_1': 1}
+2026-06-05 22:17:20,227 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:58332 - "POST /api/v1/admin/login HTTP/1.1" 200 OK
+2026-06-05 22:18:44,045 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-06-05 22:18:44,048 INFO sqlalchemy.engine.Engine SELECT users.id AS users_id, users.full_name AS users_full_name, users.email AS users_email, users.phone AS users_phone, users.password_hash AS users_password_hash, users.role AS users_role, users.referral_code AS users_referral_code, users.referred_by AS users_referred_by, users.wallet_balance AS users_wallet_balance, users.is_verified AS users_is_verified, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users 
+WHERE users.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 22:18:44,049 INFO sqlalchemy.engine.Engine [cached since 3.678e+04s ago] {'id_1': '5e791e67-d90e-4c4c-b424-700bec16b1d1', 'param_1': 1}
+2026-06-05 22:18:44,064 INFO sqlalchemy.engine.Engine SELECT categories.id AS categories_id, categories.name AS categories_name, categories.slug AS categories_slug, categories.description AS categories_description, categories.image_url AS categories_image_url, categories.is_active AS categories_is_active, categories.created_at AS categories_created_at 
+FROM categories 
+WHERE categories.id = %(id_1)s::UUID 
+ LIMIT %(param_1)s
+2026-06-05 22:18:44,065 INFO sqlalchemy.engine.Engine [cached since 3.677e+04s ago] {'id_1': 'string', 'param_1': 1}
+2026-06-05 22:18:44,093 INFO sqlalchemy.engine.Engine ROLLBACK
+INFO:     127.0.0.1:51375 - "POST /api/v1/admin/products HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:50645 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50645 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65025 - "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58397 - "POST /api/v1/admin/products HTTP/1.1" 403 Forbidden

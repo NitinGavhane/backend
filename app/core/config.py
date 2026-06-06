@@ -1,33 +1,32 @@
+import os
 from pydantic_settings import BaseSettings
-from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    app_name: str = "Garment E-commerce API"
-    debug: bool = False
+    APP_NAME: str = "Garment E-commerce Platform API"
+    APP_VERSION: str = "1.0.0"
+    DEBUG: bool = True
 
-    database_url: str = "postgresql://user:password@localhost:5432/garment_ecommerce"
-    secret_key: str = "change-me-in-production"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
-    refresh_token_expire_days: int = 7
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: str = "5432"
+    POSTGRES_DB: str = "garment_ecommerce"
 
-    redis_url: str = "redis://localhost:6379"
+    @property
+    def DATABASE_URL(self) -> str:
+        return f"postgresql+pg8000://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
-    aws_access_key_id: str = ""
-    aws_secret_access_key: str = ""
-    aws_s3_bucket: str = ""
+    SECRET_KEY: str = "your-secret-key-change-in-production-min-32-chars"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
-    razorpay_key_id: str = ""
-    razorpay_key_secret: str = ""
-    stripe_secret_key: str = ""
-
-    whatsapp_api_token: str = ""
+    CORS_ORIGINS: str = "*"
 
     class Config:
         env_file = ".env"
+        case_sensitive = True
 
 
-@lru_cache()
-def get_settings() -> Settings:
-    return Settings()
+settings = Settings()

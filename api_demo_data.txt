@@ -1,0 +1,1006 @@
+================================================================================
+  GARMENT E-COMMERCE PLATFORM - API TESTING GUIDE WITH DEMO DATA
+================================================================================
+
+Base URL: http://127.0.0.1:8000
+API Docs: http://127.0.0.1:8000/docs (Swagger)
+          http://127.0.0.1:8000/redoc (ReDoc)
+
+Preseeded Admin Account:
+  Email:    admin@garment.com
+  Password: Admin@1234
+  Role:     admin
+
+================================================================================
+  TABLE OF CONTENTS
+================================================================================
+  1. Health & Info (Public)
+  2. Authentication (Public + JWT)
+  3. Categories (Public)
+  4. Products (Public)
+  5. Admin - Login & Dashboard (JWT Admin)
+  6. Admin - Category CRUD (JWT Admin)
+  7. Admin - Product CRUD (JWT Admin)
+  8. Admin - User/Order/Referral Listing (JWT Admin)
+  9. Cart (JWT Customer)
+  10. Orders (JWT Customer)
+  11. Order Status Update (JWT Admin)
+  12. Payments (JWT Customer)
+  13. Referral (JWT Customer)
+  14. Wallet (JWT Customer)
+
+================================================================================
+  1. HEALTH & INFO (Public - No Auth Required)
+================================================================================
+
+--- 1a. GET / ---
+  Description: API root info
+  Method: GET
+  URL:    http://127.0.0.1:8000/
+  Auth:   None
+  Body:   None
+  Response: JSON object with API name, version, docs links
+
+--- 1b. GET /health ---
+  Description: Health check
+  Method: GET
+  URL:    http://127.0.0.1:8000/health
+  Auth:   None
+  Body:   None
+  Response: { "status": "ok" }
+
+
+================================================================================
+  2. AUTHENTICATION (Public + JWT)
+================================================================================
+
+--- 2a. POST /api/v1/auth/register ---
+  Description: Register a new user account
+  Auth: None (Public)
+  Demo Request Body:
+  {
+    "full_name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "9876543210",
+    "password": "Secure@123",
+    "referral_code": null
+  }
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "message": "Registration successful. Please verify OTP sent to your email.",
+    "email": "john.doe@example.com"
+  }
+
+  NOTE: If you want to register with a referral code, use:
+  {
+    "full_name": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "phone": "9876543211",
+    "password": "Secure@123",
+    "referral_code": "ABC123"
+  }
+
+--- 2b. POST /api/v1/auth/verify-otp ---
+  Description: Verify registration OTP (hardcoded to "000000" in dev)
+  Auth: None (Public)
+  Demo Request Body:
+  {
+    "email": "john.doe@example.com",
+    "otp": "000000"
+  }
+  Expected Response Status: 200
+  Expected Response Body:
+  { "message": "OTP verified successfully. You can now login." }
+
+--- 2c. POST /api/v1/auth/login ---
+  Description: Login with credentials, get JWT tokens
+  Auth: None (Public)
+  Demo Request Body:
+  {
+    "email": "john.doe@example.com",
+    "password": "Secure@123"
+  }
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+    "token_type": "bearer"
+  }
+
+  Admin Login:
+  {
+    "email": "admin@garment.com",
+    "password": "Admin@1234"
+  }
+
+--- 2d. POST /api/v1/auth/refresh-token ---
+  Description: Get a new access token using refresh token
+  Auth: None (Public)
+  Demo Request Body:
+  {
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs..."
+  }
+  Expected Response Status: 200
+  Expected Response Body:
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "token_type": "bearer"
+  }
+
+--- 2e. GET /api/v1/auth/me ---
+  Description: Get current authenticated user's profile
+  Auth: JWT (Bearer token)
+  Headers: { "Authorization": "Bearer <access_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "id": "uuid-here",
+    "full_name": "John Doe",
+    "email": "john.doe@example.com",
+    "phone": "9876543210",
+    "role": "customer",
+    "referral_code": "A1B2C3",
+    "wallet_balance": 0.0,
+    "is_verified": true
+  }
+
+
+================================================================================
+  3. CATEGORIES (Public - No Auth Required)
+================================================================================
+
+--- 3a. GET /api/v1/categories ---
+  Description: List all active categories
+  Auth: None (Public)
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  [
+    {
+      "id": "uuid-category-1",
+      "name": "Kurtas",
+      "slug": "kurtas",
+      "description": "Traditional and modern kurtas",
+      "image_url": "https://example.com/kurtas.jpg",
+      "is_active": true,
+      "created_at": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "uuid-category-2",
+      "name": "Jeans",
+      "slug": "jeans",
+      "description": "Denim jeans for men and women",
+      "image_url": null,
+      "is_active": true,
+      "created_at": "2026-01-01T00:00:00Z"
+    }
+  ]
+
+
+================================================================================
+  4. PRODUCTS (Public - No Auth Required)
+================================================================================
+
+--- 4a. GET /api/v1/products ---
+  Description: List all active products (with optional filters)
+  Auth: None (Public)
+  Body: None
+  Query Parameters (all optional):
+    ?category=<category_id>     - Filter by category
+    ?search=<keyword>           - Search in title/description
+    ?sort=price_asc             - Sort by price ascending
+    ?sort=price_desc            - Sort by price descending
+    ?sort=newest                - Sort by newest first
+    ?featured=true              - Filter featured products only
+    ?featured=false             - Filter non-featured products
+
+  Examples:
+    GET /api/v1/products
+    GET /api/v1/products?category=uuid-category-1
+    GET /api/v1/products?search=kurta
+    GET /api/v1/products?sort=price_asc&featured=true
+
+  Expected Response Status: 200
+  Expected Response Body (example):
+  [
+    {
+      "id": "uuid-product-1",
+      "title": "Cotton Kurta",
+      "sku": "KT-001",
+      "price": 1499.0,
+      "discount_price": 999.0,
+      "stock": 50,
+      "featured": true,
+      "is_active": true,
+      "category_name": "Kurtas",
+      "primary_image": "https://example.com/kurta.jpg"
+    }
+  ]
+
+--- 4b. GET /api/v1/products/{product_id} ---
+  Description: Get a single product with variants and images
+  Auth: None (Public)
+  Body: None
+  URL:  http://127.0.0.1:8000/api/v1/products/<product-uuid>
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "id": "uuid-product-1",
+    "category_id": "uuid-category-1",
+    "title": "Cotton Kurta",
+    "description": "Premium cotton kurta with embroidery",
+    "brand": "EthnicWear",
+    "sku": "KT-001",
+    "price": 1499.0,
+    "discount_price": 999.0,
+    "gst_percentage": 18.0,
+    "stock": 50,
+    "featured": true,
+    "is_active": true,
+    "created_at": "2026-01-15T00:00:00Z",
+    "updated_at": "2026-01-15T00:00:00Z",
+    "variants": [
+      {
+        "id": "uuid-variant-1",
+        "size": "M",
+        "color": "Blue",
+        "stock": 20,
+        "price": 999.0
+      },
+      {
+        "id": "uuid-variant-2",
+        "size": "L",
+        "color": "Blue",
+        "stock": 15,
+        "price": 999.0
+      }
+    ],
+    "images": [
+      {
+        "id": "uuid-image-1",
+        "image_url": "https://example.com/kurta.jpg",
+        "is_primary": true
+      }
+    ]
+  }
+
+
+================================================================================
+  5. ADMIN - LOGIN & DASHBOARD (JWT Admin Required)
+================================================================================
+
+--- 5a. POST /api/v1/admin/login ---
+  Description: Admin-specific login (validates role=admin)
+  Auth: None (Public)
+  Demo Request Body:
+  {
+    "email": "admin@garment.com",
+    "password": "Admin@1234"
+  }
+  Expected Response Status: 200
+  Expected Response Body:
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+    "token_type": "bearer"
+  }
+
+--- 5b. GET /api/v1/admin/dashboard ---
+  Description: Get dashboard statistics
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "total_users": 10,
+    "total_products": 5,
+    "total_orders": 3,
+    "total_revenue": 4500.0,
+    "pending_orders": 1
+  }
+
+--- 5c. GET /api/v1/admin/users ---
+  Description: List all registered users
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  [
+    {
+      "id": "uuid-user-1",
+      "full_name": "John Doe",
+      "email": "john.doe@example.com",
+      "phone": "9876543210",
+      "role": "customer",
+      "referral_code": "A1B2C3",
+      "wallet_balance": 50.0,
+      "is_verified": true,
+      "created_at": "2026-01-10T00:00:00Z"
+    }
+  ]
+
+--- 5d. GET /api/v1/admin/orders ---
+  Description: List all orders in the system
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  [
+    {
+      "id": "uuid-order-1",
+      "user_id": "uuid-user-1",
+      "order_number": "ORD-20260115-001",
+      "subtotal": 999.0,
+      "gst_amount": 179.82,
+      "discount_amount": 0.0,
+      "final_amount": 1178.82,
+      "order_status": "placed",
+      "payment_status": "pending",
+      "shipping_address": "123 Main St, City",
+      "estimated_delivery": "2026-01-22T00:00:00Z",
+      "created_at": "2026-01-15T10:30:00Z"
+    }
+  ]
+
+--- 5e. GET /api/v1/admin/referrals ---
+  Description: List all referral earnings
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  [
+    {
+      "id": "uuid-referral-1",
+      "referrer_user_id": "uuid-user-1",
+      "referred_user_id": "uuid-user-2",
+      "order_id": "uuid-order-2",
+      "referral_code": "A1B2C3",
+      "commission_amount": 25.0,
+      "status": "credited",
+      "created_at": "2026-01-16T00:00:00Z"
+    }
+  ]
+
+
+================================================================================
+  6. ADMIN - CATEGORY CRUD (JWT Admin Required)
+================================================================================
+
+--- 6a. POST /api/v1/admin/categories ---
+  Description: Create a new category
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Demo Request Body:
+  {
+    "name": "Kurtas",
+    "slug": "kurtas",
+    "description": "Traditional and modern kurtas for men and women",
+    "image_url": "https://images.example.com/categories/kurtas.jpg"
+  }
+  Expected Response Status: 200
+  Expected Response Body: The created Category object with id.
+
+--- 6b. PUT /api/v1/admin/categories/{category_id} ---
+  Description: Update an existing category
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Demo Request Body:
+  {
+    "name": "Updated Kurtas",
+    "slug": "updated-kurtas",
+    "description": "Updated description for kurtas",
+    "image_url": "https://images.example.com/categories/updated-kurtas.jpg",
+    "is_active": true
+  }
+  Expected Response Status: 200
+  Expected Response Body: The updated Category object.
+
+--- 6c. DELETE /api/v1/admin/categories/{category_id} ---
+  Description: Delete a category
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body:
+  { "message": "Category deleted successfully" }
+
+
+================================================================================
+  7. ADMIN - PRODUCT CRUD (JWT Admin Required)
+================================================================================
+
+--- 7a. POST /api/v1/admin/products ---
+  Description: Create a new product with variants and images
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Demo Request Body (with variants & images):
+  {
+    "category_id": "<category-uuid-from-6a>",
+    "title": "Premium Cotton Kurta",
+    "description": "Handcrafted premium cotton kurta with thread embroidery",
+    "brand": "EthnicWear",
+    "sku": "KT-001",
+    "price": 1499.0,
+    "discount_price": 999.0,
+    "gst_percentage": 18.0,
+    "stock": 100,
+    "featured": true,
+    "variants": [
+      {
+        "size": "S",
+        "color": "Blue",
+        "stock": 30,
+        "price": 999.0
+      },
+      {
+        "size": "M",
+        "color": "Blue",
+        "stock": 40,
+        "price": 999.0
+      },
+      {
+        "size": "L",
+        "color": "Green",
+        "stock": 30,
+        "price": 1099.0
+      }
+    ],
+    "images": [
+      {
+        "image_url": "https://images.example.com/products/kurta-1.jpg",
+        "is_primary": true
+      },
+      {
+        "image_url": "https://images.example.com/products/kurta-2.jpg",
+        "is_primary": false
+      }
+    ]
+  }
+
+  Demo Request Body (minimal - no variants/images):
+  {
+    "category_id": "<category-uuid>",
+    "title": "Basic T-Shirt",
+    "description": "Plain cotton t-shirt",
+    "brand": "CasualWear",
+    "sku": "TS-001",
+    "price": 499.0,
+    "gst_percentage": 18.0,
+    "stock": 200,
+    "featured": false
+  }
+
+  Expected Response Status: 200
+  Expected Response Body: The created ProductResponse object.
+
+--- 7b. PUT /api/v1/admin/products/{product_id} ---
+  Description: Update an existing product
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Demo Request Body:
+  {
+    "price": 1299.0,
+    "discount_price": 899.0,
+    "stock": 80,
+    "featured": false
+  }
+  Expected Response Status: 200
+  Expected Response Body: The updated ProductResponse object.
+
+--- 7c. DELETE /api/v1/admin/products/{product_id} ---
+  Description: Delete a product
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body:
+  { "message": "Product deleted successfully" }
+
+
+================================================================================
+  8. ADMIN - USER / ORDER / REFERRAL LISTING (JWT Admin Required)
+================================================================================
+
+  Already covered in section 5 (5c, 5d, 5e).
+
+
+================================================================================
+  9. CART (JWT Customer Required)
+================================================================================
+
+--- 9a. POST /api/v1/cart/add ---
+  Description: Add a product to cart
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Demo Request Body (without variant):
+  {
+    "product_id": "<product-uuid>",
+    "quantity": 2
+  }
+
+  Demo Request Body (with variant):
+  {
+    "product_id": "<product-uuid>",
+    "variant_id": "<variant-uuid>",
+    "quantity": 1
+  }
+  Expected Response Status: 200
+
+--- 9b. GET /api/v1/cart ---
+  Description: Get current user's cart with all items
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "items": [
+      {
+        "id": "uuid-cart-item-1",
+        "product_id": "uuid-product-1",
+        "product_title": "Premium Cotton Kurta",
+        "variant_id": "uuid-variant-1",
+        "variant_info": "M, Blue",
+        "quantity": 2,
+        "price": 999.0,
+        "image_url": "https://images.example.com/products/kurta-1.jpg"
+      }
+    ],
+    "total": 1998.0
+  }
+
+--- 9c. PUT /api/v1/cart/update ---
+  Description: Update cart item quantity (set quantity=0 to remove)
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Demo Request Body:
+  {
+    "cart_item_id": "<cart-item-uuid>",
+    "quantity": 3
+  }
+  Expected Response Status: 200
+
+--- 9d. DELETE /api/v1/cart/remove/{cart_item_id} ---
+  Description: Remove a specific item from cart
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Body: None
+  URL:  http://127.0.0.1:8000/api/v1/cart/remove/<cart-item-uuid>
+  Expected Response Status: 200
+  Expected Response Body:
+  { "message": "Item removed from cart" }
+
+
+================================================================================
+  10. ORDERS (JWT Customer Required)
+================================================================================
+
+--- 10a. POST /api/v1/orders ---
+  Description: Create an order from cart items or specified items
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Demo Request Body (order from specific items):
+  {
+    "shipping_address": "123 Main Street, New Delhi, 110001",
+    "items": [
+      {
+        "product_id": "<product-uuid>",
+        "variant_id": "<variant-uuid>",
+        "quantity": 1
+      }
+    ]
+  }
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "id": "uuid-order-1",
+    "user_id": "uuid-user-1",
+    "order_number": "ORD-20260115-001",
+    "subtotal": 999.0,
+    "gst_amount": 179.82,
+    "discount_amount": 0.0,
+    "final_amount": 1178.82,
+    "order_status": "placed",
+    "payment_status": "pending",
+    "shipping_address": "123 Main Street, New Delhi, 110001",
+    "estimated_delivery": "2026-01-22T00:00:00Z",
+    "created_at": "2026-01-15T10:30:00Z",
+    "items": [
+      {
+        "id": "uuid-order-item-1",
+        "product_id": "uuid-product-1",
+        "product_name": "Premium Cotton Kurta",
+        "variant_id": "uuid-variant-1",
+        "quantity": 1,
+        "price": 999.0
+      }
+    ]
+  }
+
+--- 10b. GET /api/v1/orders ---
+  Description: Get all orders for the current user
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body: Array of OrderResponse objects.
+
+--- 10c. GET /api/v1/orders/{order_id} ---
+  Description: Get specific order details
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Body: None
+  URL:  http://127.0.0.1:8000/api/v1/orders/<order-uuid>
+  Expected Response Status: 200
+  Expected Response Body: Full OrderResponse object with items.
+
+
+================================================================================
+  11. ORDER STATUS UPDATE (JWT Admin Required)
+================================================================================
+
+--- 11a. PUT /api/v1/orders/{order_id}/status ---
+  Description: Update order status (Admin only)
+  Auth: JWT Admin
+  Headers: { "Authorization": "Bearer <admin_token>" }
+  URL:  http://127.0.0.1:8000/api/v1/orders/<order-uuid>/status
+  Demo Request Body:
+  {
+    "status": "processing"
+  }
+
+  Valid status values (from DB enum):
+    "placed" -> "processing" -> "dispatched" -> "out_for_delivery" -> "delivered"
+    Any status -> "cancelled"
+
+  Demo sequence of status updates:
+    Step 1: { "status": "processing" }
+    Step 2: { "status": "dispatched" }
+    Step 3: { "status": "out_for_delivery" }
+    Step 4: { "status": "delivered" }
+    (or) { "status": "cancelled" }
+
+  Expected Response Status: 200
+  Expected Response Body:
+  { "message": "Order status updated to <status>" }
+
+
+================================================================================
+  12. PAYMENTS (JWT Customer Required)
+================================================================================
+
+--- 12a. POST /api/v1/payments/create ---
+  Description: Create a payment record for an order
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Demo Request Body:
+  {
+    "order_id": "<order-uuid>"
+  }
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "id": "uuid-payment-1",
+    "order_id": "uuid-order-1",
+    "transaction_id": null,
+    "gateway": "razorpay",
+    "payment_method": null,
+    "amount": 1178.82,
+    "payment_status": "pending"
+  }
+
+--- 12b. POST /api/v1/payments/verify ---
+  Description: Verify payment (marks order as paid, generates GST invoice)
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Demo Request Body:
+  {
+    "order_id": "<order-uuid>",
+    "transaction_id": "TXN123456789",
+    "payment_method": "credit_card"
+  }
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "message": "Payment verified successfully",
+    "payment": {
+      "id": "uuid-payment-1",
+      "order_id": "uuid-order-1",
+      "transaction_id": "TXN123456789",
+      "gateway": "razorpay",
+      "payment_method": "credit_card",
+      "amount": 1178.82,
+      "payment_status": "paid"
+    }
+  }
+
+
+================================================================================
+  13. REFERRAL (JWT Customer Required)
+================================================================================
+
+--- 13a. GET /api/v1/referral/me ---
+  Description: Get referral stats for current user
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "referral_code": "A1B2C3",
+    "total_earnings": 50.0,
+    "successful_referrals": 2,
+    "wallet_balance": 50.0
+  }
+
+  NOTE: When you register a new user, a referral code is auto-generated.
+  Share this code with friends. When they register using your code and
+  place an order, you earn 5% commission credited to your wallet.
+
+--- 13b. GET /api/v1/referral/history ---
+  Description: Get referral earnings history
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  [
+    {
+      "id": "uuid-referral-earning-1",
+      "referred_user_name": "Jane Smith",
+      "order_id": "uuid-order-2",
+      "commission_amount": 25.0,
+      "status": "credited",
+      "created_at": "2026-01-16T00:00:00Z"
+    }
+  ]
+
+
+================================================================================
+  14. WALLET (JWT Customer Required)
+================================================================================
+
+--- 14a. GET /api/v1/wallet/balance ---
+  Description: Get current wallet balance
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  {
+    "balance": 50.0
+  }
+
+--- 14b. GET /api/v1/wallet/transactions ---
+  Description: Get wallet transaction history
+  Auth: JWT Customer
+  Headers: { "Authorization": "Bearer <customer_token>" }
+  Body: None
+  Expected Response Status: 200
+  Expected Response Body (example):
+  [
+    {
+      "id": "uuid-wallet-txn-1",
+      "transaction_type": "credit",
+      "amount": 25.0,
+      "source": "referral_commission",
+      "reference_id": "uuid-referral-earning-1",
+      "description": "Commission for referring Jane Smith",
+      "created_at": "2026-01-16T00:00:00Z"
+    }
+  ]
+
+
+================================================================================
+  COMPLETE END-TO-END TESTING SEQUENCE (Step by Step)
+================================================================================
+
+Follow this sequence to test all APIs in order:
+
+  STEP 1 - Health Check:
+    GET /
+
+  STEP 2 - Register a new customer:
+    POST /api/v1/auth/register
+    Body: { "full_name": "Test User", "email": "test@example.com",
+            "phone": "9999999999", "password": "Test@123" }
+
+  STEP 3 - Verify OTP:
+    POST /api/v1/auth/verify-otp
+    Body: { "email": "test@example.com", "otp": "000000" }
+
+  STEP 4 - Login as customer:
+    POST /api/v1/auth/login
+    Body: { "email": "test@example.com", "password": "Test@123" }
+    => Save access_token for subsequent steps.
+
+  STEP 5 - Admin Login:
+    POST /api/v1/admin/login
+    Body: { "email": "admin@garment.com", "password": "Admin@1234" }
+    => Save admin_token.
+
+  STEP 6 - Admin creates a category:
+    POST /api/v1/admin/categories (with admin_token)
+    Body: { "name": "Kurtas", "slug": "kurtas" }
+    => Save category_id.
+
+  STEP 7 - Admin creates a product:
+    POST /api/v1/admin/products (with admin_token)
+    Body: { "category_id": "<id>", "title": "Cotton Kurta",
+            "sku": "KT-001", "price": 1499.0, "stock": 100 }
+    => Save product_id.
+
+  STEP 8 - List categories (public):
+    GET /api/v1/categories
+
+  STEP 9 - List products (public):
+    GET /api/v1/products
+
+  STEP 10 - View product detail:
+    GET /api/v1/products/<product_id>
+
+  STEP 11 - Add to cart:
+    POST /api/v1/cart/add (with customer_token)
+    Body: { "product_id": "<id>", "quantity": 2 }
+
+  STEP 12 - View cart:
+    GET /api/v1/cart (with customer_token)
+
+  STEP 13 - Place order:
+    POST /api/v1/orders (with customer_token)
+    Body: { "shipping_address": "123 Street, City",
+            "items": [{"product_id": "<id>", "quantity": 1}] }
+    => Save order_id.
+
+  STEP 14 - Admin updates order status:
+    PUT /api/v1/orders/<order_id>/status (with admin_token)
+    Body: { "status": "processing" }
+
+  STEP 15 - Create payment:
+    POST /api/v1/payments/create (with customer_token)
+    Body: { "order_id": "<order_id>" }
+
+  STEP 16 - Verify payment:
+    POST /api/v1/payments/verify (with customer_token)
+    Body: { "order_id": "<order_id>",
+            "transaction_id": "TXN_TEST_001",
+            "payment_method": "credit_card" }
+
+  STEP 17 - View referral stats:
+    GET /api/v1/referral/me (with customer_token)
+
+  STEP 18 - View wallet:
+    GET /api/v1/wallet/balance (with customer_token)
+    GET /api/v1/wallet/transactions (with customer_token)
+
+  STEP 19 - Admin dashboard:
+    GET /api/v1/admin/dashboard (with admin_token)
+
+  STEP 20 - Admin lists:
+    GET /api/v1/admin/users (with admin_token)
+    GET /api/v1/admin/orders (with admin_token)
+
+
+================================================================================
+  CURL COMMAND EXAMPLES (for quick testing)
+================================================================================
+
+--- Register ---
+curl -X POST http://127.0.0.1:8000/api/v1/auth/register ^
+  -H "Content-Type: application/json" ^
+  -d "{\"full_name\":\"Test User\",\"email\":\"test@example.com\",\"phone\":\"9999999999\",\"password\":\"Test@123\"}"
+
+--- Login ---
+curl -X POST http://127.0.0.1:8000/api/v1/auth/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"email\":\"test@example.com\",\"password\":\"Test@123\"}"
+
+--- Admin Login ---
+curl -X POST http://127.0.0.1:8000/api/v1/admin/login ^
+  -H "Content-Type: application/json" ^
+  -d "{\"email\":\"admin@garment.com\",\"password\":\"Admin@1234\"}"
+
+--- Get Profile (replace TOKEN) ---
+curl -X GET http://127.0.0.1:8000/api/v1/auth/me ^
+  -H "Authorization: Bearer <your_token_here>"
+
+--- Create Category (replace ADMIN_TOKEN) ---
+curl -X POST http://127.0.0.1:8000/api/v1/admin/categories ^
+  -H "Content-Type: application/json" ^
+  -H "Authorization: Bearer <admin_token>" ^
+  -d "{\"name\":\"Kurtas\",\"slug\":\"kurtas\"}"
+
+--- Create Product (replace ADMIN_TOKEN and CATEGORY_ID) ---
+curl -X POST http://127.0.0.1:8000/api/v1/admin/products ^
+  -H "Content-Type: application/json" ^
+  -H "Authorization: Bearer <admin_token>" ^
+  -d "{\"category_id\":\"<category_uuid>\",\"title\":\"Cotton Kurta\",\"sku\":\"KT-001\",\"price\":1499.0,\"stock\":100}"
+
+--- List Products ---
+curl -X GET http://127.0.0.1:8000/api/v1/products
+
+--- Add to Cart (replace CUSTOMER_TOKEN and PRODUCT_ID) ---
+curl -X POST http://127.0.0.1:8000/api/v1/cart/add ^
+  -H "Content-Type: application/json" ^
+  -H "Authorization: Bearer <customer_token>" ^
+  -d "{\"product_id\":\"<product_uuid>\",\"quantity\":2}"
+
+--- Place Order (replace CUSTOMER_TOKEN and PRODUCT_ID) ---
+curl -X POST http://127.0.0.1:8000/api/v1/orders ^
+  -H "Content-Type: application/json" ^
+  -H "Authorization: Bearer <customer_token>" ^
+  -d "{\"shipping_address\":\"123 Main Street, Delhi\",\"items\":[{\"product_id\":\"<product_uuid>\",\"quantity\":1}]}"
+
+--- Verify Payment (replace CUSTOMER_TOKEN and ORDER_ID) ---
+curl -X POST http://127.0.0.1:8000/api/v1/payments/verify ^
+  -H "Content-Type: application/json" ^
+  -H "Authorization: Bearer <customer_token>" ^
+  -d "{\"order_id\":\"<order_uuid>\",\"transaction_id\":\"TXN123\",\"payment_method\":\"credit_card\"}"
+
+
+================================================================================
+  DATABASE SCHEMA SUMMARY
+================================================================================
+
+  Table                Key Fields
+  -------------------  --------------------------------------------------
+  users                id(UUID PK), full_name, email(UNIQUE), phone(UNIQUE),
+                       password_hash, role(customer/admin), referral_code(UNIQUE),
+                       referred_by, wallet_balance, is_verified
+
+  categories           id(UUID PK), name, slug(UNIQUE), description, image_url, is_active
+
+  products             id(UUID PK), category_id(FK), title, sku(UNIQUE), price,
+                       discount_price, gst_percentage, stock, featured, is_active
+
+  product_variants     id(UUID PK), product_id(FK), size, color, stock, price
+
+  product_images       id(UUID PK), product_id(FK), image_url, is_primary
+
+  cart_items           id(UUID PK), user_id(FK), product_id(FK), variant_id(FK),
+                       quantity
+
+  orders               id(UUID PK), user_id(FK), order_number(UNIQUE),
+                       subtotal, gst_amount, discount_amount, final_amount,
+                       order_status(enum), payment_status(enum), shipping_address
+
+  order_items          id(UUID PK), order_id(FK), product_id(FK), variant_id(FK),
+                       product_name, quantity, price
+
+  payments             id(UUID PK), order_id(FK), transaction_id, gateway,
+                       payment_method, amount, payment_status(enum)
+
+  gst_invoices         id(UUID PK), order_id(FK UNIQUE), invoice_number(UNIQUE),
+                       gst_number, invoice_pdf_url
+
+  referral_earnings    id(UUID PK), referrer_user_id(FK), referred_user_id(FK),
+                       order_id(FK), referral_code, commission_amount, status(enum)
+
+  wallet_transactions  id(UUID PK), user_id(FK), transaction_type(credit/debit),
+                       amount, source, reference_id, description
+
+
+================================================================================
+  RELATIONSHIPS MAP
+================================================================================
+
+  Category 1---* Product
+  Product  1---* ProductVariant
+  Product  1---* ProductImage
+  User     1---* CartItem *---1 Product
+  User     1---* Order
+  Order    1---* OrderItem *---1 Product
+  Order    1---1 Payment
+  Order    1---1 GstInvoice
+  Order    1---* ReferralEarning
+  User (referrer) 1---* ReferralEarning
+  User    1---* WalletTransaction
+
+================================================================================

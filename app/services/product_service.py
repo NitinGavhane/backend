@@ -1,94 +1,130 @@
-from typing import Optional
-from sqlalchemy.orm import Session
-from app.models.product import Product
+import uuid
+
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session, joinedload
+
+from app.models.category import Category
+from app.models.product import Product, ProductImage, ProductVariant
+from app.schemas.product import ProductCreate, ProductUpdate
 
 
-def get_products(
-    db: Session,
-    category: Optional[str] = None,
-    min_price: Optional[float] = None,
-    max_price: Optional[float] = None,
-    sizes: Optional[str] = None,
-    colors: Optional[str] = None,
-    sort_by: Optional[str] = None,
-    page: int = 1,
-    limit: int = 20,
-) -> dict:
-    query = db.query(Product)
-
+def list_products(db: Session, category: str | None = None, search: str | None = None, sort: str | None = None, featured: bool | None = None):
+    query = db.query(Product).options(joinedload(Product.category), joinedload(Product.images), joinedload(Product.variants)).filter(Product.is_active == True)
     if category:
-        query = query.filter(Product.category_id == category)
-    if min_price is not None:
-        query = query.filter(Product.price >= min_price)
-    if max_price is not None:
-        query = query.filter(Product.price <= max_price)
-    if sizes:
-        size_list = [s.strip() for s in sizes.split(",")]
-        from sqlalchemy import cast, String
-        query = query.filter(
-            Product.sizes.any(size_list[0])
-        )
-    if colors:
-        color_list = [c.strip() for c in colors.split(",")]
-        query = query.filter(Product.colors.any(color_list[0]))
-
-    if sort_by == "price_asc":
+        query = query.filter(Product.category_id == _parse_uuid(category, "category_id"))
+    if search:
+        query = query.filter(Product.title.ilike(f"%{search}%"))
+    if featured is not None:
+        query = query.filter(Product.featured == featured)
+    if sort == "price_asc":
         query = query.order_by(Product.price.asc())
-    elif sort_by == "price_desc":
+    elif sort == "price_desc":
         query = query.order_by(Product.price.desc())
-    elif sort_by == "rating":
-        query = query.order_by(Product.rating.desc())
-    elif sort_by == "newest":
-        query = query.order_by(Product.is_new.desc())
-    elif sort_by == "popular":
-        query = query.order_by(Product.review_count.desc())
+    elif sort == "newest":
+        query = query.order_by(Product.created_at.desc())
     else:
-        query = query.order_by(Product.title.asc())
+        query = query.order_by(Product.created_at.desc())
+    products = query.all()
+    result = []
+    for p in products:
+        primary_image = next((img.image_url for img in p.images if img.is_primary), (p.images[0].image_url if p.images else None))
+        result.append({
+            "id": str(p.id),
+            "title": p.title,
+            "sku": p.sku,
+            "price": p.price,
+            "discount_price": p.discount_price,
+            "stock": p.stock,
+            "featured": p.featured,
+            "is_active": p.is_active,
+            "category_name": p.category.name if p.category else None,
+            "primary_image": primary_image,
+        })
+    return result
 
-    total = query.count()
-    products = query.offset((page - 1) * limit).limit(limit).all()
 
-    return {
-        "products": [p.to_dict() for p in products],
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "totalPages": (total + limit - 1) // limit,
-    }
-
-
-def get_product(db: Session, product_id: str) -> Product:
-    product = db.query(Product).filter(Product.id == product_id).first()
+def get_product(product_id: str, db: Session):
+    pid = _parse_uuid(product_id, "product_id")
+    product = db.query(Product).options(joinedload(Product.category), joinedload(Product.images), joinedload(Product.variants)).filter(Product.id == pid).first()
     if not product:
-        from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-    return product
-
-
-def get_featured_products(db: Session) -> list:
-    return [p.to_dict() for p in db.query(Product).filter(Product.is_featured == True).all()]
-
-
-def get_new_arrivals(db: Session) -> list:
-    return [p.to_dict() for p in db.query(Product).filter(Product.is_new == True).all()]
-
-
-def get_products_by_category(db: Session, category_id: str) -> list:
-    return [p.to_dict() for p in db.query(Product).filter(Product.category_id == category_id).all()]
-
-
-def search_products(db: Session, q: str, page: int = 1, limit: int = 20) -> dict:
-    query = db.query(Product).filter(
-        Product.title.ilike(f"%{q}%")
-        | Product.brand.ilike(f"%{q}%")
-        | Product.category.ilike(f"%{q}%")
-    )
-    total = query.count()
-    products = query.offset((page - 1) * limit).limit(limit).all()
     return {
-        "products": [p.to_dict() for p in products],
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "totalPages": (total + limit - 1) // limit,
+        "id": str(product.id),
+        "category_id": str(product.category_id),
+        "title": product.title,
+        "description": product.description,
+        "brand": product.brand,
+        "sku": product.sku,
+        "price": product.price,
+        "discount_price": product.discount_price,
+        "gst_percentage": product.gst_percentage,
+        "stock": product.stock,
+        "featured": product.featured,
+        "is_active": product.is_active,
+        "created_at": product.created_at,
+        "updated_at": product.updated_at,
+        "variants": [{"id": str(v.id), "size": v.size, "color": v.color, "stock": v.stock, "price": v.price} for v in product.variants],
+        "images": [{"id": str(img.id), "image_url": img.image_url, "is_primary": img.is_primary} for img in product.images],
     }
+
+
+def _parse_uuid(value: str, field: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(value)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid {field}: must be a valid UUID")
+
+
+def create_product(req: ProductCreate, db: Session):
+    category_id = _parse_uuid(req.category_id, "category_id")
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    product = Product(
+        category_id=category_id,
+        title=req.title,
+        description=req.description,
+        brand=req.brand,
+        sku=req.sku,
+        price=req.price,
+        discount_price=req.discount_price,
+        gst_percentage=req.gst_percentage,
+        stock=req.stock,
+        featured=req.featured,
+    )
+    db.add(product)
+    db.flush()
+    for v in req.variants:
+        variant = ProductVariant(product_id=product.id, size=v.size, color=v.color, stock=v.stock, price=v.price)
+        db.add(variant)
+    for img in req.images:
+        image = ProductImage(product_id=product.id, image_url=img.image_url, is_primary=img.is_primary)
+        db.add(image)
+    db.commit()
+    db.refresh(product)
+    return get_product(str(product.id), db)
+
+
+def update_product(product_id: str, req: ProductUpdate, db: Session):
+    pid = _parse_uuid(product_id, "product_id")
+    product = db.query(Product).filter(Product.id == pid).first()
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    update_data = req.model_dump(exclude_unset=True)
+    if "category_id" in update_data:
+        update_data["category_id"] = _parse_uuid(update_data["category_id"], "category_id")
+    for key, value in update_data.items():
+        setattr(product, key, value)
+    db.commit()
+    db.refresh(product)
+    return get_product(str(product.id), db)
+
+
+def delete_product(product_id: str, db: Session):
+    pid = _parse_uuid(product_id, "product_id")
+    product = db.query(Product).filter(Product.id == pid).first()
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    db.delete(product)
+    db.commit()
+    return {"message": "Product deleted successfully"}

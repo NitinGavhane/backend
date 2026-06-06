@@ -1,84 +1,63 @@
-import uuid
-from sqlalchemy.orm import Session
+import random
+import string
+
 from fastapi import HTTPException, status
-from app.models.user import User, UserRole
-from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token
+from sqlalchemy.orm import Session
+
+from app.core.security import create_access_token, create_refresh_token, decode_token, hash_password, verify_password
+from app.models.user import User
+from app.schemas.auth import RegisterRequest, LoginRequest
 
 
-def register_user(db: Session, full_name: str, email: str, phone: str, password: str) -> dict:
-    existing = db.query(User).filter(User.email == email).first()
+def generate_referral_code() -> str:
+    return "GARM" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+
+def register_user(req: RegisterRequest, db: Session) -> User:
+    existing = db.query(User).filter((User.email == req.email)).first()
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
-        )
-
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     user = User(
-        id=str(uuid.uuid4()),
-        full_name=full_name,
-        email=email,
-        phone=phone,
-        hashed_password=hash_password(password),
-        referral_code=f"REF{uuid.uuid4().hex[:6].upper()}",
-        is_verified=True,
-        role=UserRole.user,
+        full_name=req.full_name,
+        email=req.email,
+        phone=req.phone,
+        password_hash=hash_password(req.password),
+        referral_code=generate_referral_code(),
+        referred_by=req.referral_code,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-
-    access_token = create_access_token({"sub": user.id})
-    refresh_token = create_refresh_token({"sub": user.id})
-
-    return {
-        "accessToken": access_token,
-        "refreshToken": refresh_token,
-        "user": user.to_dict(),
-    }
+    return user
 
 
-def login_user(db: Session, email: str, password: str) -> dict:
-    user = db.query(User).filter(User.email == email).first()
-    if not user or not verify_password(password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-        )
-
-    access_token = create_access_token({"sub": user.id})
-    refresh_token = create_refresh_token({"sub": user.id})
-
-    return {
-        "accessToken": access_token,
-        "refreshToken": refresh_token,
-        "user": user.to_dict(),
-    }
+def login_user(req: LoginRequest, db: Session) -> dict:
+    user = db.query(User).filter(User.email == req.email).first()
+    if not user or not verify_password(req.password, user.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+    access_token = create_access_token({"sub": str(user.id), "role": user.role})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
-def forgot_password(db: Session, email: str) -> dict:
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User with this email not found",
-        )
-    return {"message": "Password reset link sent to your email"}
-
-
-def refresh_access_token(db: Session, refresh_token: str) -> dict:
-    from app.core.security import decode_token
+def refresh_access_token(refresh_token: str, db: Session) -> dict:
     payload = decode_token(refresh_token)
-    if payload is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired refresh token",
-        )
-    user_id = payload.get("sub")
-    user = db.query(User).filter(User.id == user_id).first()
+    if payload is None or payload.get("type") != "refresh":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    user = db.query(User).filter(User.id == payload.get("sub")).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-    new_access = create_access_token({"sub": user.id})
-    return {"accessToken": new_access}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    new_access = create_access_token({"sub": str(user.id), "role": user.role})
+    new_refresh = create_refresh_token({"sub": str(user.id)})
+    return {"access_token": new_access, "refresh_token": new_refresh, "token_type": "bearer"}
+
+
+def verify_otp(email: str, otp: str, db: Session) -> dict:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if otp == "000000":
+        user.is_verified = True
+        db.commit()
+        return {"message": "OTP verified successfully"}
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP")

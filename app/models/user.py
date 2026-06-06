@@ -1,38 +1,30 @@
 import uuid
-from sqlalchemy import Column, String, Float, Boolean, Enum as SAEnum
+from datetime import datetime, timezone
+
+from sqlalchemy import Boolean, DateTime, Enum, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
-import enum
-
-
-class UserRole(str, enum.Enum):
-    user = "user"
-    admin = "admin"
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    full_name = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    phone = Column(String(20), nullable=True)
-    hashed_password = Column(String(255), nullable=False)
-    avatar_url = Column(String(500), nullable=True)
-    wallet_balance = Column(Float, default=0.0)
-    referral_code = Column(String(50), unique=True, nullable=True)
-    is_verified = Column(Boolean, default=False)
-    role = Column(SAEnum(UserRole), default=UserRole.user)
-    created_at = Column(String(50), nullable=True)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    phone: Mapped[str] = mapped_column(String(20), unique=True, nullable=True)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    role: Mapped[str] = mapped_column(Enum("customer", "admin", name="user_role"), default="customer")
+    referral_code: Mapped[str] = mapped_column(String(20), unique=True, nullable=True)
+    referred_by: Mapped[str] = mapped_column(String(20), nullable=True)
+    wallet_balance: Mapped[float] = mapped_column(default=0.0)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "fullName": self.full_name,
-            "email": self.email,
-            "phone": self.phone or "",
-            "avatarUrl": self.avatar_url,
-            "walletBalance": self.wallet_balance,
-            "referralCode": self.referral_code or "",
-            "isVerified": self.is_verified,
-            "role": self.role.value if self.role else "user",
-        }
+    cart_items = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
+    orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
+    wallet_transactions = relationship("WalletTransaction", back_populates="user", cascade="all, delete-orphan")
+    referral_earnings = relationship("ReferralEarning", back_populates="referrer", foreign_keys="ReferralEarning.referrer_user_id", cascade="all, delete-orphan")

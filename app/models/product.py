@@ -1,49 +1,55 @@
 import uuid
-from sqlalchemy import Column, String, Float, Integer, Boolean, ForeignKey, JSON
-from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
+
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
 
 
 class Product(Base):
     __tablename__ = "products"
 
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    title = Column(String(255), nullable=False)
-    description = Column(String(2000), nullable=True)
-    brand = Column(String(255), nullable=True)
-    category = Column(String(100), nullable=True)
-    category_id = Column(String, ForeignKey("categories.id"), nullable=True)
-    price = Column(Float, nullable=False)
-    original_price = Column(Float, nullable=False)
-    rating = Column(Float, default=4.5)
-    review_count = Column(Integer, default=0)
-    discount_percentage = Column(Integer, default=0)
-    sizes = Column(JSON, default=list)
-    colors = Column(JSON, default=list)
-    is_featured = Column(Boolean, default=False)
-    is_new = Column(Boolean, default=False)
-    badge = Column(String(100), default="")
-    stock = Column(Integer, default=50)
-    image_url = Column(String(500), nullable=True)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    category_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    brand: Mapped[str] = mapped_column(String(100), nullable=True)
+    sku: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    price: Mapped[float] = mapped_column(Float, nullable=False)
+    discount_price: Mapped[float] = mapped_column(Float, nullable=True)
+    gst_percentage: Mapped[float] = mapped_column(Float, default=18.0)
+    stock: Mapped[int] = mapped_column(Integer, default=0)
+    featured: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "description": self.description or "",
-            "brand": self.brand or "",
-            "category": self.category or "",
-            "categoryId": self.category_id or "",
-            "price": self.price,
-            "originalPrice": self.original_price,
-            "rating": self.rating,
-            "reviewCount": self.review_count,
-            "discountPercentage": self.discount_percentage,
-            "sizes": self.sizes or [],
-            "colors": self.colors or [],
-            "isFeatured": self.is_featured,
-            "isNew": self.is_new,
-            "badge": self.badge or "",
-            "stock": self.stock,
-            "imageUrl": self.image_url,
-        }
+    category = relationship("Category", back_populates="products")
+    variants = relationship("ProductVariant", back_populates="product", cascade="all, delete-orphan")
+    images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
+
+
+class ProductVariant(Base):
+    __tablename__ = "product_variants"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
+    size: Mapped[str] = mapped_column(String(20), nullable=True)
+    color: Mapped[str] = mapped_column(String(50), nullable=True)
+    stock: Mapped[int] = mapped_column(Integer, default=0)
+    price: Mapped[float] = mapped_column(Float, nullable=True)
+
+    product = relationship("Product", back_populates="variants")
+
+
+class ProductImage(Base):
+    __tablename__ = "product_images"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
+    image_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    product = relationship("Product", back_populates="images")
