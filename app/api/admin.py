@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Form
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -16,6 +16,7 @@ from app.schemas.referral import ReferralHistoryResponse
 from app.services import order_service, product_service
 from app.models.referral import ReferralEarning
 from app.models.category import Category
+from app.core.storage import save_category_image, delete_category_image
 
 router = APIRouter(prefix="/api/v1/admin", tags=["Admin"])
 
@@ -128,6 +129,8 @@ def update_category(category_id: str, req: CategoryUpdate, admin: User = Depends
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
     update_data = req.model_dump(exclude_unset=True)
+    if "image_url" in update_data and update_data["image_url"] is not None:
+        delete_category_image(category.image_url)
     for key, value in update_data.items():
         setattr(category, key, value)
     db.commit()
@@ -148,6 +151,47 @@ def delete_category(category_id: str, admin: User = Depends(get_current_admin), 
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    delete_category_image(category.image_url)
     db.delete(category)
     db.commit()
     return {"message": "Category deleted successfully"}
+
+
+@router.post("/upload/category-image")
+def upload_category_image(file: UploadFile = File(...), admin: User = Depends(get_current_admin)):
+    try:
+        url = save_category_image(file)
+        return {"url": url}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post("/categories/with-image", response_model=CategoryResponse)
+def create_category_with_image(
+    name: str = Form(...),
+    slug: str = Form(...),
+    description: str = Form(None),
+    file: UploadFile = File(None),
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    image_url = None
+    if file:
+        try:
+            image_url = save_category_image(file)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    category = Category(name=name, slug=slug, description=description, image_url=image_url)
+    db.add(category)
+    db.commit()
+    db.refresh(category)
+    return {
+        "id": str(category.id),
+        "name": category.name,
+        "slug": category.slug,
+        "description": category.description,
+        "image_url": category.image_url,
+        "is_active": category.is_active,
+        "created_at": category.created_at,
+    }
