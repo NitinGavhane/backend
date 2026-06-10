@@ -20,6 +20,7 @@ class Product(Base):
     price: Mapped[float] = mapped_column(Float, nullable=False)
     discount_price: Mapped[float] = mapped_column(Float, nullable=True)
     gst_percentage: Mapped[float] = mapped_column(Float, default=18.0)
+    gender: Mapped[str] = mapped_column(String(20), default="unisex")
     stock: Mapped[int] = mapped_column(Integer, default=0)
     featured: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

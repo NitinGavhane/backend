@@ -14,9 +14,10 @@ def list_products(
     search: str | None = Query(None),
     sort: str | None = Query(None),
     featured: bool | None = Query(None),
+    gender: str | None = Query(None),
     db: Session = Depends(get_db),
 ):
-    return product_service.list_products(db, category, search, sort, featured)
+    return product_service.list_products(db, category, search, sort, featured, gender)
 
 
 @router.get("/{product_id}", response_model=ProductResponse)

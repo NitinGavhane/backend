@@ -18,13 +18,43 @@ from app.models.user import User
 def _run_migrations(db: Session):
     inspector = inspect(engine)
     columns = [c["name"] for c in inspector.get_columns("categories")]
+
     if "gender" not in columns:
         db.execute(text("ALTER TABLE categories ADD COLUMN gender VARCHAR(20) NOT NULL DEFAULT 'unisex'"))
-        db.execute(text("UPDATE categories SET gender = 'men' WHERE LOWER(name) IN ('men', 'footwear', 'kurtas', 'shirts')"))
-        db.execute(text("UPDATE categories SET gender = 'women' WHERE LOWER(name) = 'women'"))
-        db.execute(text("UPDATE categories SET gender = 'kids' WHERE LOWER(name) = 'kids'"))
-        db.commit()
         print("Migration: added gender column to categories")
+
+    db.execute(text("""
+        UPDATE categories SET gender = 'men'
+        WHERE LOWER(TRIM(name)) IN ('men', 'footwear', 'kurtas', 'shirts')
+          AND gender IS DISTINCT FROM 'men'
+    """))
+    db.execute(text("""
+        UPDATE categories SET gender = 'women'
+        WHERE LOWER(TRIM(name)) = 'women'
+          AND gender IS DISTINCT FROM 'women'
+    """))
+    db.execute(text("""
+        UPDATE categories SET gender = 'kids'
+        WHERE LOWER(TRIM(name)) = 'kids'
+          AND gender IS DISTINCT FROM 'kids'
+    """))
+    db.commit()
+    print("Migration: category genders synced [men→Men/Footwear/Kurtas/Shirts, women→Women, kids→Kids]")
+
+    product_columns = [c["name"] for c in inspector.get_columns("products")]
+    if "gender" not in product_columns:
+        db.execute(text("ALTER TABLE products ADD COLUMN gender VARCHAR(20) NOT NULL DEFAULT 'unisex'"))
+        print("Migration: added gender column to products")
+
+    db.execute(text("""
+        UPDATE products p
+        SET gender = c.gender
+        FROM categories c
+        WHERE p.category_id = c.id
+          AND p.gender IS DISTINCT FROM c.gender
+    """))
+    db.commit()
+    print("Migration: product genders synced from categories")
 
 
 @asynccontextmanager

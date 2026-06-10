@@ -46,6 +46,7 @@ class ProductCreate(BaseModel):
     gst_percentage: float = 18.0
     stock: int = 0
     featured: bool = False
+    gender: str | None = None
     variants: list[ProductVariantCreate] = []
     images: list[ProductImageCreate] = []
 
@@ -61,6 +62,7 @@ class ProductUpdate(BaseModel):
     gst_percentage: float | None = None
     stock: int | None = None
     featured: bool | None = None
+    gender: str | None = None
     is_active: bool | None = None
     images: list[ProductImageCreate] | None = None
 
@@ -78,6 +80,7 @@ class ProductResponse(BaseModel):
     stock: int
     featured: bool
     is_active: bool
+    gender: str
     created_at: datetime
     updated_at: datetime
     variants: list[ProductVariantResponse] = []
@@ -96,6 +99,7 @@ class ProductListResponse(BaseModel):
     stock: int
     featured: bool
     is_active: bool
+    gender: str
     category_name: str | None = None
     primary_image: str | None = None
 

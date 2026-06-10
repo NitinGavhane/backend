@@ -8,7 +8,7 @@ from app.models.product import Product, ProductImage, ProductVariant
 from app.schemas.product import ProductCreate, ProductUpdate
 
 
-def list_products(db: Session, category: str | None = None, search: str | None = None, sort: str | None = None, featured: bool | None = None):
+def list_products(db: Session, category: str | None = None, search: str | None = None, sort: str | None = None, featured: bool | None = None, gender: str | None = None):
     query = db.query(Product).options(joinedload(Product.category), joinedload(Product.images), joinedload(Product.variants)).filter(Product.is_active == True)
     if category:
         query = query.filter(Product.category_id == _parse_uuid(category, "category_id"))
@@ -16,6 +16,8 @@ def list_products(db: Session, category: str | None = None, search: str | None =
         query = query.filter(Product.title.ilike(f"%{search}%"))
     if featured is not None:
         query = query.filter(Product.featured == featured)
+    if gender:
+        query = query.filter(Product.gender == gender)
     if sort == "price_asc":
         query = query.order_by(Product.price.asc())
     elif sort == "price_desc":
@@ -37,6 +39,7 @@ def list_products(db: Session, category: str | None = None, search: str | None =
             "stock": p.stock,
             "featured": p.featured,
             "is_active": p.is_active,
+            "gender": p.gender,
             "category_id": str(p.category_id),
             "category_name": p.category.name if p.category else None,
             "primary_image": primary_image,
@@ -61,6 +64,7 @@ def get_product(product_id: str, db: Session):
         "gst_percentage": product.gst_percentage,
         "stock": product.stock,
         "featured": product.featured,
+        "gender": product.gender,
         "is_active": product.is_active,
         "created_at": product.created_at,
         "updated_at": product.updated_at,
@@ -92,6 +96,7 @@ def create_product(req: ProductCreate, db: Session):
         gst_percentage=req.gst_percentage,
         stock=req.stock,
         featured=req.featured,
+        gender=req.gender if req.gender else category.gender,
     )
     db.add(product)
     db.flush()
@@ -114,6 +119,9 @@ def update_product(product_id: str, req: ProductUpdate, db: Session):
     update_data = req.model_dump(exclude_unset=True)
     if "category_id" in update_data:
         update_data["category_id"] = _parse_uuid(update_data["category_id"], "category_id")
+        new_cat = db.query(Category).filter(Category.id == update_data["category_id"]).first()
+        if new_cat:
+            update_data.setdefault("gender", new_cat.gender)
     images_data = update_data.pop("images", None)
     for key, value in update_data.items():
         setattr(product, key, value)
