@@ -37,6 +37,7 @@ def list_products(db: Session, category: str | None = None, search: str | None =
             "stock": p.stock,
             "featured": p.featured,
             "is_active": p.is_active,
+            "category_id": str(p.category_id),
             "category_name": p.category.name if p.category else None,
             "primary_image": primary_image,
         })
@@ -113,8 +114,15 @@ def update_product(product_id: str, req: ProductUpdate, db: Session):
     update_data = req.model_dump(exclude_unset=True)
     if "category_id" in update_data:
         update_data["category_id"] = _parse_uuid(update_data["category_id"], "category_id")
+    images_data = update_data.pop("images", None)
     for key, value in update_data.items():
         setattr(product, key, value)
+    if images_data is not None:
+        for img in product.images:
+            db.delete(img)
+        for img_data in images_data:
+            image = ProductImage(product_id=product.id, image_url=img_data["image_url"], is_primary=img_data.get("is_primary", False))
+            db.add(image)
     db.commit()
     db.refresh(product)
     return get_product(str(product.id), db)

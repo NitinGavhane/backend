@@ -62,6 +62,7 @@ class ProductUpdate(BaseModel):
     stock: int | None = None
     featured: bool | None = None
     is_active: bool | None = None
+    images: list[ProductImageCreate] | None = None
 
 
 class ProductResponse(BaseModel):
