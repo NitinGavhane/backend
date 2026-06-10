@@ -107,7 +107,7 @@ def delete_product(product_id: str, admin: User = Depends(get_current_admin), db
 
 @router.post("/categories", response_model=CategoryResponse)
 def create_category(req: CategoryCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
-    category = Category(name=req.name, slug=req.slug, description=req.description, image_url=req.image_url)
+    category = Category(name=req.name, slug=req.slug, description=req.description, image_url=req.image_url, gender=req.gender)
     db.add(category)
     db.commit()
     db.refresh(category)
@@ -117,6 +117,7 @@ def create_category(req: CategoryCreate, admin: User = Depends(get_current_admin
         "slug": category.slug,
         "description": category.description,
         "image_url": category.image_url,
+        "gender": category.gender,
         "is_active": category.is_active,
         "created_at": category.created_at,
     }
@@ -138,6 +139,7 @@ def update_category(category_id: str, req: CategoryUpdate, admin: User = Depends
         "slug": category.slug,
         "description": category.description,
         "image_url": category.image_url,
+        "gender": category.gender,
         "is_active": category.is_active,
         "created_at": category.created_at,
     }

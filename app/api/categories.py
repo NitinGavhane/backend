@@ -18,6 +18,7 @@ def list_categories(db: Session = Depends(get_db)):
             "slug": c.slug,
             "description": c.description,
             "image_url": c.image_url,
+            "gender": c.gender,
             "is_active": c.is_active,
             "created_at": c.created_at,
         }

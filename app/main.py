@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
@@ -14,12 +15,25 @@ from app.core.security import hash_password
 from app.models.user import User
 
 
+def _run_migrations(db: Session):
+    inspector = inspect(engine)
+    columns = [c["name"] for c in inspector.get_columns("categories")]
+    if "gender" not in columns:
+        db.execute(text("ALTER TABLE categories ADD COLUMN gender VARCHAR(20) NOT NULL DEFAULT 'unisex'"))
+        db.execute(text("UPDATE categories SET gender = 'men' WHERE LOWER(name) IN ('men', 'footwear', 'kurtas', 'shirts')"))
+        db.execute(text("UPDATE categories SET gender = 'women' WHERE LOWER(name) = 'women'"))
+        db.execute(text("UPDATE categories SET gender = 'kids' WHERE LOWER(name) = 'kids'"))
+        db.commit()
+        print("Migration: added gender column to categories")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
         Base.metadata.create_all(bind=engine)
         db: Session = SessionLocal()
         try:
+            _run_migrations(db)
             admin_user = db.query(User).filter(User.role == "admin").first()
             if not admin_user:
                 admin_user = User(

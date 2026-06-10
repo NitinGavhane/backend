@@ -8,6 +8,7 @@ class CategoryCreate(BaseModel):
     slug: str
     description: str | None = None
     image_url: str | None = None
+    gender: str = "unisex"
 
 
 class CategoryUpdate(BaseModel):
@@ -15,6 +16,7 @@ class CategoryUpdate(BaseModel):
     slug: str | None = None
     description: str | None = None
     image_url: str | None = None
+    gender: str | None = None
     is_active: bool | None = None
 
 
@@ -24,6 +26,7 @@ class CategoryResponse(BaseModel):
     slug: str
     description: str | None = None
     image_url: str | None = None
+    gender: str
     is_active: bool
     created_at: datetime
 
