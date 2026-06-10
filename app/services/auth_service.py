@@ -9,8 +9,12 @@ from app.models.user import User
 from app.schemas.auth import RegisterRequest, LoginRequest
 
 
-def generate_referral_code() -> str:
-    return "GARM" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+def generate_referral_code(db: Session) -> str:
+    for _ in range(10):
+        code = "GARM" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        if not db.query(User).filter(User.referral_code == code).first():
+            return code
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate unique referral code")
 
 
 def register_user(req: RegisterRequest, db: Session) -> User:
@@ -20,10 +24,10 @@ def register_user(req: RegisterRequest, db: Session) -> User:
     user = User(
         full_name=req.full_name,
         email=req.email,
-        phone=req.phone,
+        phone=req.phone or None,
         password_hash=hash_password(req.password),
-        referral_code=generate_referral_code(),
-        referred_by=req.referral_code,
+        referral_code=generate_referral_code(db),
+        referred_by=req.referral_code or None,
     )
     db.add(user)
     db.commit()
