@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../constants/app_colors.dart';
+import '../../../core/constants/app_colors.dart';
 
-class HorizontalBannerSection extends StatelessWidget {
+class BannerSection extends StatelessWidget {
   final String title;
   final List<String> imageUrls;
-  final double imageHeight;
-  final double imageWidth;
 
-  const HorizontalBannerSection({
+  const BannerSection({
     super.key,
     required this.title,
     required this.imageUrls,
-    this.imageHeight = 120,
-    this.imageWidth = 200,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (imageUrls.isEmpty) return const SizedBox.shrink();
+
     return Container(
       color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
@@ -35,7 +33,7 @@ class HorizontalBannerSection extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           SizedBox(
-            height: imageHeight,
+            height: 240,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: imageUrls.length,
@@ -45,13 +43,14 @@ class HorizontalBannerSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
                     imageUrls[index],
-                    width: imageWidth,
-                    height: imageHeight,
+                    width: 135,
+                    height: 240,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      width: imageWidth,
-                      height: imageHeight,
+                      width: 135,
+                      height: 240,
                       color: AppColors.surfaceContainerHigh,
+                      child: const Icon(Icons.broken_image, color: AppColors.textHint),
                     ),
                   ),
                 );
