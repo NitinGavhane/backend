@@ -28,3 +28,5 @@ class User(Base):
     orders = relationship("Order", back_populates="user", cascade="all, delete-orphan")
     wallet_transactions = relationship("WalletTransaction", back_populates="user", cascade="all, delete-orphan")
     referral_earnings = relationship("ReferralEarning", back_populates="referrer", foreign_keys="ReferralEarning.referrer_user_id", cascade="all, delete-orphan")
+    addresses = relationship("Address", back_populates="user", cascade="all, delete-orphan")
+    reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")

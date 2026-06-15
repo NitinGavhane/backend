@@ -17,7 +17,7 @@ def list_products(db: Session, category: str | None = None, search: str | None =
     if featured is not None:
         query = query.filter(Product.featured == featured)
     if gender:
-        query = query.filter(Product.gender == gender)
+        query = query.filter(Product.gender.in_([gender, "unisex"]))
     if sort == "price_asc":
         query = query.order_by(Product.price.asc())
     elif sort == "price_desc":

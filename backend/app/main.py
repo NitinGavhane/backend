@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
-from app.api import admin, auth, cart, categories, orders, payments, products, referral, wallet
+from app.api import admin, addresses, auth, banners, blog, cart, categories, orders, payments, products, referral, reviews, wallet
 from app.core.config import settings
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -101,6 +101,10 @@ app = FastAPI(
         {"name": "Payments", "description": "Payment processing and verification"},
         {"name": "Referral", "description": "Referral code and earnings management"},
         {"name": "Wallet", "description": "Wallet balance and transactions"},
+        {"name": "Addresses", "description": "User address management — CRUD operations"},
+        {"name": "Reviews", "description": "Product reviews — create and list"},
+        {"name": "Blog", "description": "Blog posts — public listing and detail"},
+        {"name": "Banners", "description": "Home screen slider banners — public list & admin management"},
     ],
 )
 
@@ -121,6 +125,10 @@ app.include_router(payments.router)
 app.include_router(referral.router)
 app.include_router(wallet.router)
 app.include_router(admin.router)
+app.include_router(addresses.router)
+app.include_router(reviews.router)
+app.include_router(blog.router)
+app.include_router(banners.router)
 
 
 @app.get("/")
