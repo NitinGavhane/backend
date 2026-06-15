@@ -10,7 +10,7 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 from app.api import admin, addresses, auth, blog, cart, categories, home, orders, payment_methods, payments, products, referral, reviews, wallet, wishlist
 from app.core.config import settings
-from app.core.database import Base, SessionLocal, engine
+from app.core.database import SessionLocal, engine, ensure_tables
 from app.core.security import hash_password
 from app.models.user import User
 
@@ -73,7 +73,7 @@ def _run_migrations(db: Session):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        Base.metadata.create_all(bind=engine)
+        ensure_tables()
         db: Session = SessionLocal()
         try:
             _run_migrations(db)

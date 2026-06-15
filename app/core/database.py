@@ -1,6 +1,6 @@
 import ssl
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.core.config import settings
@@ -21,7 +21,33 @@ class Base(DeclarativeBase):
     pass
 
 
+_tables_initialized = False
+
+
+def ensure_tables():
+    global _tables_initialized
+    if _tables_initialized:
+        return
+    Base.metadata.create_all(bind=engine)
+    try:
+        db = SessionLocal()
+        inspector = inspect(engine)
+        user_columns = [c["name"] for c in inspector.get_columns("users")]
+        if "avatar_url" not in user_columns:
+            db.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)"))
+        order_columns = [c["name"] for c in inspector.get_columns("orders")]
+        if "return_reason" not in order_columns:
+            db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
+            db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
+        db.commit()
+        db.close()
+    except Exception as e:
+        print(f"Migration warning (non-fatal): {e}")
+    _tables_initialized = True
+
+
 def get_db():
+    ensure_tables()
     db = SessionLocal()
     try:
         yield db
