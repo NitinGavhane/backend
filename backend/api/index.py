@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+BASE = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE / "backend"))
 
 try:
     from app.main import app
