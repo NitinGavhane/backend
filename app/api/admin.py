@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
+from app.core.config import settings
+from app.core.database import Base, get_db, engine
 from app.core.deps import get_current_admin
-from app.core.security import create_access_token, create_refresh_token, verify_password
+from app.core.security import create_access_token, create_refresh_token, hash_password, verify_password
 from app.models.order import Order
 from app.models.product import Product
 from app.models.user import User
@@ -154,3 +156,18 @@ def delete_category(category_id: str, admin: User = Depends(get_current_admin), 
     db.delete(category)
     db.commit()
     return {"message": "Category deleted successfully"}
+
+
+@router.post("/migrate")
+def run_migration(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    Base.metadata.create_all(bind=engine)
+    inspector = inspect(engine)
+    user_columns = [c["name"] for c in inspector.get_columns("users")]
+    if "avatar_url" not in user_columns:
+        db.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)"))
+    order_columns = [c["name"] for c in inspector.get_columns("orders")]
+    if "return_reason" not in order_columns:
+        db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
+        db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
+    db.commit()
+    return {"message": "Migration completed successfully"}
