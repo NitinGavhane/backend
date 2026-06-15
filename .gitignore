@@ -1,29 +1,26 @@
-# Flutter
-**/build/
-**/.dart_tool/
-**/.packages
-**/.pub/
-**/pubspec.lock
-**/.flutter-plugins
-**/.flutter-plugins-dependencies
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
 
-# IDE
-**/.idea/
-**/.vscode/
-**/*.iml
-
-# OS
-**/.DS_Store
-**/Thumbs.db
-
-# Flutter web
-**/web/fonts/
-
-# Node / Backend
-**/node_modules/
+# Environment
+.env
 **/backend/.env
 
-# Python
-**/__pycache__/
-**/*.pyc
-**/*.pyo
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+server_err.log
+server_out.log
+
+# Node
+node_modules/
