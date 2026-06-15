@@ -160,14 +160,32 @@ def delete_category(category_id: str, admin: User = Depends(get_current_admin), 
 
 @router.post("/migrate")
 def run_migration(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    from app.models.address import Address
+    from app.models.banner import Banner
+    from app.models.blog import BlogPost
+    from app.models.review import Review
+    from app.models.wishlist import WishlistItem
     Base.metadata.create_all(bind=engine)
     inspector = inspect(engine)
-    user_columns = [c["name"] for c in inspector.get_columns("users")]
+    tables = inspector.get_table_names()
+    user_columns = [c["name"] for c in inspector.get_columns("users")] if "users" in tables else []
     if "avatar_url" not in user_columns:
         db.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)"))
-    order_columns = [c["name"] for c in inspector.get_columns("orders")]
+    order_columns = [c["name"] for c in inspector.get_columns("orders")] if "orders" in tables else []
     if "return_reason" not in order_columns:
         db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
         db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
     db.commit()
-    return {"message": "Migration completed successfully"}
+    return {"message": "Migration completed successfully", "tables": tables, "user_columns": user_columns, "order_columns": order_columns}
+
+
+@router.get("/debug-db")
+def debug_db(admin: User = Depends(get_current_admin)):
+    from sqlalchemy import inspect
+    inspector = inspect(engine)
+    tables = inspector.get_table_names()
+    result = {"tables": tables}
+    for t in tables:
+        cols = [c["name"] for c in inspector.get_columns(t)]
+        result[t] = cols
+    return result

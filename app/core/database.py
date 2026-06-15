@@ -28,14 +28,20 @@ def ensure_tables():
     global _tables_initialized
     if _tables_initialized:
         return
+    from app.models.address import Address
+    from app.models.banner import Banner
+    from app.models.blog import BlogPost
+    from app.models.review import Review
+    from app.models.wishlist import WishlistItem
     Base.metadata.create_all(bind=engine)
     try:
         db = SessionLocal()
         inspector = inspect(engine)
-        user_columns = [c["name"] for c in inspector.get_columns("users")]
+        tables = inspector.get_table_names()
+        user_columns = [c["name"] for c in inspector.get_columns("users")] if "users" in tables else []
         if "avatar_url" not in user_columns:
             db.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)"))
-        order_columns = [c["name"] for c in inspector.get_columns("orders")]
+        order_columns = [c["name"] for c in inspector.get_columns("orders")] if "orders" in tables else []
         if "return_reason" not in order_columns:
             db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
             db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
