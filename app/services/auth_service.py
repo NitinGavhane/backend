@@ -21,6 +21,10 @@ def register_user(req: RegisterRequest, db: Session) -> dict:
     existing = db.query(User).filter((User.email == req.email)).first()
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    if req.phone:
+        existing_phone = db.query(User).filter(User.phone == req.phone).first()
+        if existing_phone:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Phone already registered")
     user = User(
         full_name=req.full_name,
         email=req.email,
