@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
@@ -30,19 +31,30 @@ def list_products(db: Session, category: str | None = None, search: str | None =
     result = []
     for p in products:
         primary_image = next((img.image_url for img in p.images if img.is_primary), (p.images[0].image_url if p.images else None))
+        sizes = sorted(set(v.size for v in p.variants if v.size))
+        colors = sorted(set(v.color for v in p.variants if v.color))
+        discount_pct = round(((p.price - p.discount_price) / p.price) * 100, 1) if p.discount_price and p.discount_price < p.price else 0.0
+        is_new_flag = p.created_at and (datetime.now(timezone.utc) - p.created_at).days < 30
         result.append({
             "id": str(p.id),
             "title": p.title,
-            "sku": p.sku,
-            "price": p.price,
-            "discount_price": p.discount_price,
+            "brand": p.brand,
+            "description": p.description,
+            "price": p.discount_price or p.price,
+            "original_price": p.price,
+            "discount_percentage": discount_pct,
+            "rating": 0.0,
+            "review_count": 0,
             "stock": p.stock,
-            "featured": p.featured,
-            "is_active": p.is_active,
-            "gender": p.gender,
+            "image_url": primary_image,
             "category_id": str(p.category_id),
             "category_name": p.category.name if p.category else None,
-            "primary_image": primary_image,
+            "sizes": sizes,
+            "colors": colors,
+            "gradient_colors": [],
+            "is_featured": p.featured,
+            "is_new": is_new_flag,
+            "is_popular": False,
         })
     return result
 
@@ -52,24 +64,31 @@ def get_product(product_id: str, db: Session):
     product = db.query(Product).options(joinedload(Product.category), joinedload(Product.images), joinedload(Product.variants)).filter(Product.id == pid).first()
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    primary_image = next((img.image_url for img in product.images if img.is_primary), (product.images[0].image_url if product.images else None))
+    sizes = sorted(set(v.size for v in product.variants if v.size))
+    colors = sorted(set(v.color for v in product.variants if v.color))
+    discount_pct = round(((product.price - product.discount_price) / product.price) * 100, 1) if product.discount_price and product.discount_price < product.price else 0.0
+    is_new_flag = product.created_at and (datetime.now(timezone.utc) - product.created_at).days < 30
     return {
         "id": str(product.id),
-        "category_id": str(product.category_id),
         "title": product.title,
-        "description": product.description,
         "brand": product.brand,
-        "sku": product.sku,
-        "price": product.price,
-        "discount_price": product.discount_price,
-        "gst_percentage": product.gst_percentage,
+        "description": product.description,
+        "price": product.discount_price or product.price,
+        "original_price": product.price,
+        "discount_percentage": discount_pct,
+        "rating": 0.0,
+        "review_count": 0,
         "stock": product.stock,
-        "featured": product.featured,
-        "gender": product.gender,
-        "is_active": product.is_active,
-        "created_at": product.created_at,
-        "updated_at": product.updated_at,
-        "variants": [{"id": str(v.id), "size": v.size, "color": v.color, "stock": v.stock, "price": v.price} for v in product.variants],
-        "images": [{"id": str(img.id), "image_url": img.image_url, "is_primary": img.is_primary} for img in product.images],
+        "image_url": primary_image,
+        "category_id": str(product.category_id),
+        "category_name": product.category.name if product.category else None,
+        "sizes": sizes,
+        "colors": colors,
+        "gradient_colors": [],
+        "is_featured": product.featured,
+        "is_new": is_new_flag,
+        "is_popular": False,
     }
 
 

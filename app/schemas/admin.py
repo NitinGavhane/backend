@@ -8,6 +8,7 @@ class AdminUserResponse(BaseModel):
     full_name: str
     email: str
     phone: str | None = None
+    avatar_url: str | None = None
     role: str
     referral_code: str | None = None
     wallet_balance: float

@@ -27,6 +27,8 @@ class Order(Base):
         default="pending",
     )
     shipping_address: Mapped[str] = mapped_column(Text, nullable=True)
+    return_reason: Mapped[str] = mapped_column(Text, nullable=True)
+    return_status: Mapped[str] = mapped_column(String(20), nullable=True)
     estimated_delivery: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

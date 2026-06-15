@@ -25,6 +25,16 @@ def get_order(order_id: str, user: User = Depends(get_current_user), db: Session
     return order_service.get_order_detail(order_id, db)
 
 
+@router.post("/{order_id}/return")
+def return_order(order_id: str, req: dict, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return order_service.request_return(str(user.id), order_id, req, db)
+
+
+@router.post("/{order_id}/replace")
+def replace_order(order_id: str, req: dict, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return order_service.request_replace(str(user.id), order_id, req, db)
+
+
 @router.put("/{order_id}/status", response_model=OrderResponse)
 def update_order_status(order_id: str, req: OrderStatusUpdate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return order_service.update_order_status(order_id, req.status, db)

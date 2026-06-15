@@ -136,6 +136,8 @@ def format_order(order: Order) -> dict:
         "order_status": order.order_status,
         "payment_status": order.payment_status,
         "shipping_address": order.shipping_address,
+        "return_reason": order.return_reason,
+        "return_status": order.return_status,
         "estimated_delivery": order.estimated_delivery,
         "created_at": order.created_at,
         "items": [
@@ -150,3 +152,29 @@ def format_order(order: Order) -> dict:
             for item in order.items
         ],
     }
+
+
+def request_return(user_id: str, order_id: str, req: dict, db: Session) -> dict:
+    order = db.query(Order).filter(Order.id == order_id, Order.user_id == user_id).first()
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    if order.order_status not in ("delivered",):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only delivered orders can be returned")
+    order.return_reason = req.get("reason", "")
+    order.return_status = "requested"
+    db.commit()
+    db.refresh(order)
+    return {"message": "Return request submitted", "return_status": "requested"}
+
+
+def request_replace(user_id: str, order_id: str, req: dict, db: Session) -> dict:
+    order = db.query(Order).filter(Order.id == order_id, Order.user_id == user_id).first()
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+    if order.order_status not in ("delivered",):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only delivered orders can be replaced")
+    order.return_reason = req.get("reason", "")
+    order.return_status = "replace_requested"
+    db.commit()
+    db.refresh(order)
+    return {"message": "Replace request submitted", "return_status": "replace_requested"}

@@ -58,6 +58,7 @@ def list_users(admin: User = Depends(get_current_admin), db: Session = Depends(g
             "full_name": u.full_name,
             "email": u.email,
             "phone": u.phone,
+            "avatar_url": u.avatar_url if hasattr(u, "avatar_url") else None,
             "role": u.role,
             "referral_code": u.referral_code,
             "wallet_balance": u.wallet_balance,

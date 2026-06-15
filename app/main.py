@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
-from app.api import admin, auth, cart, categories, orders, payments, products, referral, wallet
+from app.api import admin, addresses, auth, blog, cart, categories, home, orders, payment_methods, payments, products, referral, reviews, wallet, wishlist
 from app.core.config import settings
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -56,6 +56,19 @@ def _run_migrations(db: Session):
     db.commit()
     print("Migration: product genders synced from categories")
 
+    user_columns = [c["name"] for c in inspector.get_columns("users")]
+    if "avatar_url" not in user_columns:
+        db.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)"))
+        print("Migration: added avatar_url column to users")
+
+    order_columns = [c["name"] for c in inspector.get_columns("orders")]
+    if "return_reason" not in order_columns:
+        db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
+        db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
+        print("Migration: added return_reason and return_status columns to orders")
+
+    db.commit()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -101,6 +114,12 @@ app = FastAPI(
         {"name": "Payments", "description": "Payment processing and verification"},
         {"name": "Referral", "description": "Referral code and earnings management"},
         {"name": "Wallet", "description": "Wallet balance and transactions"},
+        {"name": "Addresses", "description": "User address book management"},
+        {"name": "Wishlist", "description": "User wishlist management"},
+        {"name": "Reviews", "description": "Product reviews and ratings"},
+        {"name": "Blog", "description": "Blog posts listing"},
+        {"name": "Home", "description": "Home page content (banners, featured products)"},
+        {"name": "Payment Methods", "description": "Available payment methods"},
     ],
 )
 
@@ -121,6 +140,12 @@ app.include_router(payments.router)
 app.include_router(referral.router)
 app.include_router(wallet.router)
 app.include_router(admin.router)
+app.include_router(addresses.router)
+app.include_router(wishlist.router)
+app.include_router(reviews.router)
+app.include_router(blog.router)
+app.include_router(home.router)
+app.include_router(payment_methods.router)
 
 
 @app.get("/")

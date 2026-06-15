@@ -69,22 +69,24 @@ class ProductUpdate(BaseModel):
 
 class ProductResponse(BaseModel):
     id: str
-    category_id: str
     title: str
-    description: str | None = None
     brand: str | None = None
-    sku: str
+    description: str | None = None
     price: float
-    discount_price: float | None = None
-    gst_percentage: float
+    original_price: float
+    discount_percentage: float = 0.0
+    rating: float = 0.0
+    review_count: int = 0
     stock: int
-    featured: bool
-    is_active: bool
-    gender: str
-    created_at: datetime
-    updated_at: datetime
-    variants: list[ProductVariantResponse] = []
-    images: list[ProductImageResponse] = []
+    image_url: str | None = None
+    category_id: str
+    category_name: str | None = None
+    sizes: list[str] = []
+    colors: list[str] = []
+    gradient_colors: list[str] = []
+    is_featured: bool = False
+    is_new: bool = False
+    is_popular: bool = False
 
     class Config:
         from_attributes = True
