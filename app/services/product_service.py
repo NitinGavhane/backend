@@ -33,14 +33,14 @@ def list_products(db: Session, category: str | None = None, search: str | None =
         primary_image = next((img.image_url for img in p.images if img.is_primary), (p.images[0].image_url if p.images else None))
         sizes = sorted(set(v.size for v in p.variants if v.size))
         colors = sorted(set(v.color for v in p.variants if v.color))
-        discount_pct = round(((p.price - p.discount_price) / p.price) * 100, 1) if p.discount_price and p.discount_price < p.price else 0.0
+        discount_pct = round(((p.price - p.discount_price) / p.price) * 100, 1) if p.discount_price is not None and p.discount_price < p.price else 0.0
         is_new_flag = p.created_at and (datetime.now(timezone.utc) - p.created_at).days < 30
         result.append({
             "id": str(p.id),
             "title": p.title,
             "brand": p.brand,
             "description": p.description,
-            "price": p.discount_price or p.price,
+            "price": p.discount_price if p.discount_price is not None else p.price,
             "original_price": p.price,
             "discount_percentage": discount_pct,
             "rating": 0.0,
@@ -52,6 +52,7 @@ def list_products(db: Session, category: str | None = None, search: str | None =
             "sizes": sizes,
             "colors": colors,
             "gradient_colors": [],
+            "gender": p.gender,
             "is_featured": p.featured,
             "is_new": is_new_flag,
             "is_popular": False,
