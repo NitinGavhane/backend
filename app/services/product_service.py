@@ -60,6 +60,24 @@ def list_products(db: Session, category: str | None = None, search: str | None =
     return result
 
 
+def _variant_to_dict(v):
+    return {
+        "id": str(v.id),
+        "size": v.size,
+        "color": v.color,
+        "stock": v.stock,
+        "price": v.price,
+    }
+
+
+def _image_to_dict(img):
+    return {
+        "id": str(img.id),
+        "image_url": img.image_url,
+        "is_primary": img.is_primary,
+    }
+
+
 def get_product(product_id: str, db: Session):
     pid = _parse_uuid(product_id, "product_id")
     product = db.query(Product).options(joinedload(Product.category), joinedload(Product.images), joinedload(Product.variants)).filter(Product.id == pid).first()
@@ -75,6 +93,7 @@ def get_product(product_id: str, db: Session):
         "title": product.title,
         "brand": product.brand,
         "description": product.description,
+        "sku": product.sku,
         "price": product.discount_price or product.price,
         "original_price": product.price,
         "discount_percentage": discount_pct,
@@ -86,10 +105,17 @@ def get_product(product_id: str, db: Session):
         "category_name": product.category.name if product.category else None,
         "sizes": sizes,
         "colors": colors,
-        "gradient_colors": [],
+        "gender": product.gender,
+        "gst_percentage": product.gst_percentage,
+        "is_active": product.is_active,
         "is_featured": product.featured,
         "is_new": is_new_flag,
         "is_popular": False,
+        "gradient_colors": [],
+        "variants": [_variant_to_dict(v) for v in product.variants],
+        "images": [_image_to_dict(img) for img in product.images],
+        "created_at": product.created_at.isoformat() if product.created_at else None,
+        "updated_at": product.updated_at.isoformat() if product.updated_at else None,
     }
 
 
