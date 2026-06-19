@@ -144,6 +144,68 @@ def reset_password(req: ResetPasswordRequest, db: Session) -> dict:
     return {"message": "Password reset successfully"}
 
 
+def send_login_otp(email: str, db: Session) -> dict:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No account found with this email")
+
+    otp = _generate_otp()
+    user.otp_code = otp
+    user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+    db.commit()
+
+    try:
+        send_otp_email(user.email, otp)
+    except Exception:
+        pass
+
+    return {"message": f"Login OTP sent to {user.email}"}
+
+
+def login_with_otp(email: str, otp: str, db: Session) -> dict:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No account found with this email")
+
+    _verify_otp_code(user, otp, db)
+
+    access_token = create_access_token({"sub": str(user.id), "role": user.role})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
+    return {
+        "user": {
+            "id": str(user.id),
+            "full_name": user.full_name,
+            "email": user.email,
+            "phone": user.phone,
+            "avatar_url": user.avatar_url if hasattr(user, "avatar_url") else None,
+            "role": user.role,
+            "referral_code": user.referral_code,
+            "wallet_balance": user.wallet_balance,
+            "is_verified": user.is_verified,
+        },
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
+
+
+def resend_otp(email: str, db: Session) -> dict:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    otp = _generate_otp()
+    user.otp_code = otp
+    user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+    db.commit()
+
+    try:
+        send_otp_email(user.email, otp)
+    except Exception:
+        pass
+
+    return {"message": f"OTP resent to {user.email}"}
+
+
 def login_user(req: LoginRequest, db: Session) -> dict:
     user = db.query(User).filter(User.email == req.email).first()
     if not user or not verify_password(req.password, user.password_hash):

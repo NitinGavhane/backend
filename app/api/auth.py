@@ -66,6 +66,21 @@ def update_profile(req: UpdateProfileRequest, user: User = Depends(get_current_u
     return _user_to_response(updated)
 
 
+@router.post("/send-login-otp")
+def send_login_otp(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    return auth_service.send_login_otp(req.email, db)
+
+
+@router.post("/login-with-otp")
+def login_with_otp(req: VerifyOtpRequest, db: Session = Depends(get_db)):
+    return auth_service.login_with_otp(req.email, req.otp, db)
+
+
+@router.post("/resend-otp")
+def resend_otp(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    return auth_service.resend_otp(req.email, db)
+
+
 @router.post("/forgot-password")
 def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
     return auth_service.forgot_password(req.email, db)
