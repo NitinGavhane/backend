@@ -75,10 +75,7 @@ def register_user(req: RegisterRequest, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    try:
-        send_otp_email(user.email, otp)
-    except Exception:
-        pass
+    send_otp_email(user.email, otp)
 
     return {
         "user": {
@@ -124,10 +121,7 @@ def forgot_password(email: str, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    try:
-        send_password_reset_email(user.email, otp)
-    except Exception:
-        pass
+    send_password_reset_email(user.email, otp)
 
     return {"message": f"Password reset OTP sent to {user.email}"}
 
@@ -154,10 +148,7 @@ def send_login_otp(email: str, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    try:
-        send_otp_email(user.email, otp)
-    except Exception:
-        pass
+    send_otp_email(user.email, otp)
 
     return {"message": f"Login OTP sent to {user.email}"}
 
@@ -198,10 +189,7 @@ def resend_otp(email: str, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    try:
-        send_otp_email(user.email, otp)
-    except Exception:
-        pass
+    send_otp_email(user.email, otp)
 
     return {"message": f"OTP resent to {user.email}"}
 
