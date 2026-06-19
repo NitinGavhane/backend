@@ -22,6 +22,8 @@ class User(Base):
     referred_by: Mapped[str] = mapped_column(String(20), nullable=True)
     wallet_balance: Mapped[float] = mapped_column(default=0.0)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    otp_code: Mapped[str] = mapped_column(String(6), nullable=True)
+    otp_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

@@ -6,6 +6,7 @@ from app.core.deps import get_current_user
 from app.models.user import User
 from app.schemas.auth import (
     ChangePasswordRequest,
+    ForgotPasswordRequest,
     LoginRequest,
     RefreshTokenRequest,
     RegisterRequest,
@@ -63,6 +64,11 @@ def get_profile(user: User = Depends(get_current_user)):
 def update_profile(req: UpdateProfileRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     updated = auth_service.update_profile(user, req, db)
     return _user_to_response(updated)
+
+
+@router.post("/forgot-password")
+def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    return auth_service.forgot_password(req.email, db)
 
 
 @router.post("/change-password")

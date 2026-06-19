@@ -24,6 +24,12 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: str = "*"
 
+    SMTP_HOST: str = "smtp.sendgrid.net"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = "apikey"
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = "noreply@garment.com"
+
     class Config:
         env_file = ".env"
         case_sensitive = True

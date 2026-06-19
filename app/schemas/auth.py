@@ -41,8 +41,12 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
 class ResetPasswordRequest(BaseModel):
-    phone: str
+    email: str
     otp: str
     new_password: str
 

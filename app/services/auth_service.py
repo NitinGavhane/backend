@@ -1,5 +1,6 @@
 import random
 import string
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.security import create_access_token, create_refresh_token, decode_token, hash_password, verify_password
 from app.models.user import User
 from app.schemas.auth import ChangePasswordRequest, LoginRequest, RegisterRequest, ResetPasswordRequest, UpdateProfileRequest
+from app.services.email_service import send_otp_email, send_password_reset_email
 
 
 def generate_referral_code(db: Session) -> str:
@@ -15,6 +17,37 @@ def generate_referral_code(db: Session) -> str:
         if not db.query(User).filter(User.referral_code == code).first():
             return code
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate unique referral code")
+
+
+def _generate_otp() -> str:
+    return f"{random.randint(0, 999999):06d}"
+
+
+def _send_and_store_otp(user: User, db: Session, email_type: str = "verification") -> dict:
+    otp = _generate_otp()
+    user.otp_code = otp
+    user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+    db.commit()
+
+    if email_type == "verification":
+        send_otp_email(user.email, otp)
+    else:
+        send_password_reset_email(user.email, otp)
+
+    return {"message": f"OTP sent to {user.email}"}
+
+
+def _verify_otp_code(user: User, otp: str, db: Session) -> None:
+    if user.otp_code is None or user.otp_expires_at is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No OTP requested")
+    if datetime.now(timezone.utc) > user.otp_expires_at:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OTP has expired")
+    if user.otp_code != otp:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP")
+
+    user.otp_code = None
+    user.otp_expires_at = None
+    db.commit()
 
 
 def register_user(req: RegisterRequest, db: Session) -> dict:
@@ -36,8 +69,17 @@ def register_user(req: RegisterRequest, db: Session) -> dict:
     db.add(user)
     db.commit()
     db.refresh(user)
-    access_token = create_access_token({"sub": str(user.id), "role": user.role})
-    refresh_token = create_refresh_token({"sub": str(user.id)})
+
+    otp = _generate_otp()
+    user.otp_code = otp
+    user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+    db.commit()
+
+    try:
+        send_otp_email(user.email, otp)
+    except Exception:
+        pass
+
     return {
         "user": {
             "id": str(user.id),
@@ -50,9 +92,56 @@ def register_user(req: RegisterRequest, db: Session) -> dict:
             "wallet_balance": user.wallet_balance,
             "is_verified": user.is_verified,
         },
+        "message": "Registration successful. Please verify your email with the OTP sent.",
+    }
+
+
+def verify_otp(email: str, otp: str, db: Session) -> dict:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    _verify_otp_code(user, otp, db)
+    user.is_verified = True
+    db.commit()
+
+    access_token = create_access_token({"sub": str(user.id), "role": user.role})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
+    return {
+        "message": "Email verified successfully",
         "access_token": access_token,
         "refresh_token": refresh_token,
     }
+
+
+def forgot_password(email: str, db: Session) -> dict:
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    otp = _generate_otp()
+    user.otp_code = otp
+    user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+    db.commit()
+
+    try:
+        send_password_reset_email(user.email, otp)
+    except Exception:
+        pass
+
+    return {"message": f"Password reset OTP sent to {user.email}"}
+
+
+def reset_password(req: ResetPasswordRequest, db: Session) -> dict:
+    user = db.query(User).filter(User.email == req.email).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    _verify_otp_code(user, req.otp, db)
+    user.password_hash = hash_password(req.new_password)
+    db.commit()
+
+    return {"message": "Password reset successfully"}
 
 
 def login_user(req: LoginRequest, db: Session) -> dict:
@@ -90,17 +179,6 @@ def refresh_access_token(refresh_token: str, db: Session) -> dict:
     return {"access_token": new_access, "refresh_token": new_refresh, "token_type": "bearer"}
 
 
-def verify_otp(email: str, otp: str, db: Session) -> dict:
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    if otp == "000000":
-        user.is_verified = True
-        db.commit()
-        return {"message": "OTP verified successfully"}
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP")
-
-
 def update_profile(user: User, req: UpdateProfileRequest, db: Session) -> User:
     update_data = req.model_dump(exclude_unset=True)
     if "email" in update_data:
@@ -124,14 +202,3 @@ def change_password(user: User, req: ChangePasswordRequest, db: Session) -> dict
     user.password_hash = hash_password(req.new_password)
     db.commit()
     return {"message": "Password changed successfully"}
-
-
-def reset_password(req: ResetPasswordRequest, db: Session) -> dict:
-    user = db.query(User).filter(User.phone == req.phone).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    if req.otp != "000000":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OTP")
-    user.password_hash = hash_password(req.new_password)
-    db.commit()
-    return {"message": "Password reset successfully"}

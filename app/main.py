@@ -61,6 +61,12 @@ def _run_migrations(db: Session):
         db.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)"))
         print("Migration: added avatar_url column to users")
 
+    user_columns = [c["name"] for c in inspector.get_columns("users")]
+    if "otp_code" not in user_columns:
+        db.execute(text("ALTER TABLE users ADD COLUMN otp_code VARCHAR(6)"))
+        db.execute(text("ALTER TABLE users ADD COLUMN otp_expires_at TIMESTAMP WITH TIME ZONE"))
+        print("Migration: added otp_code and otp_expires_at columns to users")
+
     order_columns = [c["name"] for c in inspector.get_columns("orders")]
     if "return_reason" not in order_columns:
         db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
