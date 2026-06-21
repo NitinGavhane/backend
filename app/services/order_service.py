@@ -72,27 +72,20 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
 
     if user.referred_by:
         referrer = db.query(User).filter(User.referral_code == user.referred_by).first()
-        if referrer:
-            commission = round(final_amount * 0.05, 2)
+        if referrer and order_items_data:
+            first_product_id = order_items_data[0]["product_id"]
             earning = ReferralEarning(
                 referrer_user_id=referrer.id,
                 referred_user_id=user.id,
                 order_id=order.id,
+                product_id=first_product_id,
                 referral_code=user.referred_by,
-                commission_amount=commission,
-                status="credited",
+                purchase_amount=round(final_amount, 2),
+                reward_amount=0.0,
+                reward_percentage=0.0,
+                status="pending",
             )
             db.add(earning)
-            referrer.wallet_balance += commission
-            wallet_txn = WalletTransaction(
-                user_id=referrer.id,
-                transaction_type="credit",
-                amount=commission,
-                source="referral_commission",
-                reference_id=str(order.id),
-                description=f"Referral commission for order {order.order_number}",
-            )
-            db.add(wallet_txn)
 
     db.commit()
     db.refresh(order)

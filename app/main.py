@@ -73,6 +73,18 @@ def _run_migrations(db: Session):
         db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
         print("Migration: added return_reason and return_status columns to orders")
 
+    tables = inspector.get_table_names()
+    referral_earnings_exists = "referral_earnings" in tables
+    referral_columns = [c["name"] for c in inspector.get_columns("referral_earnings")] if referral_earnings_exists else []
+    if "product_id" not in referral_columns:
+        db.execute(text("ALTER TABLE referral_earnings ADD COLUMN product_id UUID REFERENCES products(id)"))
+        db.execute(text("ALTER TABLE referral_earnings ADD COLUMN purchase_amount FLOAT DEFAULT 0"))
+        db.execute(text("ALTER TABLE referral_earnings ADD COLUMN reward_amount FLOAT DEFAULT 0"))
+        db.execute(text("ALTER TABLE referral_earnings ADD COLUMN reward_percentage FLOAT DEFAULT 0"))
+        db.execute(text("ALTER TABLE referral_earnings ADD COLUMN approved_at TIMESTAMP WITH TIME ZONE"))
+        db.execute(text("ALTER TABLE referral_earnings ALTER COLUMN commission_amount DROP NOT NULL"))
+        print("Migration: added referral tracking columns to referral_earnings")
+
     db.commit()
 
 

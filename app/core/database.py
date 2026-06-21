@@ -31,6 +31,7 @@ def ensure_tables():
     from app.models.address import Address
     from app.models.banner import Banner
     from app.models.blog import BlogPost
+    from app.models.referral import ReferralEarning, ReferralShareClick
     from app.models.review import Review
     from app.models.wishlist import WishlistItem
     Base.metadata.create_all(bind=engine)

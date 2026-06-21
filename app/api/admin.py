@@ -14,8 +14,14 @@ from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
 from app.schemas.order import OrderResponse
 from app.schemas.product import ProductCreate, ProductResponse, ProductUpdate
-from app.schemas.referral import ReferralHistoryResponse
-from app.services import order_service, product_service
+from app.schemas.referral import (
+    AdminReferralPurchaseResponse,
+    ApproveRewardRequest,
+    ReferralHistoryResponse,
+    ReferralProductReport,
+    ReferralUserReport,
+)
+from app.services import order_service, product_service, referral_service
 from app.models.referral import ReferralEarning
 from app.models.category import Category
 
@@ -85,12 +91,50 @@ def list_all_referrals(admin: User = Depends(get_current_admin), db: Session = D
             "id": str(e.id),
             "referred_user_name": "User",
             "order_id": str(e.order_id),
-            "commission_amount": e.commission_amount,
+            "commission_amount": e.reward_amount,
             "status": e.status,
             "created_at": e.created_at,
         }
         for e in earnings
     ]
+
+
+@router.get("/referral-purchases", response_model=list[AdminReferralPurchaseResponse])
+def list_referral_purchases(
+    status: str | None = None,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return referral_service.get_admin_referral_purchases(db, status)
+
+
+@router.put("/referral-purchases/{earning_id}/approve")
+def approve_referral_reward(
+    earning_id: str,
+    req: ApproveRewardRequest,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return referral_service.approve_referral_reward(earning_id, req.reward_percentage, req.reward_amount, db)
+
+
+@router.put("/referral-purchases/{earning_id}/reject")
+def reject_referral_reward(
+    earning_id: str,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return referral_service.reject_referral_reward(earning_id, db)
+
+
+@router.get("/referral-reports/product", response_model=list[ReferralProductReport])
+def product_referral_report(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return referral_service.get_product_referral_report(db)
+
+
+@router.get("/referral-reports/user", response_model=list[ReferralUserReport])
+def user_referral_report(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return referral_service.get_user_referral_report(db)
 
 
 @router.post("/products", response_model=ProductResponse)
