@@ -31,8 +31,8 @@ class ReferralShareClick(Base):
     __tablename__ = "referral_share_clicks"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
-    referrer_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=True)
+    referrer_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=True)
     referral_code: Mapped[str] = mapped_column(String(20), nullable=True)
     ip_address: Mapped[str] = mapped_column(String(50), nullable=True)
     user_agent: Mapped[str] = mapped_column(String(500), nullable=True)

@@ -85,6 +85,16 @@ def _run_migrations(db: Session):
         db.execute(text("ALTER TABLE referral_earnings ALTER COLUMN commission_amount DROP NOT NULL"))
         print("Migration: added referral tracking columns to referral_earnings")
 
+    if referral_earnings_exists:
+        try:
+            db.execute(text("ALTER TYPE reward_status ADD VALUE 'approved'"))
+        except Exception:
+            pass
+        try:
+            db.execute(text("ALTER TYPE reward_status ADD VALUE 'rejected'"))
+        except Exception:
+            pass
+
     db.commit()
 
 

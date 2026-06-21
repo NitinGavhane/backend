@@ -24,3 +24,4 @@ server_out.log
 
 # Node
 node_modules/
+.vercel

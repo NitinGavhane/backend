@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
@@ -10,12 +11,15 @@ from app.models.user import User
 
 
 def get_referral_stats(user_id: str, db: Session) -> dict:
-    user = db.query(User).filter(User.id == user_id).first()
-    earnings = db.query(ReferralEarning).filter(ReferralEarning.referrer_user_id == user_id).all()
+    user_uuid = uuid.UUID(user_id)
+    user = db.query(User).filter(User.id == user_uuid).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    earnings = db.query(ReferralEarning).filter(ReferralEarning.referrer_user_id == user_uuid).all()
     total_earnings = sum(e.reward_amount for e in earnings if e.status == "approved")
     successful = sum(1 for e in earnings if e.status == "approved")
     pending = sum(1 for e in earnings if e.status == "pending")
-    total_clicks = db.query(ReferralShareClick).filter(ReferralShareClick.referrer_user_id == user_id).count()
+    total_clicks = db.query(ReferralShareClick).filter(ReferralShareClick.referrer_user_id == user_uuid).count()
     return {
         "referral_code": user.referral_code,
         "total_earnings": round(total_earnings, 2),
@@ -27,10 +31,11 @@ def get_referral_stats(user_id: str, db: Session) -> dict:
 
 
 def get_referral_history(user_id: str, db: Session):
+    user_uuid = uuid.UUID(user_id)
     earnings = (
         db.query(ReferralEarning)
         .options(joinedload(ReferralEarning.referrer))
-        .filter(ReferralEarning.referrer_user_id == user_id)
+        .filter(ReferralEarning.referrer_user_id == user_uuid)
         .order_by(ReferralEarning.created_at.desc())
         .all()
     )
@@ -78,8 +83,12 @@ def track_share_click(product_id: str, referral_code: str, db: Session, ip_addre
     referrer = db.query(User).filter(User.referral_code == referral_code).first()
     if not referrer:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid referral code")
+    try:
+        parsed_product_id = uuid.UUID(product_id) if product_id else None
+    except ValueError:
+        parsed_product_id = None
     click = ReferralShareClick(
-        product_id=product_id,
+        product_id=parsed_product_id,
         referrer_user_id=referrer.id,
         referral_code=referral_code,
         ip_address=ip_address,
@@ -103,9 +112,9 @@ def record_referral_purchase(
         return
     earning = ReferralEarning(
         referrer_user_id=referrer.id,
-        referred_user_id=referred_user_id,
-        order_id=order_id,
-        product_id=product_id,
+        referred_user_id=uuid.UUID(referred_user_id),
+        order_id=uuid.UUID(order_id),
+        product_id=uuid.UUID(product_id) if product_id else None,
         referral_code=referred_by_code,
         purchase_amount=purchase_amount,
         reward_amount=0.0,
@@ -153,7 +162,7 @@ def get_admin_referral_purchases(db: Session, status_filter: str = None):
 
 
 def approve_referral_reward(earning_id: str, reward_percentage: float, reward_amount: float | None, db: Session):
-    earning = db.query(ReferralEarning).filter(ReferralEarning.id == earning_id).first()
+    earning = db.query(ReferralEarning).filter(ReferralEarning.id == uuid.UUID(earning_id)).first()
     if not earning:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Referral earning not found")
     if earning.status != "pending":
@@ -184,7 +193,7 @@ def approve_referral_reward(earning_id: str, reward_percentage: float, reward_am
 
 
 def reject_referral_reward(earning_id: str, db: Session):
-    earning = db.query(ReferralEarning).filter(ReferralEarning.id == earning_id).first()
+    earning = db.query(ReferralEarning).filter(ReferralEarning.id == uuid.UUID(earning_id)).first()
     if not earning:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Referral earning not found")
     if earning.status != "pending":
