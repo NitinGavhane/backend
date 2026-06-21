@@ -1,4 +1,5 @@
 import random
+import re
 import string
 from datetime import datetime, timedelta, timezone
 
@@ -11,9 +12,12 @@ from app.schemas.auth import ChangePasswordRequest, LoginRequest, RegisterReques
 from app.services.email_service import send_otp_email, send_password_reset_email
 
 
-def generate_referral_code(db: Session) -> str:
+def generate_referral_code(db: Session, full_name: str = "") -> str:
+    clean = re.sub(r'[^A-Z]', '', full_name.upper())
+    prefix = clean[:4]
+    suffix_len = 10 - len(prefix)
     for _ in range(10):
-        code = "GARM" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        code = prefix + "".join(random.choices(string.ascii_uppercase + string.digits, k=suffix_len))
         if not db.query(User).filter(User.referral_code == code).first():
             return code
     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate unique referral code")
@@ -63,7 +67,7 @@ def register_user(req: RegisterRequest, db: Session) -> dict:
         email=req.email,
         phone=req.phone or None,
         password_hash=hash_password(req.password),
-        referral_code=generate_referral_code(db),
+        referral_code=generate_referral_code(db, req.full_name),
         referred_by=req.referral_code or None,
     )
     db.add(user)
