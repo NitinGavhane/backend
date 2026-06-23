@@ -22,4 +22,4 @@ class Category(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     products = relationship("Product", back_populates="category")
-    children = relationship("Category", backref="parent", remote_side=[id], cascade="all, delete-orphan")
+    children = relationship("Category", backref="parent", remote_side=[id])
