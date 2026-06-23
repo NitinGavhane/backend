@@ -23,23 +23,27 @@ def _run_migrations(db: Session):
         db.execute(text("ALTER TABLE categories ADD COLUMN gender VARCHAR(20) NOT NULL DEFAULT 'unisex'"))
         print("Migration: added gender column to categories")
 
-    db.execute(text("""
+        db.execute(text("""
         UPDATE categories SET gender = 'men'
-        WHERE LOWER(TRIM(name)) IN ('men', 'footwear', 'kurtas', 'shirts')
+        WHERE LOWER(TRIM(name)) IN ('men', 'footwear', 'footware', 'kurtas', 'shirts', 'casuals', 'jeans', 'formal wear')
           AND gender IS DISTINCT FROM 'men'
     """))
     db.execute(text("""
         UPDATE categories SET gender = 'women'
-        WHERE LOWER(TRIM(name)) = 'women'
+        WHERE LOWER(TRIM(name)) IN ('women', 'women footwear', 'western wear', 'top&skirt', 'dress', 'sarees', 'ethnic wear', 'western dress', 'co-ord set')
           AND gender IS DISTINCT FROM 'women'
     """))
     db.execute(text("""
         UPDATE categories SET gender = 'kids'
-        WHERE LOWER(TRIM(name)) = 'kids'
+        WHERE LOWER(TRIM(name)) IN ('kids', 'boys', 'girls')
           AND gender IS DISTINCT FROM 'kids'
     """))
+    db.execute(text("""
+        UPDATE categories SET gender = 'unisex'
+        WHERE TRIM(COALESCE(gender, '')) = ''
+    """))
     db.commit()
-    print("Migration: category genders synced [men→Men/Footwear/Kurtas/Shirts, women→Women, kids→Kids]")
+    print("Migration: category genders synced")
 
     category_columns = [c["name"] for c in inspector.get_columns("categories")]
     if "parent_id" not in category_columns:
