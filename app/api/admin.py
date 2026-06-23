@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
@@ -152,9 +154,54 @@ def delete_product(product_id: str, admin: User = Depends(get_current_admin), db
     return product_service.delete_product(product_id, db)
 
 
+@router.get("/categories/{category_id}", response_model=CategoryResponse)
+def get_admin_category(category_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    category = db.query(Category).filter(Category.id == category_id).first()
+    if not category:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    return {
+        "id": str(category.id),
+        "name": category.name,
+        "slug": category.slug,
+        "description": category.description,
+        "image_url": category.image_url,
+        "parent_id": str(category.parent_id) if category.parent_id else None,
+        "gender": category.gender,
+        "is_active": category.is_active,
+        "created_at": category.created_at,
+    }
+
+
+@router.get("/categories", response_model=list[CategoryResponse])
+def list_admin_categories(gender: str | None = None, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    query = db.query(Category).filter(Category.is_active == True)
+    if gender:
+        query = query.filter(Category.gender == gender)
+    categories = query.order_by(Category.created_at.desc()).all()
+    return [
+        {
+            "id": str(c.id),
+            "name": c.name,
+            "slug": c.slug,
+            "description": c.description,
+            "image_url": c.image_url,
+            "parent_id": str(c.parent_id) if c.parent_id else None,
+            "gender": c.gender,
+            "is_active": c.is_active,
+            "created_at": c.created_at,
+        }
+        for c in categories
+    ]
+
+
 @router.post("/categories", response_model=CategoryResponse)
 def create_category(req: CategoryCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
-    category = Category(name=req.name, slug=req.slug, description=req.description, image_url=req.image_url, gender=req.gender)
+    parent_uuid = uuid.UUID(req.parent_id) if req.parent_id else None
+    category = Category(
+        name=req.name, slug=req.slug,
+        description=req.description, image_url=req.image_url,
+        parent_id=parent_uuid, gender=req.gender,
+    )
     db.add(category)
     db.commit()
     db.refresh(category)
@@ -164,6 +211,7 @@ def create_category(req: CategoryCreate, admin: User = Depends(get_current_admin
         "slug": category.slug,
         "description": category.description,
         "image_url": category.image_url,
+        "parent_id": str(category.parent_id) if category.parent_id else None,
         "gender": category.gender,
         "is_active": category.is_active,
         "created_at": category.created_at,
@@ -176,6 +224,8 @@ def update_category(category_id: str, req: CategoryUpdate, admin: User = Depends
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
     update_data = req.model_dump(exclude_unset=True)
+    if "parent_id" in update_data:
+        update_data["parent_id"] = uuid.UUID(update_data["parent_id"]) if update_data["parent_id"] else None
     for key, value in update_data.items():
         setattr(category, key, value)
     db.commit()
@@ -186,6 +236,7 @@ def update_category(category_id: str, req: CategoryUpdate, admin: User = Depends
         "slug": category.slug,
         "description": category.description,
         "image_url": category.image_url,
+        "parent_id": str(category.parent_id) if category.parent_id else None,
         "gender": category.gender,
         "is_active": category.is_active,
         "created_at": category.created_at,
@@ -197,6 +248,9 @@ def delete_category(category_id: str, admin: User = Depends(get_current_admin), 
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    children = db.query(Category).filter(Category.parent_id == category_id).all()
+    for child in children:
+        db.delete(child)
     db.delete(category)
     db.commit()
     return {"message": "Category deleted successfully"}

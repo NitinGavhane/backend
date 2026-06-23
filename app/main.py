@@ -41,6 +41,12 @@ def _run_migrations(db: Session):
     db.commit()
     print("Migration: category genders synced [men→Men/Footwear/Kurtas/Shirts, women→Women, kids→Kids]")
 
+    category_columns = [c["name"] for c in inspector.get_columns("categories")]
+    if "parent_id" not in category_columns:
+        db.execute(text("ALTER TABLE categories ADD COLUMN parent_id UUID REFERENCES categories(id) ON DELETE CASCADE"))
+        db.execute(text("CREATE INDEX IF NOT EXISTS ix_categories_parent_id ON categories(parent_id)"))
+        print("Migration: added parent_id column to categories")
+
     product_columns = [c["name"] for c in inspector.get_columns("products")]
     if "gender" not in product_columns:
         db.execute(text("ALTER TABLE products ADD COLUMN gender VARCHAR(20) NOT NULL DEFAULT 'unisex'"))

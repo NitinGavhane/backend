@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, Enum, String
+from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -16,8 +16,10 @@ class Category(Base):
     slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     description: Mapped[str] = mapped_column(String(500), nullable=True)
     image_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    parent_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("categories.id", ondelete="CASCADE"), nullable=True, index=True)
     gender: Mapped[str] = mapped_column(String(20), default="unisex")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     products = relationship("Product", back_populates="category")
+    children = relationship("Category", backref="parent", remote_side=[id], cascade="all, delete-orphan")
