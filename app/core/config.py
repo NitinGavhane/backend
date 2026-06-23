@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
 
+    DATABASE_URL: str | None = None
+
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_HOST: str = "localhost"
@@ -14,7 +16,12 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "garment_ecommerce"
 
     @property
-    def DATABASE_URL(self) -> str:
+    def db_url(self) -> str:
+        if self.DATABASE_URL:
+            raw = self.DATABASE_URL
+            if raw.startswith("postgresql://"):
+                raw = raw.replace("postgresql://", "postgresql+pg8000://", 1)
+            return raw
         return f"postgresql+pg8000://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     SECRET_KEY: str = "your-secret-key-change-in-production-min-32-chars"

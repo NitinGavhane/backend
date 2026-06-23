@@ -1,19 +1,30 @@
 import ssl
+from urllib.parse import urlparse
 
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.core.config import settings
 
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = True
-ssl_context.verify_mode = ssl.CERT_REQUIRED
+_connect_args: dict = {}
+parsed = urlparse(settings.db_url)
+if parsed.scheme.endswith("+pg8000") and parsed.hostname != "localhost":
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = True
+        ctx.verify_mode = ssl.CERT_REQUIRED
+        _connect_args["ssl_context"] = ctx
+    except Exception:
+        try:
+            ctx = ssl._create_unverified_context()
+            _connect_args["ssl_context"] = ctx
+        except Exception:
+            pass
 
-engine = create_engine(
-    settings.DATABASE_URL,
-    echo=settings.DEBUG,
-    connect_args={"ssl_context": ssl_context},
-)
+if _connect_args:
+    engine = create_engine(settings.db_url, echo=settings.DEBUG, connect_args=_connect_args)
+else:
+    engine = create_engine(settings.db_url, echo=settings.DEBUG)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
