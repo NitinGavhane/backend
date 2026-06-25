@@ -11,11 +11,13 @@ from app.core.security import create_access_token, create_refresh_token, hash_pa
 from app.models.order import Order
 from app.models.product import Product
 from app.models.user import User
+from app.models.coupon import Coupon
 from app.schemas.admin import AdminDashboardStats, AdminUserResponse
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
+from app.schemas.coupon import CouponCreate, CouponResponse, CouponUpdate
 from app.schemas.order import OrderResponse
-from app.schemas.product import ProductCreate, ProductResponse, ProductUpdate
+from app.schemas.product import AdminProductResponse, ProductCreate, ProductUpdate
 from app.schemas.referral import (
     AdminReferralPurchaseResponse,
     ApproveRewardRequest,
@@ -85,6 +87,11 @@ def list_all_orders(admin: User = Depends(get_current_admin), db: Session = Depe
     return [order_service.format_order(o) for o in orders]
 
 
+@router.put("/orders/{order_id}/status", response_model=OrderResponse)
+def admin_update_order_status(order_id: str, req: dict, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return order_service.update_order_status(order_id, req.get("status", ""), db)
+
+
 @router.get("/referrals", response_model=list[ReferralHistoryResponse])
 def list_all_referrals(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     earnings = db.query(ReferralEarning).order_by(ReferralEarning.created_at.desc()).all()
@@ -139,12 +146,22 @@ def user_referral_report(admin: User = Depends(get_current_admin), db: Session =
     return referral_service.get_user_referral_report(db)
 
 
-@router.post("/products", response_model=ProductResponse)
+@router.get("/products", response_model=list[AdminProductResponse])
+def list_admin_products(gender: str | None = None, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return product_service.list_admin_products(db, gender)
+
+
+@router.get("/products/{product_id}", response_model=AdminProductResponse)
+def get_admin_product(product_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return product_service.get_admin_product(product_id, db)
+
+
+@router.post("/products", response_model=AdminProductResponse)
 def create_product(req: ProductCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return product_service.create_product(req, db)
 
 
-@router.put("/products/{product_id}", response_model=ProductResponse)
+@router.put("/products/{product_id}", response_model=AdminProductResponse)
 def update_product(product_id: str, req: ProductUpdate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return product_service.update_product(product_id, req, db)
 
@@ -152,6 +169,66 @@ def update_product(product_id: str, req: ProductUpdate, admin: User = Depends(ge
 @router.delete("/products/{product_id}")
 def delete_product(product_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return product_service.delete_product(product_id, db)
+
+
+@router.get("/coupons", response_model=list[CouponResponse])
+def list_coupons(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    coupons = db.query(Coupon).order_by(Coupon.created_at.desc()).all()
+    return coupons
+
+
+@router.get("/coupons/{coupon_id}", response_model=CouponResponse)
+def get_coupon(coupon_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    coupon = db.query(Coupon).filter(Coupon.id == coupon_id).first()
+    if not coupon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coupon not found")
+    return coupon
+
+
+@router.post("/coupons", response_model=CouponResponse)
+def create_coupon(req: CouponCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    existing = db.query(Coupon).filter(Coupon.code == req.code.upper()).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Coupon code already exists")
+    coupon = Coupon(
+        code=req.code.upper(),
+        type=req.type,
+        value=req.value,
+        min_order_amount=req.min_order_amount,
+        max_discount=req.max_discount,
+        expiry_date=req.expiry_date,
+        usage_limit=req.usage_limit,
+        is_active=req.is_active,
+    )
+    db.add(coupon)
+    db.commit()
+    db.refresh(coupon)
+    return coupon
+
+
+@router.put("/coupons/{coupon_id}", response_model=CouponResponse)
+def update_coupon(coupon_id: str, req: CouponUpdate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    coupon = db.query(Coupon).filter(Coupon.id == coupon_id).first()
+    if not coupon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coupon not found")
+    update_data = req.model_dump(exclude_unset=True)
+    if "code" in update_data:
+        update_data["code"] = update_data["code"].upper()
+    for key, value in update_data.items():
+        setattr(coupon, key, value)
+    db.commit()
+    db.refresh(coupon)
+    return coupon
+
+
+@router.delete("/coupons/{coupon_id}")
+def delete_coupon(coupon_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    coupon = db.query(Coupon).filter(Coupon.id == coupon_id).first()
+    if not coupon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coupon not found")
+    db.delete(coupon)
+    db.commit()
+    return {"message": "Coupon deleted successfully"}
 
 
 @router.get("/categories/{category_id}", response_model=CategoryResponse)

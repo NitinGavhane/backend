@@ -119,6 +119,71 @@ def get_product(product_id: str, db: Session):
     }
 
 
+def get_admin_product(product_id: str, db: Session):
+    pid = _parse_uuid(product_id, "product_id")
+    product = db.query(Product).options(joinedload(Product.category), joinedload(Product.images), joinedload(Product.variants)).filter(Product.id == pid).first()
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    primary_image = next((img.image_url for img in product.images if img.is_primary), (product.images[0].image_url if product.images else None))
+    return {
+        "id": str(product.id),
+        "title": product.title,
+        "sku": product.sku,
+        "price": product.price,
+        "discount_price": product.discount_price,
+        "stock": product.stock,
+        "featured": product.featured,
+        "is_active": product.is_active,
+        "is_replaceable": product.is_replaceable,
+        "is_returnable": product.is_returnable,
+        "category_id": str(product.category_id),
+        "category_name": product.category.name if product.category else None,
+        "primary_image": primary_image,
+        "description": product.description,
+        "brand": product.brand,
+        "gender": product.gender,
+        "gst_percentage": product.gst_percentage,
+        "created_at": product.created_at.isoformat() if product.created_at else None,
+        "updated_at": product.updated_at.isoformat() if product.updated_at else None,
+        "variants": [_variant_to_dict(v) for v in product.variants],
+        "images": [_image_to_dict(img) for img in product.images],
+    }
+
+
+def list_admin_products(db: Session, gender: str | None = None):
+    query = db.query(Product).options(joinedload(Product.category), joinedload(Product.images), joinedload(Product.variants))
+    if gender:
+        query = query.filter(Product.gender == gender)
+    products = query.order_by(Product.created_at.desc()).all()
+    result = []
+    for p in products:
+        primary_image = next((img.image_url for img in p.images if img.is_primary), (p.images[0].image_url if p.images else None))
+        result.append({
+            "id": str(p.id),
+            "title": p.title,
+            "sku": p.sku,
+            "price": p.price,
+            "discount_price": p.discount_price,
+            "stock": p.stock,
+            "featured": p.featured,
+            "is_active": p.is_active,
+            "is_replaceable": p.is_replaceable,
+            "is_returnable": p.is_returnable,
+            "category_id": str(p.category_id),
+            "category_name": p.category.name if p.category else None,
+            "primary_image": primary_image,
+            "description": p.description,
+            "brand": p.brand,
+            "gender": p.gender,
+            "gst_percentage": p.gst_percentage,
+            "created_at": p.created_at.isoformat() if p.created_at else None,
+            "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+            "variants": [_variant_to_dict(v) for v in p.variants],
+            "images": [_image_to_dict(img) for img in p.images],
+        })
+    return result
+
+
 def _parse_uuid(value: str, field: str) -> uuid.UUID:
     try:
         return uuid.UUID(value)
@@ -142,6 +207,8 @@ def create_product(req: ProductCreate, db: Session):
         gst_percentage=req.gst_percentage,
         stock=req.stock,
         featured=req.featured,
+        is_replaceable=req.is_replaceable,
+        is_returnable=req.is_returnable,
         gender=req.gender if req.gender else category.gender,
     )
     db.add(product)
@@ -154,7 +221,7 @@ def create_product(req: ProductCreate, db: Session):
         db.add(image)
     db.commit()
     db.refresh(product)
-    return get_product(str(product.id), db)
+    return get_admin_product(str(product.id), db)
 
 
 def update_product(product_id: str, req: ProductUpdate, db: Session):
@@ -179,7 +246,7 @@ def update_product(product_id: str, req: ProductUpdate, db: Session):
             db.add(image)
     db.commit()
     db.refresh(product)
-    return get_product(str(product.id), db)
+    return get_admin_product(str(product.id), db)
 
 
 def delete_product(product_id: str, db: Session):

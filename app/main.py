@@ -105,6 +105,31 @@ def _run_migrations(db: Session):
         except Exception:
             pass
 
+    product_columns = [c["name"] for c in inspector.get_columns("products")] if "products" in tables else []
+    if "is_replaceable" not in product_columns:
+        db.execute(text("ALTER TABLE products ADD COLUMN is_replaceable BOOLEAN DEFAULT FALSE"))
+        db.execute(text("ALTER TABLE products ADD COLUMN is_returnable BOOLEAN DEFAULT FALSE"))
+        print("Migration: added is_replaceable and is_returnable columns to products")
+
+    if "coupons" not in tables:
+        db.execute(text("""
+            CREATE TABLE coupons (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                code VARCHAR(50) UNIQUE NOT NULL,
+                type VARCHAR(20) NOT NULL DEFAULT 'percentage',
+                value FLOAT NOT NULL,
+                min_order_amount FLOAT,
+                max_discount FLOAT,
+                expiry_date VARCHAR(50),
+                usage_limit INTEGER DEFAULT 100,
+                used_count INTEGER DEFAULT 0,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        """))
+        db.execute(text("CREATE INDEX IF NOT EXISTS ix_coupons_code ON coupons(code)"))
+        print("Migration: created coupons table")
+
     db.commit()
 
 

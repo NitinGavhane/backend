@@ -46,6 +46,8 @@ class ProductCreate(BaseModel):
     gst_percentage: float = 18.0
     stock: int = 0
     featured: bool = False
+    is_replaceable: bool = False
+    is_returnable: bool = False
     gender: str | None = None
     variants: list[ProductVariantCreate] = []
     images: list[ProductImageCreate] = []
@@ -62,6 +64,8 @@ class ProductUpdate(BaseModel):
     gst_percentage: float | None = None
     stock: int | None = None
     featured: bool | None = None
+    is_replaceable: bool | None = None
+    is_returnable: bool | None = None
     gender: str | None = None
     is_active: bool | None = None
     images: list[ProductImageCreate] | None = None
@@ -104,6 +108,33 @@ class ProductListResponse(BaseModel):
     gender: str
     category_name: str | None = None
     primary_image: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class AdminProductResponse(BaseModel):
+    id: str
+    title: str
+    sku: str
+    price: float
+    discount_price: float | None = None
+    stock: int
+    featured: bool
+    is_active: bool
+    is_replaceable: bool = False
+    is_returnable: bool = False
+    category_id: str | None = None
+    category_name: str | None = None
+    primary_image: str | None = None
+    description: str | None = None
+    brand: str | None = None
+    gender: str | None = None
+    gst_percentage: float = 18.0
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    variants: list[ProductVariantResponse] = []
+    images: list[ProductImageResponse] = []
 
     class Config:
         from_attributes = True
