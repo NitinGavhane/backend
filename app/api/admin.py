@@ -271,13 +271,38 @@ def list_admin_categories(gender: str | None = None, admin: User = Depends(get_c
     ]
 
 
+_SPECIFIC_GENDERS = {"men", "women", "kids"}
+
+
+def _resolve_category_gender(name: str | None, requested_gender: str | None, parent_uuid: uuid.UUID | None, db: Session) -> str:
+    """Resolve the effective gender for a category.
+
+    Priority: an explicitly chosen real gender (men/women/kids) > the parent's
+    gender (so a subcategory under "Kids" becomes "kids") > the category's own
+    name when it is a main gender category > "unisex".
+    """
+    if requested_gender and requested_gender.lower() in _SPECIFIC_GENDERS:
+        return requested_gender.lower()
+    if parent_uuid:
+        parent = db.query(Category).filter(Category.id == parent_uuid).first()
+        if parent:
+            if parent.gender and parent.gender.lower() in _SPECIFIC_GENDERS:
+                return parent.gender.lower()
+            if parent.name and parent.name.strip().lower() in _SPECIFIC_GENDERS:
+                return parent.name.strip().lower()
+    if name and name.strip().lower() in _SPECIFIC_GENDERS:
+        return name.strip().lower()
+    return (requested_gender or "unisex").lower()
+
+
 @router.post("/categories", response_model=CategoryResponse)
 def create_category(req: CategoryCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     parent_uuid = uuid.UUID(req.parent_id) if req.parent_id else None
+    resolved_gender = _resolve_category_gender(req.name, req.gender, parent_uuid, db)
     category = Category(
         name=req.name, slug=req.slug,
         description=req.description, image_url=req.image_url,
-        parent_id=parent_uuid, gender=req.gender,
+        parent_id=parent_uuid, gender=resolved_gender,
     )
     db.add(category)
     db.commit()
@@ -305,6 +330,12 @@ def update_category(category_id: str, req: CategoryUpdate, admin: User = Depends
         update_data["parent_id"] = uuid.UUID(update_data["parent_id"]) if update_data["parent_id"] else None
     for key, value in update_data.items():
         setattr(category, key, value)
+    # Re-resolve gender whenever the inputs that determine it may have changed,
+    # so a category moved under a gender parent inherits the right gender.
+    if {"gender", "parent_id", "name"} & set(update_data.keys()):
+        category.gender = _resolve_category_gender(
+            category.name, update_data.get("gender", category.gender), category.parent_id, db
+        )
     db.commit()
     db.refresh(category)
     return {
