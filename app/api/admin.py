@@ -381,8 +381,18 @@ def run_migration(admin: User = Depends(get_current_admin), db: Session = Depend
     if "return_reason" not in order_columns:
         db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
         db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
+    # Product flags required by the Product model. These are added idempotently
+    # with IF NOT EXISTS because the lifespan migration that normally adds them
+    # does not run on serverless (Vercel) cold starts — a missing column here
+    # makes every product query fail with a 500. See _run_migrations in main.py.
+    db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_replaceable BOOLEAN DEFAULT FALSE"))
+    db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_returnable BOOLEAN DEFAULT FALSE"))
+    db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS gender VARCHAR(20) DEFAULT 'unisex'"))
+    db.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS gender VARCHAR(20) DEFAULT 'unisex'"))
+    db.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id UUID REFERENCES categories(id) ON DELETE CASCADE"))
     db.commit()
-    return {"message": "Migration completed successfully", "tables": tables, "user_columns": user_columns, "order_columns": order_columns}
+    product_columns = [c["name"] for c in inspect(engine).get_columns("products")] if "products" in tables else []
+    return {"message": "Migration completed successfully", "tables": tables, "user_columns": user_columns, "order_columns": order_columns, "product_columns": product_columns}
 
 
 @router.get("/debug-db")
