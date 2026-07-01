@@ -38,6 +38,7 @@ def list_products(db: Session, category: str | None = None, search: str | None =
         result.append({
             "id": str(p.id),
             "title": p.title,
+            "sku": p.sku,
             "brand": p.brand,
             "description": p.description,
             "price": p.discount_price if p.discount_price is not None else p.price,
@@ -56,6 +57,8 @@ def list_products(db: Session, category: str | None = None, search: str | None =
             "is_featured": p.featured,
             "is_new": is_new_flag,
             "is_popular": False,
+            "is_replaceable": p.is_replaceable,
+            "is_returnable": p.is_returnable,
         })
     return result
 
@@ -111,6 +114,8 @@ def get_product(product_id: str, db: Session):
         "is_featured": product.featured,
         "is_new": is_new_flag,
         "is_popular": False,
+        "is_replaceable": product.is_replaceable,
+        "is_returnable": product.is_returnable,
         "gradient_colors": [],
         "variants": [_variant_to_dict(v) for v in product.variants],
         "images": [_image_to_dict(img) for img in product.images],
