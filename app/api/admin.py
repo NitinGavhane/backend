@@ -14,6 +14,7 @@ from app.models.user import User
 from app.models.coupon import Coupon
 from app.schemas.admin import AdminDashboardStats, AdminUserResponse
 from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.banner import BannerCreate, BannerResponse, BannerUpdate
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
 from app.schemas.coupon import CouponCreate, CouponResponse, CouponUpdate
 from app.schemas.order import OrderResponse
@@ -28,6 +29,7 @@ from app.schemas.referral import (
 from app.services import order_service, product_service, referral_service
 from app.models.referral import ReferralEarning
 from app.models.category import Category
+from app.models.banner import Banner
 
 router = APIRouter(prefix="/api/v1/admin", tags=["Admin"])
 
@@ -362,6 +364,67 @@ def delete_category(category_id: str, admin: User = Depends(get_current_admin), 
     db.delete(category)
     db.commit()
     return {"message": "Category deleted successfully"}
+
+
+# ── Banners (sliding hero banners) ───────────────────────────────────────────
+
+def _banner_dict(b: Banner) -> dict:
+    return {
+        "id": str(b.id),
+        "title": b.title,
+        "subtitle": b.subtitle,
+        "image_url": b.image_url,
+        "link_url": b.link_url,
+        "link_text": b.link_text,
+        "section": b.section,
+        "sort_order": b.sort_order,
+        "is_active": b.is_active,
+    }
+
+
+@router.get("/banners", response_model=list[BannerResponse])
+def list_admin_banners(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    banners = db.query(Banner).order_by(Banner.sort_order.asc(), Banner.created_at.desc()).all()
+    return [_banner_dict(b) for b in banners]
+
+
+@router.get("/banners/{banner_id}", response_model=BannerResponse)
+def get_admin_banner(banner_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    banner = db.query(Banner).filter(Banner.id == banner_id).first()
+    if not banner:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Banner not found")
+    return _banner_dict(banner)
+
+
+@router.post("/banners", response_model=BannerResponse)
+def create_banner(req: BannerCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    banner = Banner(**req.model_dump())
+    db.add(banner)
+    db.commit()
+    db.refresh(banner)
+    return _banner_dict(banner)
+
+
+@router.put("/banners/{banner_id}", response_model=BannerResponse)
+def update_banner(banner_id: str, req: BannerUpdate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    banner = db.query(Banner).filter(Banner.id == banner_id).first()
+    if not banner:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Banner not found")
+    for key, value in req.model_dump(exclude_unset=True).items():
+        setattr(banner, key, value)
+    db.commit()
+    db.refresh(banner)
+    return _banner_dict(banner)
+
+
+@router.delete("/banners/{banner_id}")
+def delete_banner(banner_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    banner = db.query(Banner).filter(Banner.id == banner_id).first()
+    if not banner:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Banner not found")
+    db.delete(banner)
+    db.commit()
+    return {"message": "Banner deleted successfully"}
 
 
 @router.post("/migrate")
