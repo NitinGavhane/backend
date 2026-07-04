@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class CouponCreate(BaseModel):
@@ -37,6 +37,14 @@ class CouponResponse(BaseModel):
     used_count: int = 0
     is_active: bool
     created_at: datetime | None = None
+
+    # The ORM `id` is a uuid.UUID; Pydantic v2 will not auto-coerce it to str,
+    # so serializing raw ORM rows (as the coupon endpoints do) 500s. Coerce here
+    # so list/get/create/update all return correctly from ORM objects.
+    @field_validator("id", mode="before")
+    @classmethod
+    def _coerce_id_to_str(cls, v):
+        return str(v)
 
     class Config:
         from_attributes = True

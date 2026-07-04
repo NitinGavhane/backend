@@ -21,10 +21,16 @@ if parsed.scheme.endswith("+pg8000") and parsed.hostname != "localhost":
         except Exception:
             pass
 
+# pool_pre_ping validates each pooled connection with a lightweight liveness
+# check before use, so a connection Neon dropped during idle (common on
+# Vercel serverless cold starts) is transparently reconnected instead of
+# surfacing as a 500 on the first request. pool_recycle proactively retires
+# connections older than 5 min, staying under Neon's idle-disconnect window.
+_engine_kwargs = dict(echo=settings.DEBUG, pool_pre_ping=True, pool_recycle=300)
 if _connect_args:
-    engine = create_engine(settings.db_url, echo=settings.DEBUG, connect_args=_connect_args)
+    engine = create_engine(settings.db_url, connect_args=_connect_args, **_engine_kwargs)
 else:
-    engine = create_engine(settings.db_url, echo=settings.DEBUG)
+    engine = create_engine(settings.db_url, **_engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
