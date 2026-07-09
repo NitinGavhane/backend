@@ -63,6 +63,23 @@ def list_products(db: Session, category: str | None = None, search: str | None =
     return result
 
 
+def _gst_breakup(gst_percentage: float | None) -> dict:
+    """Derive the CGST/SGST/IGST split from a product's total GST rate.
+
+    Intra-state sales split the total equally into CGST + SGST; the combined
+    inter-state rate (IGST) equals the full total. The total GST% stays the
+    single source of truth so no extra columns are stored.
+    """
+    total = gst_percentage or 0.0
+    half = round(total / 2, 2)
+    return {
+        "gst_percentage": total,
+        "cgst_percentage": half,
+        "sgst_percentage": half,
+        "igst_percentage": total,
+    }
+
+
 def _variant_to_dict(v):
     return {
         "id": str(v.id),
@@ -109,7 +126,7 @@ def get_product(product_id: str, db: Session):
         "sizes": sizes,
         "colors": colors,
         "gender": product.gender,
-        "gst_percentage": product.gst_percentage,
+        **_gst_breakup(product.gst_percentage),
         "is_active": product.is_active,
         "is_featured": product.featured,
         "is_new": is_new_flag,
@@ -147,7 +164,7 @@ def get_admin_product(product_id: str, db: Session):
         "description": product.description,
         "brand": product.brand,
         "gender": product.gender,
-        "gst_percentage": product.gst_percentage,
+        **_gst_breakup(product.gst_percentage),
         "created_at": product.created_at.isoformat() if product.created_at else None,
         "updated_at": product.updated_at.isoformat() if product.updated_at else None,
         "variants": [_variant_to_dict(v) for v in product.variants],
@@ -180,7 +197,7 @@ def list_admin_products(db: Session, gender: str | None = None):
             "description": p.description,
             "brand": p.brand,
             "gender": p.gender,
-            "gst_percentage": p.gst_percentage,
+            **_gst_breakup(p.gst_percentage),
             "created_at": p.created_at.isoformat() if p.created_at else None,
             "updated_at": p.updated_at.isoformat() if p.updated_at else None,
             "variants": [_variant_to_dict(v) for v in p.variants],

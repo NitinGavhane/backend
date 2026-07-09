@@ -95,6 +95,10 @@ class ProductResponse(BaseModel):
     is_popular: bool = False
     is_replaceable: bool = False
     is_returnable: bool = False
+    gst_percentage: float = 18.0
+    cgst_percentage: float = 0.0
+    sgst_percentage: float = 0.0
+    igst_percentage: float = 0.0
     variants: list[ProductVariantResponse] = []
     images: list[ProductImageResponse] = []
 
@@ -137,6 +141,9 @@ class AdminProductResponse(BaseModel):
     brand: str | None = None
     gender: str | None = None
     gst_percentage: float = 18.0
+    cgst_percentage: float = 0.0
+    sgst_percentage: float = 0.0
+    igst_percentage: float = 0.0
     created_at: datetime | None = None
     updated_at: datetime | None = None
     variants: list[ProductVariantResponse] = []

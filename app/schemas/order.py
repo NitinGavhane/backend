@@ -34,6 +34,9 @@ class OrderResponse(BaseModel):
     order_number: str
     subtotal: float
     gst_amount: float
+    cgst_amount: float = 0.0
+    sgst_amount: float = 0.0
+    igst_amount: float = 0.0
     discount_amount: float
     final_amount: float
     order_status: str

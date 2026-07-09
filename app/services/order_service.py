@@ -124,6 +124,11 @@ def format_order(order: Order) -> dict:
         "order_number": order.order_number,
         "subtotal": order.subtotal,
         "gst_amount": order.gst_amount,
+        # Intra-state split: total GST divided equally into CGST + SGST.
+        # IGST (inter-state combined rate) equals the full GST amount.
+        "cgst_amount": round((order.gst_amount or 0.0) / 2, 2),
+        "sgst_amount": round((order.gst_amount or 0.0) / 2, 2),
+        "igst_amount": round(order.gst_amount or 0.0, 2),
         "discount_amount": order.discount_amount,
         "final_amount": order.final_amount,
         "order_status": order.order_status,
