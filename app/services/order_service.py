@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
+from app.core import gst
 from app.models.cart import CartItem
 from app.models.order import Order, OrderItem
 from app.models.product import Product
@@ -24,7 +25,6 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     subtotal = 0.0
-    total_gst = 0.0
     order_items_data = []
 
     for item_input in req.items:
@@ -35,9 +35,7 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Insufficient stock for {product.title}")
         unit_price = product.discount_price or product.price
         item_subtotal = unit_price * item_input.quantity
-        item_gst = item_subtotal * (product.gst_percentage / 100)
         subtotal += item_subtotal
-        total_gst += item_gst
         order_items_data.append({
             "product_id": product.id,
             "variant_id": item_input.variant_id,
@@ -47,14 +45,22 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
         })
         product.stock -= item_input.quantity
 
-    final_amount = subtotal + total_gst
+    # Place-of-supply GST: intra-state (CGST+SGST) if the customer is in the
+    # seller's state, otherwise inter-state (IGST). Decided from the order's
+    # shipping-address state — the seller (West Bengal) is fixed.
+    subtotal = round(subtotal, 2)
+    breakup = gst.gst_breakup(subtotal, req.shipping_state)
+    final_amount = subtotal + breakup["gst_amount"]
     estimated_delivery = datetime.now(timezone.utc) + timedelta(days=7)
 
     order = Order(
         user_id=user_id,
         order_number=generate_order_number(),
-        subtotal=round(subtotal, 2),
-        gst_amount=round(total_gst, 2),
+        subtotal=subtotal,
+        gst_amount=breakup["gst_amount"],
+        cgst_amount=breakup["cgst_amount"],
+        sgst_amount=breakup["sgst_amount"],
+        igst_amount=breakup["igst_amount"],
         discount_amount=0.0,
         final_amount=round(final_amount, 2),
         order_status="placed",
@@ -117,6 +123,25 @@ def update_order_status(order_id: str, status_str: str, db: Session):
     return format_order(order)
 
 
+def _order_gst_breakup(order: Order) -> dict:
+    """CGST/SGST/IGST amounts stored on the order, with a legacy fallback.
+
+    Orders placed before the split columns existed only have gst_amount; treat
+    those as intra-state and split the total evenly.
+    """
+    cgst = order.cgst_amount or 0.0
+    sgst = order.sgst_amount or 0.0
+    igst = getattr(order, "igst_amount", 0.0) or 0.0
+    if cgst == 0.0 and sgst == 0.0 and igst == 0.0:
+        half = round((order.gst_amount or 0.0) / 2, 2)
+        return {"cgst_amount": half, "sgst_amount": half, "igst_amount": 0.0}
+    return {
+        "cgst_amount": round(cgst, 2),
+        "sgst_amount": round(sgst, 2),
+        "igst_amount": round(igst, 2),
+    }
+
+
 def format_order(order: Order) -> dict:
     return {
         "id": str(order.id),
@@ -124,11 +149,10 @@ def format_order(order: Order) -> dict:
         "order_number": order.order_number,
         "subtotal": order.subtotal,
         "gst_amount": order.gst_amount,
-        # Intra-state split: total GST divided equally into CGST + SGST.
-        # IGST (inter-state combined rate) equals the full GST amount.
-        "cgst_amount": round((order.gst_amount or 0.0) / 2, 2),
-        "sgst_amount": round((order.gst_amount or 0.0) / 2, 2),
-        "igst_amount": round(order.gst_amount or 0.0, 2),
+        # CGST/SGST/IGST are locked in at checkout based on place of supply.
+        # Legacy orders (predating these columns) fall back to an even
+        # intra-state split of the stored total.
+        **_order_gst_breakup(order),
         "discount_amount": order.discount_amount,
         "final_amount": order.final_amount,
         "order_status": order.order_status,

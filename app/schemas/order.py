@@ -13,6 +13,10 @@ class OrderItemInput(BaseModel):
 
 class OrderCreateRequest(BaseModel):
     shipping_address: str
+    # Customer's state (from the selected billing/shipping address). Used to
+    # decide intra-state (CGST+SGST) vs inter-state (IGST) GST. Optional so old
+    # clients keep working (treated as intra-state when absent).
+    shipping_state: str | None = None
     items: list[OrderItemInput]
 
 

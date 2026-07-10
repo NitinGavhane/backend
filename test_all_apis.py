@@ -183,7 +183,6 @@ def main():
             "sku": sku,
             "price": 999.0,
             "discount_price": 799.0,
-            "gst_percentage": 18.0,
             "stock": 100,
             "featured": True,
             "variants": [
@@ -223,7 +222,6 @@ def main():
             "brand": "TestBrand",
             "sku": sku2,
             "price": 500.0,
-            "gst_percentage": 18.0,
             "stock": 50,
             "featured": False,
             "variants": [],

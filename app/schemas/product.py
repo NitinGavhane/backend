@@ -43,7 +43,6 @@ class ProductCreate(BaseModel):
     sku: str
     price: float
     discount_price: float | None = None
-    gst_percentage: float = 18.0
     stock: int = 0
     featured: bool = False
     is_replaceable: bool = False
@@ -61,7 +60,6 @@ class ProductUpdate(BaseModel):
     sku: str | None = None
     price: float | None = None
     discount_price: float | None = None
-    gst_percentage: float | None = None
     stock: int | None = None
     featured: bool | None = None
     is_replaceable: bool | None = None
@@ -95,10 +93,9 @@ class ProductResponse(BaseModel):
     is_popular: bool = False
     is_replaceable: bool = False
     is_returnable: bool = False
-    gst_percentage: float = 18.0
-    cgst_percentage: float = 0.0
-    sgst_percentage: float = 0.0
-    igst_percentage: float = 0.0
+    cgst_percentage: float = 9.0
+    sgst_percentage: float = 9.0
+    igst_percentage: float = 18.0
     variants: list[ProductVariantResponse] = []
     images: list[ProductImageResponse] = []
 
@@ -140,10 +137,6 @@ class AdminProductResponse(BaseModel):
     description: str | None = None
     brand: str | None = None
     gender: str | None = None
-    gst_percentage: float = 18.0
-    cgst_percentage: float = 0.0
-    sgst_percentage: float = 0.0
-    igst_percentage: float = 0.0
     created_at: datetime | None = None
     updated_at: datetime | None = None
     variants: list[ProductVariantResponse] = []

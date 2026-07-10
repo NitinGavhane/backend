@@ -111,6 +111,17 @@ def _run_migrations(db: Session):
         db.execute(text("ALTER TABLE products ADD COLUMN is_returnable BOOLEAN DEFAULT FALSE"))
         print("Migration: added is_replaceable and is_returnable columns to products")
 
+    # GST is fixed (not per product): CGST+SGST intra-state, IGST inter-state,
+    # decided at checkout from the customer's state. Drop any per-product GST
+    # columns and store the split amounts on the order instead.
+    db.execute(text("ALTER TABLE products DROP COLUMN IF EXISTS gst_percentage"))
+    db.execute(text("ALTER TABLE products DROP COLUMN IF EXISTS cgst_percentage"))
+    db.execute(text("ALTER TABLE products DROP COLUMN IF EXISTS sgst_percentage"))
+    db.execute(text("ALTER TABLE products DROP COLUMN IF EXISTS igst_percentage"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS cgst_amount FLOAT DEFAULT 0.0"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS sgst_amount FLOAT DEFAULT 0.0"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS igst_amount FLOAT DEFAULT 0.0"))
+
     if "coupons" not in tables:
         db.execute(text("""
             CREATE TABLE coupons (

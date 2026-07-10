@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
+from app.core import gst
 from app.models.category import Category
 from app.models.product import Product, ProductImage, ProductVariant
 from app.schemas.product import ProductCreate, ProductUpdate
@@ -63,20 +64,15 @@ def list_products(db: Session, category: str | None = None, search: str | None =
     return result
 
 
-def _gst_breakup(gst_percentage: float | None) -> dict:
-    """Derive the CGST/SGST/IGST split from a product's total GST rate.
-
-    Intra-state sales split the total equally into CGST + SGST; the combined
-    inter-state rate (IGST) equals the full total. The total GST% stays the
-    single source of truth so no extra columns are stored.
+def _gst_fields() -> dict:
+    """Fixed GST rates shown to buyers. Nothing is configured per product; the
+    seller is in West Bengal, so browse-time display uses the intra-state split
+    (CGST + SGST). The inter-state IGST rate is exposed for reference/invoicing.
     """
-    total = gst_percentage or 0.0
-    half = round(total / 2, 2)
     return {
-        "gst_percentage": total,
-        "cgst_percentage": half,
-        "sgst_percentage": half,
-        "igst_percentage": total,
+        "cgst_percentage": gst.CGST_PERCENTAGE,
+        "sgst_percentage": gst.SGST_PERCENTAGE,
+        "igst_percentage": gst.IGST_PERCENTAGE,
     }
 
 
@@ -126,7 +122,7 @@ def get_product(product_id: str, db: Session):
         "sizes": sizes,
         "colors": colors,
         "gender": product.gender,
-        **_gst_breakup(product.gst_percentage),
+        **_gst_fields(),
         "is_active": product.is_active,
         "is_featured": product.featured,
         "is_new": is_new_flag,
@@ -164,7 +160,6 @@ def get_admin_product(product_id: str, db: Session):
         "description": product.description,
         "brand": product.brand,
         "gender": product.gender,
-        **_gst_breakup(product.gst_percentage),
         "created_at": product.created_at.isoformat() if product.created_at else None,
         "updated_at": product.updated_at.isoformat() if product.updated_at else None,
         "variants": [_variant_to_dict(v) for v in product.variants],
@@ -197,7 +192,6 @@ def list_admin_products(db: Session, gender: str | None = None):
             "description": p.description,
             "brand": p.brand,
             "gender": p.gender,
-            **_gst_breakup(p.gst_percentage),
             "created_at": p.created_at.isoformat() if p.created_at else None,
             "updated_at": p.updated_at.isoformat() if p.updated_at else None,
             "variants": [_variant_to_dict(v) for v in p.variants],
@@ -226,7 +220,6 @@ def create_product(req: ProductCreate, db: Session):
         sku=req.sku,
         price=req.price,
         discount_price=req.discount_price,
-        gst_percentage=req.gst_percentage,
         stock=req.stock,
         featured=req.featured,
         is_replaceable=req.is_replaceable,

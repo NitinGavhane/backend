@@ -59,10 +59,10 @@ for c in db.query(Category).order_by(Category.created_at.desc()).all():
 HTML += get_table("Categories", cols, rows)
 
 # ── Products ──
-cols = ["ID (short)", "Title", "SKU", "Price", "Discount", "GST%", "Stock", "Active"]
+cols = ["ID (short)", "Title", "SKU", "Price", "Discount", "Stock", "Active"]
 rows = []
 for p in db.query(Product).order_by(Product.created_at.desc()).all():
-    rows.append((str(p.id)[:8]+"..", p.title, p.sku, f"${p.price:.2f}", f"${p.discount_price:.2f}" if p.discount_price else "—", f"{p.gst_percentage}%", p.stock, f"<span class='badge badge-{str(p.is_active).lower()}'>{p.is_active}</span>"))
+    rows.append((str(p.id)[:8]+"..", p.title, p.sku, f"${p.price:.2f}", f"${p.discount_price:.2f}" if p.discount_price else "—", p.stock, f"<span class='badge badge-{str(p.is_active).lower()}'>{p.is_active}</span>"))
 HTML += get_table("Products", cols, rows)
 
 # ── Orders ──

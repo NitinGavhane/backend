@@ -16,6 +16,9 @@ class Order(Base):
     order_number: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     subtotal: Mapped[float] = mapped_column(Float, default=0.0)
     gst_amount: Mapped[float] = mapped_column(Float, default=0.0)
+    cgst_amount: Mapped[float] = mapped_column(Float, default=0.0)
+    sgst_amount: Mapped[float] = mapped_column(Float, default=0.0)
+    igst_amount: Mapped[float] = mapped_column(Float, default=0.0)
     discount_amount: Mapped[float] = mapped_column(Float, default=0.0)
     final_amount: Mapped[float] = mapped_column(Float, default=0.0)
     order_status: Mapped[str] = mapped_column(

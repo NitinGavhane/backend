@@ -451,6 +451,15 @@ def run_migration(admin: User = Depends(get_current_admin), db: Session = Depend
     db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_replaceable BOOLEAN DEFAULT FALSE"))
     db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_returnable BOOLEAN DEFAULT FALSE"))
     db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS gender VARCHAR(20) DEFAULT 'unisex'"))
+    # GST is fixed (not per product): drop any per-product GST columns and store
+    # the CGST/SGST/IGST split on the order (set at checkout by place of supply).
+    db.execute(text("ALTER TABLE products DROP COLUMN IF EXISTS gst_percentage"))
+    db.execute(text("ALTER TABLE products DROP COLUMN IF EXISTS cgst_percentage"))
+    db.execute(text("ALTER TABLE products DROP COLUMN IF EXISTS sgst_percentage"))
+    db.execute(text("ALTER TABLE products DROP COLUMN IF EXISTS igst_percentage"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS cgst_amount FLOAT DEFAULT 0.0"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS sgst_amount FLOAT DEFAULT 0.0"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS igst_amount FLOAT DEFAULT 0.0"))
     db.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS gender VARCHAR(20) DEFAULT 'unisex'"))
     db.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id UUID REFERENCES categories(id) ON DELETE CASCADE"))
     db.commit()
