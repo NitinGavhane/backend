@@ -1,17 +1,15 @@
 import io
-import os
+import logging
 import uuid
-from pathlib import Path
-
-from fastapi import UploadFile
+from datetime import datetime, timezone
+from typing import NamedTuple
+from urllib.parse import unquote, urlparse
 
 from app.core.config import settings
 
-UPLOAD_DIR = Path("static/uploads/categories")
-ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+logger = logging.getLogger(__name__)
 
-# Banner image upload rules (kept in sync with the specs shown in the Admin app).
+# Image upload rules (kept in sync with the specs shown in the Admin app).
 IMAGE_MAX_SIZE = 5 * 1024 * 1024  # 5 MB
 IMAGE_MIN_WIDTH = 600
 IMAGE_MIN_HEIGHT = 400
@@ -22,9 +20,86 @@ _IMAGE_FORMATS = {
     "WEBP": (".webp", "image/webp"),
 }
 
+# S3 key prefixes an admin may upload into. Anything else is rejected so a
+# client cannot write to arbitrary locations in the bucket.
+IMAGE_PREFIXES = ("banners", "products", "categories")
+DEFAULT_PREFIX = "banners"
 
-def upload_image_to_s3(contents: bytes, filename: str | None, content_type: str | None) -> str:
-    """Validate an uploaded image and store it in S3, returning its public URL.
+# Values stored in the *.storage_type columns.
+STORAGE_S3 = "s3"
+STORAGE_EXTERNAL = "external"
+
+
+class StoredImage(NamedTuple):
+    """An image persisted to S3: its public URL and the bucket key."""
+
+    url: str
+    key: str
+
+
+def _public_base() -> str:
+    """Base URL images are served from (a CDN if configured, else raw S3)."""
+    if settings.S3_PUBLIC_BASE_URL:
+        return settings.S3_PUBLIC_BASE_URL.rstrip("/")
+    return f"https://{settings.S3_UPLOAD_BUCKET}.s3.{settings.AWS_REGION}.amazonaws.com"
+
+
+def s3_url_bases() -> list[str]:
+    """Every base URL that identifies an object in our own bucket.
+
+    Both forms are recognised because rows written before S3_PUBLIC_BASE_URL was
+    configured hold direct S3 URLs, while newer rows hold CDN URLs.
+    """
+    bases = []
+    if settings.S3_UPLOAD_BUCKET:
+        bases.append(f"https://{settings.S3_UPLOAD_BUCKET}.s3.{settings.AWS_REGION}.amazonaws.com")
+        bases.append(f"https://{settings.S3_UPLOAD_BUCKET}.s3.amazonaws.com")
+    if settings.S3_PUBLIC_BASE_URL:
+        bases.append(settings.S3_PUBLIC_BASE_URL.rstrip("/"))
+    # Longest first so a CDN base that shares a host with another entry wins.
+    return sorted(set(bases), key=len, reverse=True)
+
+
+def s3_key_for_url(image_url: str | None) -> str | None:
+    """Return the bucket key if image_url points at our own bucket, else None.
+
+    The key is derived from the URL rather than trusted from the client, so a
+    single rule classifies newly-uploaded images, legacy rows, and images an
+    admin pasted in as external links.
+    """
+    if not image_url:
+        return None
+    url = image_url.strip()
+    for base in s3_url_bases():
+        if url.startswith(base + "/"):
+            key = unquote(urlparse(url[len(base) + 1 :]).path)
+            return key or None
+    return None
+
+
+def image_metadata(image_url: str | None) -> dict:
+    """Derive the stored image metadata columns for an image URL.
+
+    Returns storage_type ('s3' or 'external'), file_name (the S3 key, or None
+    for external URLs) and uploaded_at.
+    """
+    if not image_url or not image_url.strip():
+        return {"storage_type": None, "file_name": None, "uploaded_at": None}
+    key = s3_key_for_url(image_url)
+    return {
+        "storage_type": STORAGE_S3 if key else STORAGE_EXTERNAL,
+        "file_name": key,
+        "uploaded_at": datetime.now(timezone.utc),
+    }
+
+
+def upload_image_to_s3(
+    contents: bytes,
+    filename: str | None,
+    content_type: str | None,
+    prefix: str = DEFAULT_PREFIX,
+) -> StoredImage:
+    """Validate an uploaded image and store it in S3.
 
     Validation (also enforced client-side in the Admin app): allowed formats
     JPG/PNG/WebP, max 5 MB, minimum 600x400. Raises ValueError on any rule
@@ -32,6 +107,9 @@ def upload_image_to_s3(contents: bytes, filename: str | None, content_type: str 
     """
     if not settings.S3_UPLOAD_BUCKET:
         raise ValueError("Image upload is not configured on the server (missing S3 bucket)")
+
+    if prefix not in IMAGE_PREFIXES:
+        raise ValueError(f"Unsupported upload folder. Allowed folders: {', '.join(IMAGE_PREFIXES)}")
 
     if len(contents) > IMAGE_MAX_SIZE:
         raise ValueError("File too large. Maximum size is 5 MB")
@@ -59,7 +137,7 @@ def upload_image_to_s3(contents: bytes, filename: str | None, content_type: str 
         )
 
     ext, ct = _IMAGE_FORMATS[fmt]
-    key = f"banners/{uuid.uuid4().hex}{ext}"
+    key = f"{prefix}/{uuid.uuid4().hex}{ext}"
 
     # boto3 picks up credentials from the EC2 instance role at runtime.
     import boto3
@@ -73,41 +151,31 @@ def upload_image_to_s3(contents: bytes, filename: str | None, content_type: str 
         CacheControl="public, max-age=31536000",
     )
 
-    if settings.S3_PUBLIC_BASE_URL:
-        base = settings.S3_PUBLIC_BASE_URL.rstrip("/")
-    else:
-        base = f"https://{settings.S3_UPLOAD_BUCKET}.s3.{settings.AWS_REGION}.amazonaws.com"
-    return f"{base}/{key}"
+    return StoredImage(url=f"{_public_base()}/{key}", key=key)
 
 
-def ensure_upload_dir():
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+def delete_image_from_s3(image_url: str | None) -> bool:
+    """Best-effort delete of the S3 object behind image_url.
+
+    External URLs are left alone (nothing of ours to delete). S3 failures are
+    logged and swallowed: an unreachable bucket must never block the admin from
+    deleting the database row, at the cost of a possible orphaned object.
+    Returns True only when an object was actually deleted.
+    """
+    key = s3_key_for_url(image_url)
+    if not key or not settings.S3_UPLOAD_BUCKET:
+        return False
+    try:
+        import boto3
+
+        s3 = boto3.client("s3", region_name=settings.AWS_REGION)
+        s3.delete_object(Bucket=settings.S3_UPLOAD_BUCKET, Key=key)
+        return True
+    except Exception:
+        logger.exception("Failed to delete S3 object %s; leaving it orphaned", key)
+        return False
 
 
-def save_category_image(file: UploadFile) -> str:
-    ensure_upload_dir()
-
-    ext = Path(file.filename).suffix.lower() if file.filename else ".jpg"
-    if ext not in ALLOWED_EXTENSIONS:
-        raise ValueError(f"Unsupported file type: {ext}. Allowed: {ALLOWED_EXTENSIONS}")
-
-    contents = file.read()
-    if len(contents) > MAX_FILE_SIZE:
-        raise ValueError("File too large. Maximum size is 5 MB")
-
-    filename = f"{uuid.uuid4().hex}{ext}"
-    filepath = UPLOAD_DIR / filename
-
-    with open(filepath, "wb") as f:
-        f.write(contents)
-
-    return f"/static/uploads/categories/{filename}"
-
-
-def delete_category_image(image_url: str | None):
-    if not image_url:
-        return
-    relative_path = image_url.lstrip("/")
-    filepath = Path(relative_path)
-    if filepath.exists():
-        filepath.unlink()
+def delete_images_from_s3(image_urls) -> int:
+    """Best-effort delete of several images. Returns the number removed."""
+    return sum(1 for url in image_urls if delete_image_from_s3(url))

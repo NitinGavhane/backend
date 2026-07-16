@@ -30,6 +30,10 @@ class ProductImageResponse(BaseModel):
     id: str
     image_url: str
     is_primary: bool
+    # Derived server-side from image_url; not accepted on create/update.
+    storage_type: str | None = None
+    file_name: str | None = None
+    uploaded_at: datetime | None = None
 
     class Config:
         from_attributes = True

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
+from app.core import storage
 from app.core.config import settings
 from app.core.database import Base, get_db, engine
 from app.core.deps import get_current_admin
@@ -233,22 +234,29 @@ def delete_coupon(coupon_id: str, admin: User = Depends(get_current_admin), db: 
     return {"message": "Coupon deleted successfully"}
 
 
+def _category_dict(c: Category) -> dict:
+    return {
+        "id": str(c.id),
+        "name": c.name,
+        "slug": c.slug,
+        "description": c.description,
+        "image_url": c.image_url,
+        "storage_type": c.storage_type,
+        "file_name": c.file_name,
+        "uploaded_at": c.uploaded_at,
+        "parent_id": str(c.parent_id) if c.parent_id else None,
+        "gender": c.gender,
+        "is_active": c.is_active,
+        "created_at": c.created_at,
+    }
+
+
 @router.get("/categories/{category_id}", response_model=CategoryResponse)
 def get_admin_category(category_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
-    return {
-        "id": str(category.id),
-        "name": category.name,
-        "slug": category.slug,
-        "description": category.description,
-        "image_url": category.image_url,
-        "parent_id": str(category.parent_id) if category.parent_id else None,
-        "gender": category.gender,
-        "is_active": category.is_active,
-        "created_at": category.created_at,
-    }
+    return _category_dict(category)
 
 
 @router.get("/categories", response_model=list[CategoryResponse])
@@ -257,20 +265,7 @@ def list_admin_categories(gender: str | None = None, admin: User = Depends(get_c
     if gender:
         query = query.filter(Category.gender == gender)
     categories = query.order_by(Category.created_at.desc()).all()
-    return [
-        {
-            "id": str(c.id),
-            "name": c.name,
-            "slug": c.slug,
-            "description": c.description,
-            "image_url": c.image_url,
-            "parent_id": str(c.parent_id) if c.parent_id else None,
-            "gender": c.gender,
-            "is_active": c.is_active,
-            "created_at": c.created_at,
-        }
-        for c in categories
-    ]
+    return [_category_dict(c) for c in categories]
 
 
 _SPECIFIC_GENDERS = {"men", "women", "kids"}
@@ -305,21 +300,12 @@ def create_category(req: CategoryCreate, admin: User = Depends(get_current_admin
         name=req.name, slug=req.slug,
         description=req.description, image_url=req.image_url,
         parent_id=parent_uuid, gender=resolved_gender,
+        **storage.image_metadata(req.image_url),
     )
     db.add(category)
     db.commit()
     db.refresh(category)
-    return {
-        "id": str(category.id),
-        "name": category.name,
-        "slug": category.slug,
-        "description": category.description,
-        "image_url": category.image_url,
-        "parent_id": str(category.parent_id) if category.parent_id else None,
-        "gender": category.gender,
-        "is_active": category.is_active,
-        "created_at": category.created_at,
-    }
+    return _category_dict(category)
 
 
 @router.put("/categories/{category_id}", response_model=CategoryResponse)
@@ -330,6 +316,12 @@ def update_category(category_id: str, req: CategoryUpdate, admin: User = Depends
     update_data = req.model_dump(exclude_unset=True)
     if "parent_id" in update_data:
         update_data["parent_id"] = uuid.UUID(update_data["parent_id"]) if update_data["parent_id"] else None
+    # Only re-derive metadata when the image actually changes, so an unrelated
+    # edit (name, gender) doesn't reset uploaded_at.
+    replaced_image = None
+    if "image_url" in update_data and update_data["image_url"] != category.image_url:
+        replaced_image = category.image_url
+        update_data.update(storage.image_metadata(update_data["image_url"]))
     for key, value in update_data.items():
         setattr(category, key, value)
     # Re-resolve gender whenever the inputs that determine it may have changed,
@@ -340,17 +332,9 @@ def update_category(category_id: str, req: CategoryUpdate, admin: User = Depends
         )
     db.commit()
     db.refresh(category)
-    return {
-        "id": str(category.id),
-        "name": category.name,
-        "slug": category.slug,
-        "description": category.description,
-        "image_url": category.image_url,
-        "parent_id": str(category.parent_id) if category.parent_id else None,
-        "gender": category.gender,
-        "is_active": category.is_active,
-        "created_at": category.created_at,
-    }
+    # Drop the old object only after the new URL is safely committed.
+    storage.delete_image_from_s3(replaced_image)
+    return _category_dict(category)
 
 
 @router.delete("/categories/{category_id}")
@@ -359,10 +343,13 @@ def delete_category(category_id: str, admin: User = Depends(get_current_admin), 
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
     children = db.query(Category).filter(Category.parent_id == category_id).all()
+    # Children are deleted alongside the parent, so their images go too.
+    image_urls = [c.image_url for c in [category, *children]]
     for child in children:
         db.delete(child)
     db.delete(category)
     db.commit()
+    storage.delete_images_from_s3(image_urls)
     return {"message": "Category deleted successfully"}
 
 
@@ -374,6 +361,9 @@ def _banner_dict(b: Banner) -> dict:
         "title": b.title,
         "subtitle": b.subtitle,
         "image_url": b.image_url,
+        "storage_type": b.storage_type,
+        "file_name": b.file_name,
+        "uploaded_at": b.uploaded_at,
         "link_url": b.link_url,
         "link_text": b.link_text,
         "section": b.section,
@@ -398,7 +388,7 @@ def get_admin_banner(banner_id: str, admin: User = Depends(get_current_admin), d
 
 @router.post("/banners", response_model=BannerResponse)
 def create_banner(req: BannerCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
-    banner = Banner(**req.model_dump())
+    banner = Banner(**req.model_dump(), **storage.image_metadata(req.image_url))
     db.add(banner)
     db.commit()
     db.refresh(banner)
@@ -410,10 +400,19 @@ def update_banner(banner_id: str, req: BannerUpdate, admin: User = Depends(get_c
     banner = db.query(Banner).filter(Banner.id == banner_id).first()
     if not banner:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Banner not found")
-    for key, value in req.model_dump(exclude_unset=True).items():
+    update_data = req.model_dump(exclude_unset=True)
+    # Only re-derive metadata when the image actually changes, so an unrelated
+    # edit (title, sort order) doesn't reset uploaded_at.
+    replaced_image = None
+    if "image_url" in update_data and update_data["image_url"] != banner.image_url:
+        replaced_image = banner.image_url
+        update_data.update(storage.image_metadata(update_data["image_url"]))
+    for key, value in update_data.items():
         setattr(banner, key, value)
     db.commit()
     db.refresh(banner)
+    # Drop the old object only after the new URL is safely committed.
+    storage.delete_image_from_s3(replaced_image)
     return _banner_dict(banner)
 
 
@@ -422,8 +421,10 @@ def delete_banner(banner_id: str, admin: User = Depends(get_current_admin), db: 
     banner = db.query(Banner).filter(Banner.id == banner_id).first()
     if not banner:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Banner not found")
+    image_url = banner.image_url
     db.delete(banner)
     db.commit()
+    storage.delete_image_from_s3(image_url)
     return {"message": "Banner deleted successfully"}
 
 

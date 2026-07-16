@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
-from app.core import gst
+from app.core import gst, storage
 from app.models.category import Category
 from app.models.product import Product, ProductImage, ProductVariant
 from app.schemas.product import ProductCreate, ProductUpdate
@@ -91,6 +91,9 @@ def _image_to_dict(img):
         "id": str(img.id),
         "image_url": img.image_url,
         "is_primary": img.is_primary,
+        "storage_type": img.storage_type,
+        "file_name": img.file_name,
+        "uploaded_at": img.uploaded_at,
     }
 
 
@@ -232,7 +235,12 @@ def create_product(req: ProductCreate, db: Session):
         variant = ProductVariant(product_id=product.id, size=v.size, color=v.color, stock=v.stock, price=v.price)
         db.add(variant)
     for img in req.images:
-        image = ProductImage(product_id=product.id, image_url=img.image_url, is_primary=img.is_primary)
+        image = ProductImage(
+            product_id=product.id,
+            image_url=img.image_url,
+            is_primary=img.is_primary,
+            **storage.image_metadata(img.image_url),
+        )
         db.add(image)
     db.commit()
     db.refresh(product)
@@ -253,14 +261,33 @@ def update_product(product_id: str, req: ProductUpdate, db: Session):
     images_data = update_data.pop("images", None)
     for key, value in update_data.items():
         setattr(product, key, value)
+    removed_images = []
     if images_data is not None:
+        # The image list is replaced wholesale, so only the images that are gone
+        # from the new list get their S3 objects dropped — a URL the admin kept
+        # is re-inserted below and must keep its object.
+        kept_urls = {img_data["image_url"] for img_data in images_data}
+        removed_images = [img.image_url for img in product.images if img.image_url not in kept_urls]
+        # Carry the original upload time across a rewrite of an unchanged image.
+        uploaded_at_by_url = {img.image_url: img.uploaded_at for img in product.images}
         for img in product.images:
             db.delete(img)
+        db.flush()
         for img_data in images_data:
-            image = ProductImage(product_id=product.id, image_url=img_data["image_url"], is_primary=img_data.get("is_primary", False))
+            url = img_data["image_url"]
+            metadata = storage.image_metadata(url)
+            if uploaded_at_by_url.get(url):
+                metadata["uploaded_at"] = uploaded_at_by_url[url]
+            image = ProductImage(
+                product_id=product.id,
+                image_url=url,
+                is_primary=img_data.get("is_primary", False),
+                **metadata,
+            )
             db.add(image)
     db.commit()
     db.refresh(product)
+    storage.delete_images_from_s3(removed_images)
     return get_admin_product(str(product.id), db)
 
 
@@ -269,6 +296,8 @@ def delete_product(product_id: str, db: Session):
     product = db.query(Product).filter(Product.id == pid).first()
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    image_urls = [img.image_url for img in product.images]
     db.delete(product)
     db.commit()
+    storage.delete_images_from_s3(image_urls)
     return {"message": "Product deleted successfully"}

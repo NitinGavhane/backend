@@ -9,10 +9,52 @@ from sqlalchemy.orm import Session
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 from app.api import admin, addresses, auth, blog, cart, categories, home, orders, payment_methods, payments, products, referral, reviews, uploads, wallet, wishlist
+from app.core import storage
 from app.core.config import settings
 from app.core.database import SessionLocal, engine, ensure_tables
 from app.core.security import hash_password
 from app.models.user import User
+
+
+def _backfill_image_storage(db: Session):
+    """Classify pre-existing image rows that predate the storage_type column.
+
+    A row is ours when its URL sits under one of our bucket's base URLs; the
+    remainder of the URL is the S3 key. Everything else is a pasted external
+    link. uploaded_at stays NULL for these rows — the original upload time was
+    never recorded and inventing one would be worse than admitting we lack it.
+    """
+    bases = storage.s3_url_bases()
+    if not bases:
+        # Without the bucket config every URL would look external, and the
+        # storage_type IS NULL guard means that verdict would stick. Leave the
+        # rows unclassified and retry on a boot that has the S3 env set.
+        print("Migration: skipped image backfill (S3 bucket not configured)")
+        return
+
+    for image_table in ("banners", "product_images", "categories"):
+        for base in bases:
+            prefix = base + "/"
+            # :cut is cast explicitly — an untyped bind would make Postgres pick
+            # substring(text FROM text), the regex overload, which returns NULL.
+            db.execute(
+                text(f"""
+                    UPDATE {image_table}
+                    SET storage_type = 's3', file_name = substring(image_url from cast(:cut as integer))
+                    WHERE storage_type IS NULL
+                      AND image_url IS NOT NULL
+                      AND left(image_url, cast(:plen as integer)) = :prefix
+                """),
+                {"cut": len(prefix) + 1, "plen": len(prefix), "prefix": prefix},
+            )
+        db.execute(
+            text(f"""
+                UPDATE {image_table}
+                SET storage_type = 'external'
+                WHERE storage_type IS NULL AND image_url IS NOT NULL
+            """)
+        )
+    print("Migration: backfilled image storage_type/file_name")
 
 
 def _run_migrations(db: Session):
@@ -145,6 +187,15 @@ def _run_migrations(db: Session):
         print("Migration: created coupons table")
 
     db.execute(text("ALTER TABLE payments ADD COLUMN IF NOT EXISTS gateway_order_id VARCHAR(255)"))
+
+    # Image provenance: where each image lives, so S3-hosted ones can be removed
+    # from the bucket when deleted while pasted external URLs are only unlinked.
+    for image_table in ("banners", "product_images", "categories"):
+        db.execute(text(f"ALTER TABLE {image_table} ADD COLUMN IF NOT EXISTS storage_type VARCHAR(16)"))
+        db.execute(text(f"ALTER TABLE {image_table} ADD COLUMN IF NOT EXISTS file_name VARCHAR(255)"))
+        db.execute(text(f"ALTER TABLE {image_table} ADD COLUMN IF NOT EXISTS uploaded_at TIMESTAMP WITH TIME ZONE"))
+    db.commit()
+    _backfill_image_storage(db)
 
     db.commit()
 

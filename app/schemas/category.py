@@ -28,6 +28,10 @@ class CategoryResponse(BaseModel):
     slug: str
     description: str | None = None
     image_url: str | None = None
+    # Derived server-side from image_url; not accepted on create/update.
+    storage_type: str | None = None
+    file_name: str | None = None
+    uploaded_at: datetime | None = None
     parent_id: str | None = None
     gender: str
     is_active: bool

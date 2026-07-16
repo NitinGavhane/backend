@@ -53,5 +53,9 @@ class ProductImage(Base):
     product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False)
     image_url: Mapped[str] = mapped_column(String(500), nullable=False)
     is_primary: Mapped[bool] = mapped_column(Boolean, default=False)
+    # See Banner.storage_type — same convention.
+    storage_type: Mapped[str] = mapped_column(String(16), nullable=True)
+    file_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     product = relationship("Product", back_populates="images")

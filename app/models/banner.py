@@ -15,6 +15,11 @@ class Banner(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=True)
     subtitle: Mapped[str] = mapped_column(String(255), nullable=True)
     image_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    # How image_url is hosted: "s3" (uploaded to our bucket, file_name holds the
+    # key so it can be deleted) or "external" (a pasted third-party URL).
+    storage_type: Mapped[str] = mapped_column(String(16), nullable=True)
+    file_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     link_url: Mapped[str] = mapped_column(String(500), nullable=True)
     link_text: Mapped[str] = mapped_column(String(100), nullable=True)
     section: Mapped[str] = mapped_column(String(50), default="hero")

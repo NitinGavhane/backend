@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -6,6 +8,10 @@ class BannerResponse(BaseModel):
     title: str | None = None
     subtitle: str | None = None
     image_url: str
+    # Derived server-side from image_url; not accepted on create/update.
+    storage_type: str | None = None
+    file_name: str | None = None
+    uploaded_at: datetime | None = None
     link_url: str | None = None
     link_text: str | None = None
     section: str
