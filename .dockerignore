@@ -1,0 +1,20 @@
+# Keep the image small and never bake secrets or local cruft into it.
+.env
+.env.*
+.git
+.gitignore
+.vercel
+venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.log
+server_err.log
+server_out.log
+test_*.py
+db_viewer.py
+check_email.py
+*.html
+*.txt
+!requirements.txt
+static/uploads/**

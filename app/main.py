@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
-from app.api import admin, addresses, auth, blog, cart, categories, home, orders, payment_methods, payments, products, referral, reviews, wallet, wishlist
+from app.api import admin, addresses, auth, blog, cart, categories, home, orders, payment_methods, payments, products, referral, reviews, uploads, wallet, wishlist
 from app.core.config import settings
 from app.core.database import SessionLocal, engine, ensure_tables
 from app.core.security import hash_password
@@ -96,14 +96,17 @@ def _run_migrations(db: Session):
         print("Migration: added referral tracking columns to referral_earnings")
 
     if referral_earnings_exists:
-        try:
-            db.execute(text("ALTER TYPE reward_status ADD VALUE 'approved'"))
-        except Exception:
-            pass
-        try:
-            db.execute(text("ALTER TYPE reward_status ADD VALUE 'rejected'"))
-        except Exception:
-            pass
+        # ALTER TYPE ... ADD VALUE errors if the label already exists and, when
+        # it does, poisons the surrounding transaction ("current transaction is
+        # aborted") so every later migration statement is skipped. Run each in
+        # its own committed transaction and roll back on failure.
+        db.commit()
+        for _val in ("approved", "rejected"):
+            try:
+                db.execute(text(f"ALTER TYPE reward_status ADD VALUE IF NOT EXISTS '{_val}'"))
+                db.commit()
+            except Exception:
+                db.rollback()
 
     product_columns = [c["name"] for c in inspector.get_columns("products")] if "products" in tables else []
     if "is_replaceable" not in product_columns:
@@ -140,6 +143,8 @@ def _run_migrations(db: Session):
         """))
         db.execute(text("CREATE INDEX IF NOT EXISTS ix_coupons_code ON coupons(code)"))
         print("Migration: created coupons table")
+
+    db.execute(text("ALTER TABLE payments ADD COLUMN IF NOT EXISTS gateway_order_id VARCHAR(255)"))
 
     db.commit()
 
@@ -197,10 +202,16 @@ app = FastAPI(
     ],
 )
 
+# CORS_ORIGINS may be a single origin or a comma-separated list (e.g. the
+# admin and shop CloudFront URLs). Browsers reject credentialed requests when
+# the allowed origin is "*", so when a wildcard is configured we disable
+# credentials and echo any origin instead of sending a broken combination.
+_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+_allow_all = "*" in _origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.CORS_ORIGINS],
-    allow_credentials=True,
+    allow_origins=["*"] if _allow_all else _origins,
+    allow_credentials=not _allow_all,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -220,6 +231,7 @@ app.include_router(reviews.router)
 app.include_router(blog.router)
 app.include_router(home.router)
 app.include_router(payment_methods.router)
+app.include_router(uploads.router)
 
 
 @app.get("/")

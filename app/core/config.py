@@ -37,6 +37,18 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     SMTP_FROM_EMAIL: str = "noreply@garment.com"
 
+    # Razorpay — the only supported payment gateway. Keys are supplied via env
+    # (test keys start with rzp_test_, live keys with rzp_live_).
+    RAZORPAY_KEY_ID: str = ""
+    RAZORPAY_KEY_SECRET: str = ""
+
+    # S3 image uploads (banners). Credentials come from the EC2 instance role,
+    # so only the bucket/region are configured here. S3_PUBLIC_BASE_URL lets a
+    # CDN front the bucket; when empty the direct S3 object URL is used.
+    AWS_REGION: str = "ap-south-1"
+    S3_UPLOAD_BUCKET: str = ""
+    S3_PUBLIC_BASE_URL: str = ""
+
     class Config:
         env_file = ".env"
         case_sensitive = True

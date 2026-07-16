@@ -14,6 +14,7 @@ class Payment(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     order_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False)
     transaction_id: Mapped[str] = mapped_column(String(255), nullable=True)
+    gateway_order_id: Mapped[str] = mapped_column(String(255), nullable=True)
     gateway: Mapped[str] = mapped_column(String(50), default="razorpay")
     payment_method: Mapped[str] = mapped_column(String(50), nullable=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False)

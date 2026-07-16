@@ -11,8 +11,8 @@ router = APIRouter(prefix="/api/v1/payment-methods", tags=["Payment Methods"])
 
 @router.get("", response_model=list[PaymentMethodResponse])
 def list_payment_methods(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Razorpay is the only supported payment method.
     methods = [
-        {"id": "cod", "name": "Cash on Delivery", "code": "cod", "icon_url": None, "is_active": True},
         {"id": "razorpay", "name": "Razorpay", "code": "razorpay", "icon_url": None, "is_active": True},
     ]
     return methods
