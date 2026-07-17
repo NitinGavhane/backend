@@ -3,6 +3,8 @@ from pydantic import BaseModel
 
 class PaymentCreateRequest(BaseModel):
     order_id: str
+    # Code of a configured payment method (e.g. "upi"). Validated server-side.
+    payment_method: str | None = None
 
 
 class PaymentVerifyRequest(BaseModel):

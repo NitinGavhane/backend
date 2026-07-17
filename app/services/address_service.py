@@ -22,6 +22,7 @@ def create_address(user_id: str, req: AddressCreate, db: Session):
         street=req.street,
         city=req.city,
         state=req.state,
+        country=(req.country or "IN").upper(),
         pincode=req.pincode,
         type=req.type,
         is_default=req.is_default,
@@ -37,6 +38,8 @@ def update_address(user_id: str, address_id: str, req: AddressUpdate, db: Sessio
     if not address:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Address not found")
     update_data = req.model_dump(exclude_unset=True)
+    if update_data.get("country"):
+        update_data["country"] = update_data["country"].upper()
     if update_data.get("is_default"):
         db.query(Address).filter(Address.user_id == user_id, Address.is_default == True, Address.id != address_id).update({"is_default": False})
     for key, value in update_data.items():
@@ -63,6 +66,7 @@ def _format_address(address: Address) -> dict:
         "street": address.street,
         "city": address.city,
         "state": address.state,
+        "country": address.country or "IN",
         "pincode": address.pincode,
         "type": address.type,
         "is_default": address.is_default,

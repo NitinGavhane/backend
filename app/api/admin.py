@@ -10,6 +10,7 @@ from app.core.database import Base, get_db, engine
 from app.core.deps import get_current_admin
 from app.core.security import create_access_token, create_refresh_token, hash_password, verify_password
 from app.models.order import Order
+from app.models.payment_method import PaymentMethod
 from app.models.product import Product
 from app.models.user import User
 from app.models.coupon import Coupon
@@ -19,6 +20,7 @@ from app.schemas.banner import BannerCreate, BannerResponse, BannerUpdate
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
 from app.schemas.coupon import CouponCreate, CouponResponse, CouponUpdate
 from app.schemas.order import OrderResponse
+from app.schemas.payment_method import AdminPaymentMethodResponse, PaymentMethodCreate, PaymentMethodUpdate
 from app.schemas.product import AdminProductResponse, ProductCreate, ProductUpdate
 from app.schemas.referral import (
     AdminReferralPurchaseResponse,
@@ -426,6 +428,100 @@ def delete_banner(banner_id: str, admin: User = Depends(get_current_admin), db: 
     db.commit()
     storage.delete_image_from_s3(image_url)
     return {"message": "Banner deleted successfully"}
+
+
+# ── Payment methods ──────────────────────────────────────────────────────────
+#
+# What the buyer picks at checkout. The gateway behind a method is configuration
+# here, never something the storefront names.
+
+def _payment_method_dict(m: PaymentMethod) -> dict:
+    return {
+        "id": str(m.id),
+        "code": m.code,
+        "name": m.name,
+        "description": m.description,
+        "icon_url": m.icon_url,
+        "gateway": m.gateway,
+        "regions": m.regions,
+        "is_active": m.is_active,
+        "sort_order": m.sort_order,
+    }
+
+
+def _normalised_method_fields(data: dict) -> dict:
+    """Codes and regions are matched case-insensitively elsewhere, so store them
+    in one canonical case rather than relying on every caller to agree."""
+    if "code" in data and data["code"]:
+        data["code"] = data["code"].strip().lower()
+    if "regions" in data and data["regions"]:
+        regions = data["regions"].strip()
+        data["regions"] = regions if regions == "*" else ",".join(
+            r.strip().upper() for r in regions.split(",") if r.strip()
+        )
+    return data
+
+
+@router.get("/payment-methods", response_model=list[AdminPaymentMethodResponse])
+def list_admin_payment_methods(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    methods = db.query(PaymentMethod).order_by(PaymentMethod.sort_order.asc(), PaymentMethod.name.asc()).all()
+    return [_payment_method_dict(m) for m in methods]
+
+
+@router.get("/payment-methods/{method_id}", response_model=AdminPaymentMethodResponse)
+def get_admin_payment_method(method_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    method = db.query(PaymentMethod).filter(PaymentMethod.id == method_id).first()
+    if not method:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment method not found")
+    return _payment_method_dict(method)
+
+
+@router.post("/payment-methods", response_model=AdminPaymentMethodResponse)
+def create_payment_method(req: PaymentMethodCreate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    data = _normalised_method_fields(req.model_dump())
+    if db.query(PaymentMethod).filter(PaymentMethod.code == data["code"]).first():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A payment method with code '{data['code']}' already exists",
+        )
+    method = PaymentMethod(**data)
+    db.add(method)
+    db.commit()
+    db.refresh(method)
+    return _payment_method_dict(method)
+
+
+@router.put("/payment-methods/{method_id}", response_model=AdminPaymentMethodResponse)
+def update_payment_method(method_id: str, req: PaymentMethodUpdate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    method = db.query(PaymentMethod).filter(PaymentMethod.id == method_id).first()
+    if not method:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment method not found")
+    data = _normalised_method_fields(req.model_dump(exclude_unset=True))
+    if "code" in data:
+        clash = db.query(PaymentMethod).filter(PaymentMethod.code == data["code"], PaymentMethod.id != method.id).first()
+        if clash:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"A payment method with code '{data['code']}' already exists",
+            )
+    for key, value in data.items():
+        setattr(method, key, value)
+    db.commit()
+    db.refresh(method)
+    return _payment_method_dict(method)
+
+
+@router.delete("/payment-methods/{method_id}")
+def delete_payment_method(method_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    method = db.query(PaymentMethod).filter(PaymentMethod.id == method_id).first()
+    if not method:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment method not found")
+    # Payment rows record the method as free text, so deleting one leaves past
+    # payments readable. Deactivating is still the gentler option for a method
+    # in use, which is why is_active exists.
+    db.delete(method)
+    db.commit()
+    return {"message": "Payment method deleted successfully"}
 
 
 @router.post("/migrate")

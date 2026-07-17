@@ -16,6 +16,37 @@ from app.core.security import hash_password
 from app.models.user import User
 
 
+# The methods the store opens with. Codes match the gateway's own method names
+# so they can be handed straight to its checkout. Seeded once; after that the
+# table is the source of truth and the Admin app owns it.
+_DEFAULT_PAYMENT_METHODS = [
+    ("upi", "UPI", "Pay using any UPI app", "IN", 0),
+    ("card", "Credit / Debit Card", "Visa, Mastercard, RuPay & more", "*", 1),
+    ("netbanking", "Net Banking", "All major banks supported", "IN", 2),
+    ("wallet", "Wallets", "Paytm, PhonePe, Amazon Pay & more", "IN", 3),
+]
+
+
+def _seed_payment_methods(db: Session):
+    """Populate the methods table on first boot, so checkout is never empty.
+
+    Seeds only when the table has no rows at all. Once it does, the table is the
+    Admin app's to own: topping up per-missing-code would resurrect a method an
+    admin had deliberately deleted, every single deploy.
+    """
+    if db.execute(text("SELECT count(*) FROM payment_methods")).scalar():
+        return
+    for code, name, description, regions, sort_order in _DEFAULT_PAYMENT_METHODS:
+        db.execute(
+            text("""
+                INSERT INTO payment_methods (id, code, name, description, gateway, regions, is_active, sort_order, created_at)
+                VALUES (gen_random_uuid(), :code, :name, :description, 'razorpay', :regions, true, :sort_order, NOW())
+            """),
+            {"code": code, "name": name, "description": description, "regions": regions, "sort_order": sort_order},
+        )
+    print(f"Migration: seeded {len(_DEFAULT_PAYMENT_METHODS)} default payment methods")
+
+
 def _backfill_image_storage(db: Session):
     """Classify pre-existing image rows that predate the storage_type column.
 
@@ -196,6 +227,14 @@ def _run_migrations(db: Session):
         db.execute(text(f"ALTER TABLE {image_table} ADD COLUMN IF NOT EXISTS uploaded_at TIMESTAMP WITH TIME ZONE"))
     db.commit()
     _backfill_image_storage(db)
+
+    # Payment methods are presented to the buyer instead of the gateway name.
+    # country decides which of them a buyer is offered; existing rows predate
+    # any non-Indian customer, so they are India.
+    db.execute(text("ALTER TABLE addresses ADD COLUMN IF NOT EXISTS country VARCHAR(2) DEFAULT 'IN'"))
+    db.execute(text("UPDATE addresses SET country = 'IN' WHERE country IS NULL"))
+    db.commit()
+    _seed_payment_methods(db)
 
     db.commit()
 

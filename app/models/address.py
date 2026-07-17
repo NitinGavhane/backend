@@ -18,6 +18,9 @@ class Address(Base):
     street: Mapped[str] = mapped_column(Text, nullable=False)
     city: Mapped[str] = mapped_column(String(100), nullable=False)
     state: Mapped[str] = mapped_column(String(100), nullable=False)
+    # ISO-3166-1 alpha-2. Decides which payment methods the buyer is offered;
+    # the store is India-only today, hence the default.
+    country: Mapped[str] = mapped_column(String(2), default="IN", nullable=False)
     pincode: Mapped[str] = mapped_column(String(20), nullable=False)
     type: Mapped[str] = mapped_column(String(20), default="Home")
     is_default: Mapped[bool] = mapped_column(Boolean, default=False)

@@ -12,11 +12,11 @@ router = APIRouter(prefix="/api/v1/payments", tags=["Payments"])
 
 @router.post("/create", response_model=PaymentResponse)
 def create_payment(req: PaymentCreateRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return payment_service.create_payment(req.order_id, db)
+    return payment_service.create_payment(req.order_id, req.payment_method, user.id, db)
 
 
 @router.post("/verify")
 def verify_payment(req: PaymentVerifyRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return payment_service.verify_payment(
-        req.order_id, req.razorpay_order_id, req.razorpay_payment_id, req.razorpay_signature, db
+        req.order_id, req.razorpay_order_id, req.razorpay_payment_id, req.razorpay_signature, user.id, db
     )

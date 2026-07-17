@@ -9,6 +9,7 @@ class AddressCreate(BaseModel):
     street: str
     city: str
     state: str
+    country: str = "IN"
     pincode: str
     type: str = "Home"
     is_default: bool = False
@@ -20,6 +21,7 @@ class AddressUpdate(BaseModel):
     street: str | None = None
     city: str | None = None
     state: str | None = None
+    country: str | None = None
     pincode: str | None = None
     type: str | None = None
     is_default: bool | None = None
@@ -32,6 +34,7 @@ class AddressResponse(BaseModel):
     street: str
     city: str
     state: str
+    country: str = "IN"
     pincode: str
     type: str
     is_default: bool
