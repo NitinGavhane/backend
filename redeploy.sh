@@ -27,7 +27,7 @@ ssh $SSHO -i "$KEY" "$EC2_HOST" "bash -s" <<REMOTE
 set -e
 sudo docker pull "$IMG"
 sudo docker rm -f api 2>/dev/null || true
-sudo docker run -d --restart unless-stopped --env-file /home/ec2-user/app.env -p 80:8000 --name api "$IMG"
+sudo docker run -d --restart unless-stopped --env-file /home/ec2-user/app.env -p 127.0.0.1:8000:8000 --name api "$IMG"
 REMOTE
 
 echo "==> Waiting for health..."

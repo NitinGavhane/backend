@@ -70,6 +70,7 @@ class ProductUpdate(BaseModel):
     is_returnable: bool | None = None
     gender: str | None = None
     is_active: bool | None = None
+    variants: list[ProductVariantCreate] | None = None
     images: list[ProductImageCreate] | None = None
 
 

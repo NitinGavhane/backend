@@ -42,6 +42,7 @@ class OrderResponse(BaseModel):
     sgst_amount: float = 0.0
     igst_amount: float = 0.0
     discount_amount: float
+    delivery_fee: float = 0.0
     final_amount: float
     order_status: str
     payment_status: str

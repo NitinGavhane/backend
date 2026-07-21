@@ -20,6 +20,7 @@ class Order(Base):
     sgst_amount: Mapped[float] = mapped_column(Float, default=0.0)
     igst_amount: Mapped[float] = mapped_column(Float, default=0.0)
     discount_amount: Mapped[float] = mapped_column(Float, default=0.0)
+    delivery_fee: Mapped[float] = mapped_column(Float, default=0.0)
     final_amount: Mapped[float] = mapped_column(Float, default=0.0)
     order_status: Mapped[str] = mapped_column(
         Enum("placed", "processing", "dispatched", "out_for_delivery", "delivered", "cancelled", name="order_status"),

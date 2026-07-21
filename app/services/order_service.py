@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.core import gst
+from app.services import delivery_service
 from app.models.cart import CartItem
 from app.models.order import Order, OrderItem
 from app.models.product import Product
@@ -23,6 +24,10 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    # Read delivery settings up front — before any stock is decremented — so the
+    # one-time default-row creation can't commit a half-built order.
+    delivery_settings = delivery_service.get_settings(db)
 
     subtotal = 0.0
     order_items_data = []
@@ -50,7 +55,10 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
     # shipping-address state — the seller (West Bengal) is fixed.
     subtotal = round(subtotal, 2)
     breakup = gst.gst_breakup(subtotal, req.shipping_state)
-    final_amount = subtotal + breakup["gst_amount"]
+    # Delivery charge from the store-wide settings (free unless the seller has
+    # configured a fee; waived above the free-over threshold).
+    delivery_fee = delivery_service.compute_fee(subtotal, delivery_settings)
+    final_amount = subtotal + breakup["gst_amount"] + delivery_fee
     estimated_delivery = datetime.now(timezone.utc) + timedelta(days=7)
 
     order = Order(
@@ -62,6 +70,7 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
         sgst_amount=breakup["sgst_amount"],
         igst_amount=breakup["igst_amount"],
         discount_amount=0.0,
+        delivery_fee=delivery_fee,
         final_amount=round(final_amount, 2),
         order_status="placed",
         shipping_address=req.shipping_address,
@@ -154,6 +163,7 @@ def format_order(order: Order) -> dict:
         # intra-state split of the stored total.
         **_order_gst_breakup(order),
         "discount_amount": order.discount_amount,
+        "delivery_fee": order.delivery_fee or 0.0,
         "final_amount": order.final_amount,
         "order_status": order.order_status,
         "payment_status": order.payment_status,

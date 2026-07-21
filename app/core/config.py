@@ -42,6 +42,16 @@ class Settings(BaseSettings):
     RAZORPAY_KEY_ID: str = ""
     RAZORPAY_KEY_SECRET: str = ""
 
+    # Seller identity printed on GST tax invoices. Overridable via env once the
+    # real GSTIN/registered address is available; the defaults keep invoices
+    # rendering sensibly in the meantime. The seller state drives the
+    # intra/inter-state GST label already computed at checkout (West Bengal).
+    SELLER_NAME: str = "Dristi Fashions"
+    SELLER_GSTIN: str = "19AAAAA0000A1Z5"
+    SELLER_ADDRESS: str = "West Bengal, India"
+    SELLER_STATE: str = "West Bengal"
+    SELLER_EMAIL: str = "support@dristifashions.com"
+
     # S3 image uploads (banners). Credentials come from the EC2 instance role,
     # so only the bucket/region are configured here. S3_PUBLIC_BASE_URL lets a
     # CDN front the bucket; when empty the direct S3 object URL is used.

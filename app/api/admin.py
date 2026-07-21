@@ -19,6 +19,7 @@ from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.banner import BannerCreate, BannerResponse, BannerUpdate
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
 from app.schemas.coupon import CouponCreate, CouponResponse, CouponUpdate
+from app.schemas.delivery import DeliverySettingsResponse, DeliverySettingsUpdate
 from app.schemas.order import OrderResponse
 from app.schemas.payment_method import AdminPaymentMethodResponse, PaymentMethodCreate, PaymentMethodUpdate
 from app.schemas.product import AdminProductResponse, ProductCreate, ProductUpdate
@@ -29,7 +30,7 @@ from app.schemas.referral import (
     ReferralProductReport,
     ReferralUserReport,
 )
-from app.services import order_service, product_service, referral_service
+from app.services import delivery_service, order_service, product_service, referral_service
 from app.models.referral import ReferralEarning
 from app.models.category import Category
 from app.models.banner import Banner
@@ -174,6 +175,16 @@ def update_product(product_id: str, req: ProductUpdate, admin: User = Depends(ge
 @router.delete("/products/{product_id}")
 def delete_product(product_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return product_service.delete_product(product_id, db)
+
+
+@router.get("/delivery-settings", response_model=DeliverySettingsResponse)
+def get_delivery_settings(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return delivery_service.get_settings(db)
+
+
+@router.put("/delivery-settings", response_model=DeliverySettingsResponse)
+def update_delivery_settings(req: DeliverySettingsUpdate, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return delivery_service.update_settings(req, db)
 
 
 @router.get("/coupons", response_model=list[CouponResponse])
@@ -557,6 +568,7 @@ def run_migration(admin: User = Depends(get_current_admin), db: Session = Depend
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS cgst_amount FLOAT DEFAULT 0.0"))
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS sgst_amount FLOAT DEFAULT 0.0"))
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS igst_amount FLOAT DEFAULT 0.0"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_fee FLOAT DEFAULT 0.0"))
     db.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS gender VARCHAR(20) DEFAULT 'unisex'"))
     db.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id UUID REFERENCES categories(id) ON DELETE CASCADE"))
     db.commit()

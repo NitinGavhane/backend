@@ -227,7 +227,9 @@ def create_product(req: ProductCreate, db: Session):
         featured=req.featured,
         is_replaceable=req.is_replaceable,
         is_returnable=req.is_returnable,
-        gender=req.gender if req.gender else category.gender,
+        # The category is authoritative for gender — the product always inherits
+        # it, so category and gender can never contradict each other.
+        gender=category.gender,
     )
     db.add(product)
     db.flush()
@@ -257,10 +259,29 @@ def update_product(product_id: str, req: ProductUpdate, db: Session):
         update_data["category_id"] = _parse_uuid(update_data["category_id"], "category_id")
         new_cat = db.query(Category).filter(Category.id == update_data["category_id"]).first()
         if new_cat:
-            update_data.setdefault("gender", new_cat.gender)
+            # The category is authoritative for gender: a product always inherits
+            # its category's gender, so a men-only category can never hold a
+            # product tagged "women". Any gender sent by the client is ignored.
+            update_data["gender"] = new_cat.gender
+    variants_data = update_data.pop("variants", None)
     images_data = update_data.pop("images", None)
     for key, value in update_data.items():
         setattr(product, key, value)
+    if variants_data is not None:
+        # Variants are replaced wholesale (the admin form always sends the full
+        # current list), so edits — including newly added variants and their
+        # prices — are persisted instead of silently dropped.
+        for v in product.variants:
+            db.delete(v)
+        db.flush()
+        for v in variants_data:
+            db.add(ProductVariant(
+                product_id=product.id,
+                size=v.get("size"),
+                color=v.get("color"),
+                stock=v.get("stock") or 0,
+                price=v.get("price"),
+            ))
     removed_images = []
     if images_data is not None:
         # The image list is replaced wholesale, so only the images that are gone

@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user, get_current_admin
 from app.models.user import User
 from app.schemas.order import OrderCreateRequest, OrderResponse, OrderStatusUpdate
-from app.services import order_service
+from app.services import invoice_service, order_service
 
 router = APIRouter(prefix="/api/v1/orders", tags=["Orders"])
 
@@ -23,6 +23,17 @@ def list_orders(user: User = Depends(get_current_user), db: Session = Depends(ge
 @router.get("/{order_id}", response_model=OrderResponse)
 def get_order(order_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return order_service.get_order_detail(order_id, db)
+
+
+@router.get("/{order_id}/invoice")
+def download_invoice(order_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Return the GST tax invoice for a paid order as a downloadable PDF."""
+    pdf, filename = invoice_service.generate_invoice_pdf(order_id, user.id, db)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.post("/{order_id}/return")

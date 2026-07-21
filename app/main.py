@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
-from app.api import admin, addresses, auth, blog, cart, categories, home, orders, payment_methods, payments, products, referral, reviews, uploads, wallet, wishlist
+from app.api import admin, addresses, auth, blog, cart, categories, delivery, home, orders, payment_methods, payments, products, referral, reviews, uploads, wallet, wishlist
 from app.core import storage
 from app.core.config import settings
 from app.core.database import SessionLocal, engine, ensure_tables
@@ -197,6 +197,7 @@ def _run_migrations(db: Session):
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS cgst_amount FLOAT DEFAULT 0.0"))
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS sgst_amount FLOAT DEFAULT 0.0"))
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS igst_amount FLOAT DEFAULT 0.0"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_fee FLOAT DEFAULT 0.0"))
 
     if "coupons" not in tables:
         db.execute(text("""
@@ -320,6 +321,7 @@ app.include_router(wishlist.router)
 app.include_router(reviews.router)
 app.include_router(blog.router)
 app.include_router(home.router)
+app.include_router(delivery.router)
 app.include_router(payment_methods.router)
 app.include_router(uploads.router)
 

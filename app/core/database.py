@@ -48,6 +48,7 @@ def ensure_tables():
     from app.models.address import Address
     from app.models.banner import Banner
     from app.models.blog import BlogPost
+    from app.models.delivery import DeliverySettings
     from app.models.referral import ReferralEarning, ReferralShareClick
     from app.models.review import Review
     from app.models.wishlist import WishlistItem
@@ -63,6 +64,8 @@ def ensure_tables():
         if "return_reason" not in order_columns:
             db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
             db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
+        if "delivery_fee" not in order_columns:
+            db.execute(text("ALTER TABLE orders ADD COLUMN delivery_fee FLOAT DEFAULT 0.0"))
         db.commit()
         db.close()
     except Exception as e:
