@@ -4,6 +4,18 @@ from app.models.banner import Banner
 from app.models.product import Product
 
 
+def _primary_image(product: Product) -> str | None:
+    """The image the seller marked primary, falling back to the first one.
+
+    Matches product_service so the home feed, listings and the product page all
+    show the same photo.
+    """
+    return next(
+        (img.image_url for img in product.images if img.is_primary),
+        product.images[0].image_url if product.images else None,
+    )
+
+
 def get_home_content(db: Session):
     banners = db.query(Banner).filter(Banner.is_active == True).order_by(Banner.sort_order.asc()).all()
     featured_products = db.query(Product).filter(Product.is_active == True, Product.featured == True).order_by(Product.created_at.desc()).limit(10).all()
@@ -28,7 +40,7 @@ def get_home_content(db: Session):
                 "title": p.title,
                 "price": p.discount_price or p.price,
                 "original_price": p.price,
-                "image_url": p.images[0].image_url if p.images else None,
+                "image_url": _primary_image(p),
             }
             for p in featured_products
         ],
@@ -38,7 +50,7 @@ def get_home_content(db: Session):
                 "title": p.title,
                 "price": p.discount_price or p.price,
                 "original_price": p.price,
-                "image_url": p.images[0].image_url if p.images else None,
+                "image_url": _primary_image(p),
             }
             for p in new_products
         ],
