@@ -24,12 +24,22 @@ class Settings(BaseSettings):
             return raw
         return f"postgresql+pg8000://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
+    # TLS to the database: "auto" turns it on for any host reachable over the
+    # internet and off for a loopback/private-network host (see database.py);
+    # "require" / "disable" override that.
+    DB_SSL: str = "auto"
+
     SECRET_KEY: str = "your-secret-key-change-in-production-min-32-chars"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     CORS_ORIGINS: str = "*"
+
+    # Public storefront origin. Shared product/referral links are built from
+    # this, so a link a customer sends is a real, clickable URL. Keep it in step
+    # with AppLinks.siteUrl in the user app.
+    SITE_URL: str = "https://dristifashions.com"
 
     SMTP_HOST: str = "smtp.sendgrid.net"
     SMTP_PORT: int = 587

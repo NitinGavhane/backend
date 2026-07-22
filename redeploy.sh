@@ -42,10 +42,14 @@ echo "==> Restarting container on EC2 (via SSM)..."
 # credentials from the garment-ec2-role instance profile on every pull and they never
 # go stale. Adding an explicit login actually errors ("not implemented") because the
 # ecr-login helper has no credential-store write support.
+# --network garment-net is required: the database runs as the `garment-db`
+# container on that user-defined network and is resolved by name from app.env
+# (POSTGRES_HOST=garment-db). Dropping this flag breaks every DB query.
 CMDS="commands=["
 CMDS="$CMDS\"docker pull $IMG\","
+CMDS="$CMDS\"docker network create garment-net 2>/dev/null || true\","
 CMDS="$CMDS\"docker rm -f api 2>/dev/null || true\","
-CMDS="$CMDS\"docker run -d --restart unless-stopped --env-file /home/ec2-user/app.env -p 127.0.0.1:8000:8000 --name api $IMG\""
+CMDS="$CMDS\"docker run -d --restart unless-stopped --network garment-net --env-file /home/ec2-user/app.env -p 127.0.0.1:8000:8000 --name api $IMG\""
 CMDS="$CMDS]"
 
 CMD_ID=$("$AWS" ssm send-command --region "$REGION" \

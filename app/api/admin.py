@@ -28,6 +28,8 @@ from app.schemas.referral import (
     ApproveRewardRequest,
     ReferralHistoryResponse,
     ReferralProductReport,
+    ReferralSettingsResponse,
+    ReferralSettingsUpdate,
     ReferralUserReport,
 )
 from app.services import delivery_service, order_service, product_service, referral_service
@@ -112,6 +114,20 @@ def list_all_referrals(admin: User = Depends(get_current_admin), db: Session = D
         }
         for e in earnings
     ]
+
+
+@router.get("/referral-settings", response_model=ReferralSettingsResponse)
+def get_referral_settings(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return referral_service.get_settings(db)
+
+
+@router.put("/referral-settings", response_model=ReferralSettingsResponse)
+def update_referral_settings(
+    req: ReferralSettingsUpdate,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return referral_service.update_settings(req, db)
 
 
 @router.get("/referral-purchases", response_model=list[AdminReferralPurchaseResponse])
@@ -552,10 +568,10 @@ def run_migration(admin: User = Depends(get_current_admin), db: Session = Depend
     if "return_reason" not in order_columns:
         db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
         db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
-    # Product flags required by the Product model. These are added idempotently
-    # with IF NOT EXISTS because the lifespan migration that normally adds them
-    # does not run on serverless (Vercel) cold starts — a missing column here
-    # makes every product query fail with a 500. See _run_migrations in main.py.
+    # Product flags required by the Product model, added idempotently with
+    # IF NOT EXISTS so this endpoint can repair a database whose lifespan
+    # migration never ran — a missing column here makes every product query
+    # fail with a 500. See _run_migrations in main.py.
     db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_replaceable BOOLEAN DEFAULT FALSE"))
     db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_returnable BOOLEAN DEFAULT FALSE"))
     db.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS gender VARCHAR(20) DEFAULT 'unisex'"))

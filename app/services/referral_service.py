@@ -4,10 +4,39 @@ from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.config import settings as app_settings
 from app.models.order import Order
 from app.models.product import Product, ProductImage
-from app.models.referral import ReferralEarning, ReferralShareClick
+from app.models.referral import ReferralEarning, ReferralSettings, ReferralShareClick
 from app.models.user import User
+from app.schemas.referral import ReferralSettingsUpdate
+
+
+def get_settings(db: Session) -> ReferralSettings:
+    """The singleton refer-and-earn settings row, created on first use."""
+    settings = db.query(ReferralSettings).first()
+    if not settings:
+        settings = ReferralSettings(enabled=True, commission_percentage=5.0)
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+    return settings
+
+
+def update_settings(req: ReferralSettingsUpdate, db: Session) -> ReferralSettings:
+    settings = get_settings(db)
+    for key, value in req.model_dump(exclude_unset=True).items():
+        setattr(settings, key, value)
+    if settings.commission_percentage < 0:
+        settings.commission_percentage = 0.0
+    db.commit()
+    db.refresh(settings)
+    return settings
+
+
+def suggested_reward(purchase_amount: float, settings: ReferralSettings) -> float:
+    """Commission the admin is offered when approving — never paid on its own."""
+    return round(purchase_amount * settings.commission_percentage / 100, 2)
 
 
 def get_referral_stats(user_id: str, db: Session) -> dict:
@@ -17,16 +46,24 @@ def get_referral_stats(user_id: str, db: Session) -> dict:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     earnings = db.query(ReferralEarning).filter(ReferralEarning.referrer_user_id == user_uuid).all()
     total_earnings = sum(e.reward_amount for e in earnings if e.status == "approved")
+    pending_earnings = sum(e.reward_amount for e in earnings if e.status == "pending")
     successful = sum(1 for e in earnings if e.status == "approved")
     pending = sum(1 for e in earnings if e.status == "pending")
     total_clicks = db.query(ReferralShareClick).filter(ReferralShareClick.referrer_user_id == user_uuid).count()
+    programme = get_settings(db)
     return {
         "referral_code": user.referral_code,
         "total_earnings": round(total_earnings, 2),
+        # What is waiting on the admin's approval — shown so a referrer can see
+        # a reward is coming rather than wondering if the share worked.
+        "pending_earnings": round(pending_earnings, 2),
         "successful_referrals": successful,
         "pending_referrals": pending,
         "total_clicks": total_clicks,
         "wallet_balance": user.wallet_balance,
+        "commission_percentage": programme.commission_percentage if programme.enabled else 0.0,
+        "programme_enabled": programme.enabled,
+        "share_base_url": app_settings.SITE_URL,
     }
 
 
@@ -76,7 +113,13 @@ def get_referral_history(user_id: str, db: Session):
 
 
 def generate_share_url(product_id: str, referral_code: str) -> str:
-    return f"/product/{product_id}?ref={referral_code}"
+    """An absolute, clickable storefront link that carries the referrer's code.
+
+    Was a bare path ("/product/<id>?ref=CODE"), which is not something a
+    customer can paste into WhatsApp.
+    """
+    base = app_settings.SITE_URL.rstrip("/")
+    return f"{base}/product/{product_id}?ref={referral_code}"
 
 
 def track_share_click(product_id: str, referral_code: str, db: Session, ip_address: str = None, user_agent: str = None) -> dict:
@@ -99,30 +142,54 @@ def track_share_click(product_id: str, referral_code: str, db: Session, ip_addre
     return {"message": "Click tracked"}
 
 
-def record_referral_purchase(
-    referred_user_id: str,
-    referred_by_code: str,
-    order_id: str,
-    product_id: str,
-    purchase_amount: float,
-    db: Session,
-):
-    referrer = db.query(User).filter(User.referral_code == referred_by_code).first()
-    if not referrer:
+def record_first_order_referral(user: User, order, subtotal: float, product_id, db: Session):
+    """Record a pending commission for whoever referred `user`.
+
+    Only the referred customer's **first** order earns — a repeat customer is no
+    longer a referral. Adds the row to the caller's session without committing,
+    so it lands in the same transaction as the order.
+
+    The commission base is the product subtotal, not the order total: the
+    referrer is not paid a share of GST or the delivery charge.
+    """
+    if not user.referred_by:
         return
-    earning = ReferralEarning(
-        referrer_user_id=referrer.id,
-        referred_user_id=uuid.UUID(referred_user_id),
-        order_id=uuid.UUID(order_id),
-        product_id=uuid.UUID(product_id) if product_id else None,
-        referral_code=referred_by_code,
-        purchase_amount=purchase_amount,
-        reward_amount=0.0,
-        reward_percentage=0.0,
-        status="pending",
+    programme = get_settings(db)
+    if not programme.enabled:
+        return
+    referrer = db.query(User).filter(User.referral_code == user.referred_by).first()
+    # A code that no longer exists, or someone's own code, earns nothing.
+    if not referrer or referrer.id == user.id:
+        return
+    # First order only. The new order is already flushed, so look for any other.
+    previous_orders = (
+        db.query(Order)
+        .filter(Order.user_id == user.id, Order.id != order.id)
+        .count()
     )
-    db.add(earning)
-    db.commit()
+    if previous_orders:
+        return
+    # Belt and braces: never record two earnings for the same referred customer.
+    already = (
+        db.query(ReferralEarning)
+        .filter(ReferralEarning.referred_user_id == user.id)
+        .count()
+    )
+    if already:
+        return
+    db.add(ReferralEarning(
+        referrer_user_id=referrer.id,
+        referred_user_id=user.id,
+        order_id=order.id,
+        product_id=product_id,
+        referral_code=user.referred_by,
+        purchase_amount=round(subtotal, 2),
+        # Suggested payout, shown to the admin and to the referrer as "pending".
+        # Nothing reaches a wallet until the admin approves it.
+        reward_amount=suggested_reward(subtotal, programme),
+        reward_percentage=programme.commission_percentage,
+        status="pending",
+    ))
 
 
 def get_admin_referral_purchases(db: Session, status_filter: str = None):

@@ -62,13 +62,20 @@ def register_user(req: RegisterRequest, db: Session) -> dict:
         existing_phone = db.query(User).filter(User.phone == req.phone).first()
         if existing_phone:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Phone already registered")
+    # Only keep a referral code that actually belongs to someone. A typo or a
+    # stale link would otherwise be stored and silently never pay out.
+    referred_by = None
+    if req.referral_code:
+        code = req.referral_code.strip().upper()
+        if code and db.query(User).filter(User.referral_code == code).first():
+            referred_by = code
     user = User(
         full_name=req.full_name,
         email=req.email,
         phone=req.phone or None,
         password_hash=hash_password(req.password),
         referral_code=generate_referral_code(db, req.full_name),
-        referred_by=req.referral_code or None,
+        referred_by=referred_by,
     )
     db.add(user)
     db.commit()

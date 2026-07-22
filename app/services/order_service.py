@@ -6,11 +6,10 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.core import gst
-from app.services import delivery_service
+from app.services import delivery_service, referral_service
 from app.models.cart import CartItem
 from app.models.order import Order, OrderItem
 from app.models.product import Product
-from app.models.referral import ReferralEarning
 from app.models.user import User
 from app.models.wallet import WalletTransaction
 from app.schemas.order import OrderCreateRequest
@@ -85,22 +84,13 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
 
     db.flush()
 
-    if user.referred_by:
-        referrer = db.query(User).filter(User.referral_code == user.referred_by).first()
-        if referrer and order_items_data:
-            first_product_id = order_items_data[0]["product_id"]
-            earning = ReferralEarning(
-                referrer_user_id=referrer.id,
-                referred_user_id=user.id,
-                order_id=order.id,
-                product_id=first_product_id,
-                referral_code=user.referred_by,
-                purchase_amount=round(final_amount, 2),
-                reward_amount=0.0,
-                reward_percentage=0.0,
-                status="pending",
-            )
-            db.add(earning)
+    referral_service.record_first_order_referral(
+        user,
+        order,
+        subtotal,
+        order_items_data[0]["product_id"] if order_items_data else None,
+        db,
+    )
 
     db.commit()
     db.refresh(order)

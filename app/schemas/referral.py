@@ -6,10 +6,30 @@ from pydantic import BaseModel
 class ReferralStatsResponse(BaseModel):
     referral_code: str | None = None
     total_earnings: float = 0.0
+    # Approved-and-paid vs still waiting on the admin.
+    pending_earnings: float = 0.0
     successful_referrals: int = 0
     pending_referrals: int = 0
     total_clicks: int = 0
     wallet_balance: float = 0.0
+    # The programme, so the app can say "earn X%" and build share links without
+    # hardcoding either value.
+    commission_percentage: float = 0.0
+    programme_enabled: bool = True
+    share_base_url: str = ""
+
+
+class ReferralSettingsResponse(BaseModel):
+    enabled: bool
+    commission_percentage: float
+
+    class Config:
+        from_attributes = True
+
+
+class ReferralSettingsUpdate(BaseModel):
+    enabled: bool | None = None
+    commission_percentage: float | None = None
 
 
 class ReferralHistoryResponse(BaseModel):

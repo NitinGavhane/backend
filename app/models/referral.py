@@ -1,11 +1,34 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Enum, Float, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+
+
+class ReferralSettings(Base):
+    """Store-wide refer-and-earn programme, edited from the Admin app.
+
+    A single row (a singleton), like DeliverySettings. `commission_percentage`
+    is only the *suggested* payout: the admin approves each referred sale and
+    can override the amount, so nothing is ever paid automatically.
+    """
+
+    __tablename__ = "referral_settings"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    # When False the programme is off: no new earnings are recorded and the
+    # storefront stops advertising a commission.
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Suggested commission on the referred order's product subtotal.
+    commission_percentage: Mapped[float] = mapped_column(Float, default=5.0)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
 
 class ReferralEarning(Base):
