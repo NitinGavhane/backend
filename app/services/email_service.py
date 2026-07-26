@@ -12,7 +12,7 @@ SENDING_DOMAIN = settings.SMTP_FROM_EMAIL.split("@")[1]
 
 def send_email(recipient: str, subject: str, html_body: str, text_body: str = "") -> None:
     msg = MIMEMultipart("alternative")
-    msg["From"] = formataddr(("Garment", settings.SMTP_FROM_EMAIL))
+    msg["From"] = formataddr(("Dristi Fashions", settings.SMTP_FROM_EMAIL))
     msg["Reply-To"] = settings.SMTP_FROM_EMAIL
     msg["To"] = recipient
     msg["Subject"] = subject
