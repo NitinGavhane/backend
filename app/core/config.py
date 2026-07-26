@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = ""
     SMTP_FROM_EMAIL: str = "noreply@garment.com"
 
+    # Google OAuth — client ID for verifying ID tokens server-side.
+    GOOGLE_CLIENT_ID: str = ""
+
     # Razorpay — the only supported payment gateway. Keys are supplied via env
     # (test keys start with rzp_test_, live keys with rzp_live_).
     RAZORPAY_KEY_ID: str = ""

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
-from app.api import admin, addresses, auth, blog, cart, categories, delivery, home, orders, payment_methods, payments, products, referral, reviews, uploads, wallet, wishlist
+from app.api import admin, addresses, auth, blog, cart, categories, contact, delivery, home, orders, payment_methods, payments, products, referral, reviews, uploads, wallet, wishlist
 from app.core import storage
 from app.core.config import settings
 from app.core.database import SessionLocal, engine, ensure_tables
@@ -143,6 +143,11 @@ def _run_migrations(db: Session):
     if "avatar_url" not in user_columns:
         db.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(500)"))
         print("Migration: added avatar_url column to users")
+
+    user_columns = [c["name"] for c in inspector.get_columns("users")]
+    if "google_id" not in user_columns:
+        db.execute(text("ALTER TABLE users ADD COLUMN google_id VARCHAR(255) UNIQUE"))
+        print("Migration: added google_id column to users")
 
     user_columns = [c["name"] for c in inspector.get_columns("users")]
     if "otp_code" not in user_columns:
@@ -324,6 +329,7 @@ app.include_router(home.router)
 app.include_router(delivery.router)
 app.include_router(payment_methods.router)
 app.include_router(uploads.router)
+app.include_router(contact.router)
 
 
 @app.get("/")

@@ -16,6 +16,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     phone: Mapped[str] = mapped_column(String(20), unique=True, nullable=True)
     avatar_url: Mapped[str] = mapped_column(String(500), nullable=True)
+    google_id: Mapped[str] = mapped_column(String(255), unique=True, nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(Enum("customer", "admin", name="user_role"), default="customer")
     referral_code: Mapped[str] = mapped_column(String(20), unique=True, nullable=True)

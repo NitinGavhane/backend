@@ -159,7 +159,7 @@ def send_login_otp(email: str, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    send_otp_email(user.email, otp)
+    send_otp_email(user.email, otp, context="login")
 
     return {"message": f"Login OTP sent to {user.email}"}
 
@@ -226,6 +226,60 @@ def login_user(req: LoginRequest, db: Session) -> dict:
         "access_token": access_token,
         "refresh_token": refresh_token,
     }
+
+
+def google_login(id_token: str, db: Session) -> dict:
+    try:
+        from google.oauth2 import id_token as google_id_token
+        from google.auth.transport import requests
+
+        info = google_id_token.verify_oauth2_token(
+            id_token, requests.Request(), settings.GOOGLE_CLIENT_ID
+        )
+        google_id = info.get("sub")
+        email = info.get("email", "")
+        full_name = info.get("name", email.split("@")[0])
+        avatar_url = info.get("picture")
+
+        user = db.query(User).filter(User.google_id == google_id).first()
+        if not user and email:
+            user = db.query(User).filter(User.email == email).first()
+            if user:
+                user.google_id = google_id
+                db.commit()
+
+        if not user:
+            user = User(
+                full_name=full_name,
+                email=email,
+                google_id=google_id,
+                avatar_url=avatar_url,
+                is_verified=True,
+                referral_code=generate_referral_code(db, full_name),
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+
+        access_token = create_access_token({"sub": str(user.id), "role": user.role})
+        refresh_token = create_refresh_token({"sub": str(user.id)})
+        return {
+            "user": {
+                "id": str(user.id),
+                "full_name": user.full_name,
+                "email": user.email,
+                "phone": user.phone,
+                "avatar_url": user.avatar_url if hasattr(user, "avatar_url") else None,
+                "role": user.role,
+                "referral_code": user.referral_code,
+                "wallet_balance": user.wallet_balance,
+                "is_verified": user.is_verified,
+            },
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid Google token: {e}")
 
 
 def refresh_access_token(refresh_token: str, db: Session) -> dict:

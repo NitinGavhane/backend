@@ -47,6 +47,10 @@ class OrderResponse(BaseModel):
     order_status: str
     payment_status: str
     shipping_address: str | None = None
+    # Populated by format_order() when a return/replace has been requested; the
+    # storefront reads these to reflect return state on the order screen.
+    return_reason: str | None = None
+    return_status: str | None = None
     estimated_delivery: datetime | None = None
     created_at: datetime
     items: list[OrderItemResponse] = []

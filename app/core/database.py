@@ -68,6 +68,7 @@ def ensure_tables():
     from app.models.address import Address
     from app.models.banner import Banner
     from app.models.blog import BlogPost
+    from app.models.contact import ContactMessage, NewsletterSubscriber
     from app.models.delivery import DeliverySettings
     from app.models.referral import ReferralEarning, ReferralSettings, ReferralShareClick
     from app.models.review import Review

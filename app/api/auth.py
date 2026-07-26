@@ -7,6 +7,7 @@ from app.models.user import User
 from app.schemas.auth import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
+    GoogleLoginRequest,
     LoginRequest,
     RefreshTokenRequest,
     RegisterRequest,
@@ -48,6 +49,11 @@ def verify_otp(req: VerifyOtpRequest, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     return auth_service.login_user(req, db)
+
+
+@router.post("/google")
+def google_login(req: GoogleLoginRequest, db: Session = Depends(get_db)):
+    return auth_service.google_login(req.id_token, db)
 
 
 @router.post("/refresh-token", response_model=TokenResponse)

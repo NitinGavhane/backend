@@ -66,10 +66,15 @@ def _build_otp_html(title: str, otp: str, subtitle: str, accent_color: str) -> s
 </html>"""
 
 
-def send_otp_email(recipient: str, otp: str) -> None:
-    subject = "Your OTP Code – Garment"
-    html = _build_otp_html("Email Verification", otp, "Use the code below to verify your email address.", "#2563eb")
-    text = f"Your email verification code is: {otp}\n\nThis code expires in 10 minutes. Never share it with anyone."
+def send_otp_email(recipient: str, otp: str, context: str = "verification") -> None:
+    if context == "login":
+        subject = "Login OTP – Garment"
+        html = _build_otp_html("Sign In", otp, "Use the code below to sign in to your account.", "#2563eb")
+        text = f"Your login code is: {otp}\n\nThis code expires in 10 minutes. Never share it with anyone."
+    else:
+        subject = "Your OTP Code – Garment"
+        html = _build_otp_html("Email Verification", otp, "Use the code below to verify your email address.", "#2563eb")
+        text = f"Your email verification code is: {otp}\n\nThis code expires in 10 minutes. Never share it with anyone."
     send_email(recipient, subject, html, text)
 
 

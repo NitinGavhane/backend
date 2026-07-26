@@ -19,6 +19,7 @@ from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.banner import BannerCreate, BannerResponse, BannerUpdate
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
 from app.schemas.coupon import CouponCreate, CouponResponse, CouponUpdate
+from app.schemas.contact import ContactMessageResponse, NewsletterSubscriberResponse
 from app.schemas.delivery import DeliverySettingsResponse, DeliverySettingsUpdate
 from app.schemas.order import OrderResponse
 from app.schemas.payment_method import AdminPaymentMethodResponse, PaymentMethodCreate, PaymentMethodUpdate
@@ -32,7 +33,7 @@ from app.schemas.referral import (
     ReferralSettingsUpdate,
     ReferralUserReport,
 )
-from app.services import delivery_service, order_service, product_service, referral_service
+from app.services import contact_service, delivery_service, order_service, product_service, referral_service
 from app.models.referral import ReferralEarning
 from app.models.category import Category
 from app.models.banner import Banner
@@ -114,6 +115,42 @@ def list_all_referrals(admin: User = Depends(get_current_admin), db: Session = D
         }
         for e in earnings
     ]
+
+
+@router.get("/contact-messages", response_model=list[ContactMessageResponse])
+def list_contact_messages(
+    unread_only: bool = False,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return contact_service.list_messages(db, unread_only)
+
+
+@router.put("/contact-messages/{message_id}/read")
+def mark_contact_message(
+    message_id: str,
+    is_read: bool = True,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return contact_service.set_read(message_id, is_read, db)
+
+
+@router.delete("/contact-messages/{message_id}")
+def delete_contact_message(
+    message_id: str,
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return contact_service.delete_message(message_id, db)
+
+
+@router.get("/newsletter-subscribers", response_model=list[NewsletterSubscriberResponse])
+def list_newsletter_subscribers(
+    admin: User = Depends(get_current_admin),
+    db: Session = Depends(get_db),
+):
+    return contact_service.list_subscribers(db)
 
 
 @router.get("/referral-settings", response_model=ReferralSettingsResponse)
