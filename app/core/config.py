@@ -41,11 +41,13 @@ class Settings(BaseSettings):
     # with AppLinks.siteUrl in the user app.
     SITE_URL: str = "https://dristifashions.com"
 
-    SMTP_HOST: str = "smtp.sendgrid.net"
+    # Google Workspace SMTP (smtp.gmail.com, 587 STARTTLS). The username is the
+    # full mailbox address; the password is the account's app password.
+    SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USERNAME: str = "apikey"
+    SMTP_USERNAME: str = "info@dristifashions.com"
     SMTP_PASSWORD: str = ""
-    SMTP_FROM_EMAIL: str = "noreply@garment.com"
+    SMTP_FROM_EMAIL: str = "info@dristifashions.com"
 
     # Google OAuth — client ID for verifying ID tokens server-side.
     GOOGLE_CLIENT_ID: str = ""
