@@ -20,10 +20,15 @@ _IMAGE_FORMATS = {
     "WEBP": (".webp", "image/webp"),
 }
 
-# S3 key prefixes an admin may upload into. Anything else is rejected so a
-# client cannot write to arbitrary locations in the bucket.
+# S3 key prefixes an admin may upload into via /upload. Anything else is
+# rejected so a client cannot write to arbitrary locations in the bucket.
 IMAGE_PREFIXES = ("banners", "products", "categories")
 DEFAULT_PREFIX = "banners"
+# Every prefix upload_image_to_s3 may store under. "returns" is added here so
+# the customer-facing /upload/return-evidence route can use the same validator,
+# but it is deliberately NOT in IMAGE_PREFIXES — the admin upload route checks
+# that tuple, so an admin panel can never touch customer evidence.
+ALLOWED_PREFIXES = IMAGE_PREFIXES + ("returns",)
 
 # Values stored in the *.storage_type columns.
 STORAGE_S3 = "s3"
@@ -108,7 +113,7 @@ def upload_image_to_s3(
     if not settings.S3_UPLOAD_BUCKET:
         raise ValueError("Image upload is not configured on the server (missing S3 bucket)")
 
-    if prefix not in IMAGE_PREFIXES:
+    if prefix not in ALLOWED_PREFIXES:
         raise ValueError(f"Unsupported upload folder. Allowed folders: {', '.join(IMAGE_PREFIXES)}")
 
     if len(contents) > IMAGE_MAX_SIZE:

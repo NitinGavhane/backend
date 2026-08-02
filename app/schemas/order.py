@@ -51,7 +51,14 @@ class OrderResponse(BaseModel):
     # storefront reads these to reflect return state on the order screen.
     return_reason: str | None = None
     return_status: str | None = None
+    return_evidence: list[str] = []
+    return_admin_note: str | None = None
     estimated_delivery: datetime | None = None
+    dispatched_at: datetime | None = None
+    delivered_at: datetime | None = None
+    return_requested_at: datetime | None = None
+    return_approved_at: datetime | None = None
+    return_picked_up_at: datetime | None = None
     created_at: datetime
     items: list[OrderItemResponse] = []
 
@@ -61,3 +68,10 @@ class OrderResponse(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: str
+
+
+class ReturnRequest(BaseModel):
+    reason: str = ""
+    # Evidence images (return URL from the upload endpoint) the customer wants
+    # reviewed; optional but recommended.
+    evidence: list[str] = []

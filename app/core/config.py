@@ -41,13 +41,27 @@ class Settings(BaseSettings):
     # with AppLinks.siteUrl in the user app.
     SITE_URL: str = "https://dristifashions.com"
 
-    # Google Workspace SMTP (smtp.gmail.com, 587 STARTTLS). The username is the
-    # full mailbox address; the password is the account's app password.
-    SMTP_HOST: str = "smtp.gmail.com"
+    # Amazon SES SMTP (email-smtp.<region>.amazonaws.com, 587 STARTTLS). The
+    # username is the SES SMTP user's IAM access key id; the password is the
+    # SigV4-derived SES SMTP password (not the IAM secret itself). From is the
+    # verified business address info@dristifashions.com.
+    SMTP_HOST: str = "email-smtp.ap-south-1.amazonaws.com"
     SMTP_PORT: int = 587
-    SMTP_USERNAME: str = "info@dristifashions.com"
+    SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM_EMAIL: str = "info@dristifashions.com"
+
+    # WhatsApp notifications — provider-agnostic seam. Leave WHATSAPP_PROVIDER
+    # empty to keep WhatsApp as a logged no-op (email still delivers everything);
+    # set it to "twilio" and supply the credentials to switch it on.
+    WHATSAPP_PROVIDER: str = ""
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_WHATSAPP_FROM: str = ""  # Twilio WhatsApp sender number, e.g. +14155238886
+    # Approved Content-API template SIDs, keyed by our internal template name
+    # (order_placed, order_dispatched, order_delivered, return_approved,
+    # return_rejected, return_picked_up). JSON mapping; empty dict until set.
+    TWILIO_TEMPLATES: dict = {}
 
     # Google OAuth — client ID for verifying ID tokens server-side.
     GOOGLE_CLIENT_ID: str = ""

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_user, get_current_admin
 from app.models.user import User
-from app.schemas.order import OrderCreateRequest, OrderResponse, OrderStatusUpdate
+from app.schemas.order import OrderCreateRequest, OrderResponse, OrderStatusUpdate, ReturnRequest
 from app.services import invoice_service, order_service
 
 router = APIRouter(prefix="/api/v1/orders", tags=["Orders"])
@@ -37,13 +37,13 @@ def download_invoice(order_id: str, user: User = Depends(get_current_user), db: 
 
 
 @router.post("/{order_id}/return")
-def return_order(order_id: str, req: dict, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return order_service.request_return(str(user.id), order_id, req, db)
+def return_order(order_id: str, req: ReturnRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return order_service.request_return(str(user.id), order_id, req.model_dump(), db)
 
 
 @router.post("/{order_id}/replace")
-def replace_order(order_id: str, req: dict, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return order_service.request_replace(str(user.id), order_id, req, db)
+def replace_order(order_id: str, req: ReturnRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return order_service.request_replace(str(user.id), order_id, req.model_dump(), db)
 
 
 @router.put("/{order_id}/status", response_model=OrderResponse)

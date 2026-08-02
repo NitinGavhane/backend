@@ -1,3 +1,4 @@
+import json
 import random
 import string
 from datetime import datetime, timedelta, timezone
@@ -6,7 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.core import gst
-from app.services import delivery_service, referral_service
+from app.services import delivery_service, referral_service, notifications
 from app.models.cart import CartItem
 from app.models.order import Order, OrderItem
 from app.models.product import Product
@@ -94,6 +95,10 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
 
     db.commit()
     db.refresh(order)
+    try:
+        notifications.notify_order_placed(order)
+    except Exception:
+        pass
     return get_order_detail(str(order.id), db)
 
 
@@ -142,6 +147,10 @@ def _order_gst_breakup(order: Order) -> dict:
 
 
 def format_order(order: Order) -> dict:
+    try:
+        return_evidence = json.loads(order.return_evidence) if order.return_evidence else []
+    except (ValueError, TypeError):
+        return_evidence = []
     return {
         "id": str(order.id),
         "user_id": str(order.user_id),
@@ -160,7 +169,14 @@ def format_order(order: Order) -> dict:
         "shipping_address": order.shipping_address,
         "return_reason": order.return_reason,
         "return_status": order.return_status,
+        "return_evidence": return_evidence,
+        "return_admin_note": order.return_admin_note,
         "estimated_delivery": order.estimated_delivery,
+        "dispatched_at": order.dispatched_at,
+        "delivered_at": order.delivered_at,
+        "return_requested_at": order.return_requested_at,
+        "return_approved_at": order.return_approved_at,
+        "return_picked_up_at": order.return_picked_up_at,
         "created_at": order.created_at,
         "items": [
             {
@@ -184,8 +200,15 @@ def request_return(user_id: str, order_id: str, req: dict, db: Session) -> dict:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only delivered orders can be returned")
     order.return_reason = req.get("reason", "")
     order.return_status = "requested"
+    order.return_requested_at = datetime.now(timezone.utc)
+    evidence = req.get("evidence") or []
+    order.return_evidence = json.dumps(evidence) if evidence else None
     db.commit()
     db.refresh(order)
+    try:
+        notifications.notify_return_requested(order)
+    except Exception:
+        pass
     return {"message": "Return request submitted", "return_status": "requested"}
 
 
@@ -197,6 +220,13 @@ def request_replace(user_id: str, order_id: str, req: dict, db: Session) -> dict
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only delivered orders can be replaced")
     order.return_reason = req.get("reason", "")
     order.return_status = "replace_requested"
+    order.return_requested_at = datetime.now(timezone.utc)
+    evidence = req.get("evidence") or []
+    order.return_evidence = json.dumps(evidence) if evidence else None
     db.commit()
     db.refresh(order)
+    try:
+        notifications.notify_return_requested(order)
+    except Exception:
+        pass
     return {"message": "Replace request submitted", "return_status": "replace_requested"}

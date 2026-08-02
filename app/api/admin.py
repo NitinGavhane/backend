@@ -605,6 +605,21 @@ def run_migration(admin: User = Depends(get_current_admin), db: Session = Depend
     if "return_reason" not in order_columns:
         db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
         db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
+    # Delivery workflow columns (dispatch/return OTPs, evidence, timestamps).
+    for _ddl in [
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_evidence TEXT",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_admin_note TEXT",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS dispatch_otp VARCHAR(6)",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS dispatch_otp_expires_at TIMESTAMP WITH TIME ZONE",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_otp VARCHAR(6)",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_otp_expires_at TIMESTAMP WITH TIME ZONE",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS dispatched_at TIMESTAMP WITH TIME ZONE",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP WITH TIME ZONE",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_requested_at TIMESTAMP WITH TIME ZONE",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_approved_at TIMESTAMP WITH TIME ZONE",
+        "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_picked_up_at TIMESTAMP WITH TIME ZONE",
+    ]:
+        db.execute(text(_ddl))
     # Product flags required by the Product model, added idempotently with
     # IF NOT EXISTS so this endpoint can repair a database whose lifespan
     # migration never ran — a missing column here makes every product query

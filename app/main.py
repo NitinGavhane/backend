@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
-from app.api import admin, addresses, auth, blog, cart, categories, contact, delivery, home, orders, payment_methods, payments, products, referral, reviews, uploads, wallet, wishlist
+from app.api import admin, addresses, auth, blog, cart, categories, contact, delivery, fulfillment, home, orders, payment_methods, payments, products, referral, reviews, uploads, wallet, wishlist
 from app.core import storage
 from app.core.config import settings
 from app.core.database import SessionLocal, engine, ensure_tables
@@ -160,6 +160,27 @@ def _run_migrations(db: Session):
         db.execute(text("ALTER TABLE orders ADD COLUMN return_reason TEXT"))
         db.execute(text("ALTER TABLE orders ADD COLUMN return_status VARCHAR(20)"))
         print("Migration: added return_reason and return_status columns to orders")
+
+    # Delivery workflow columns — dispatch OTP, return pickup OTP, evidence,
+    # and the lifecycle timestamps the delivery/returns dashboards depend on.
+    for _col, _ddl in [
+        ("return_evidence", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_evidence TEXT"),
+        ("return_admin_note", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_admin_note TEXT"),
+        ("dispatch_otp", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS dispatch_otp VARCHAR(6)"),
+        ("dispatch_otp_expires_at", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS dispatch_otp_expires_at TIMESTAMP WITH TIME ZONE"),
+        ("return_otp", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_otp VARCHAR(6)"),
+        ("return_otp_expires_at", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_otp_expires_at TIMESTAMP WITH TIME ZONE"),
+        ("dispatched_at", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS dispatched_at TIMESTAMP WITH TIME ZONE"),
+        ("delivered_at", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP WITH TIME ZONE"),
+        ("return_requested_at", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_requested_at TIMESTAMP WITH TIME ZONE"),
+        ("return_approved_at", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_approved_at TIMESTAMP WITH TIME ZONE"),
+        ("return_picked_up_at", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_picked_up_at TIMESTAMP WITH TIME ZONE"),
+    ]:
+        if _col not in order_columns:
+            db.execute(text(_ddl))
+            print(f"Migration: added {_col} column to orders")
+
+    order_columns = [c["name"] for c in inspector.get_columns("orders")]
 
     tables = inspector.get_table_names()
     referral_earnings_exists = "referral_earnings" in tables
@@ -330,6 +351,7 @@ app.include_router(delivery.router)
 app.include_router(payment_methods.router)
 app.include_router(uploads.router)
 app.include_router(contact.router)
+app.include_router(fulfillment.router)
 
 
 @app.get("/")

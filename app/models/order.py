@@ -33,6 +33,23 @@ class Order(Base):
     shipping_address: Mapped[str] = mapped_column(Text, nullable=True)
     return_reason: Mapped[str] = mapped_column(Text, nullable=True)
     return_status: Mapped[str] = mapped_column(String(20), nullable=True)
+    # Return evidence images the customer uploads (JSON array of URLs).
+    return_evidence: Mapped[str] = mapped_column(Text, nullable=True)
+    # Admin note surfaced to the customer (e.g. rejection reason).
+    return_admin_note: Mapped[str] = mapped_column(Text, nullable=True)
+    # Delivery OTP — generated at dispatch, verified by the delivery partner
+    # to mark the order delivered. Never exposed to the customer in APIs; it
+    # travels by email/WhatsApp instead.
+    dispatch_otp: Mapped[str] = mapped_column(String(6), nullable=True)
+    dispatch_otp_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Return pickup OTP — generated on approval, verified at pickup.
+    return_otp: Mapped[str] = mapped_column(String(6), nullable=True)
+    return_otp_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    dispatched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    delivered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    return_requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    return_approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    return_picked_up_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     estimated_delivery: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
