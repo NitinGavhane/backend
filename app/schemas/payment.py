@@ -27,6 +27,9 @@ class PaymentResponse(BaseModel):
     razorpay_key_id: str | None = None
     currency: str | None = None
     amount_paise: int | None = None
+    # True when the order was placed against Cash on Delivery, in which case
+    # there is no gateway order to open and nothing to verify.
+    cod: bool | None = None
 
     class Config:
         from_attributes = True

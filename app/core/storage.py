@@ -184,3 +184,34 @@ def delete_image_from_s3(image_url: str | None) -> bool:
 def delete_images_from_s3(image_urls) -> int:
     """Best-effort delete of several images. Returns the number removed."""
     return sum(1 for url in image_urls if delete_image_from_s3(url))
+
+
+# Uploadcare hosts — image rows that predate S3 hold pasted Uploadcare CDN links
+# (ucarecdn.com) or the older vanity host (ucarecd.net). These support on-the-fly
+# transforms inserted between the file UUID and the filename.
+_UPLOADCARE_HOSTS = ("ucarecdn.com", "ucarecd.net")
+
+
+def serve_image_url(image_url: str | None, width: int = 1000) -> str | None:
+    """Return a CDN URL shaped for display.
+
+    Uploadcare links are rewritten to request a comfortably-large render plus a
+    lean JPEG re-encode, so large-screens get a bitmap bigger than the card is
+    drawn at and the heavy original PNG stops being shipped in full. S3/CloudFront
+    URLs already serve native (>=600px on upload) resolution and pass through
+    unchanged. Any URL that cannot be parsed safely is returned as-is rather than
+    risking a broken image.
+    """
+    if not image_url:
+        return None
+    url = image_url.strip()
+    path = url.split("?", 1)[0]
+    parts = path.split("/")
+    if len(parts) >= 5 and any(parts[2].endswith(host) for host in _UPLOADCARE_HOSTS):
+        uuid_part = parts[3]
+        filename = "/".join(parts[4:])
+        if uuid_part and filename:
+            # https://{host}/{uuid}/-/resize/{width}x/-/format/jpeg/{filename}
+            ops = f"-/resize/{width}x/-/format/jpeg"
+            return f"https://{parts[2]}/{uuid_part}/{ops}/{filename}"
+    return url

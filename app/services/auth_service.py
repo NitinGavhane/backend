@@ -86,7 +86,16 @@ def register_user(req: RegisterRequest, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    send_otp_email(user.email, otp)
+    try:
+        send_otp_email(user.email, otp)
+    except Exception as exc:
+        db.delete(user)
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not send the verification email to this address. "
+            "Please check the email and try again.",
+        ) from exc
 
     return {
         "user": {
@@ -132,7 +141,13 @@ def forgot_password(email: str, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    send_password_reset_email(user.email, otp)
+    try:
+        send_password_reset_email(user.email, otp)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not send the reset email. Please try again later.",
+        ) from exc
 
     return {"message": f"Password reset OTP sent to {user.email}"}
 
@@ -159,7 +174,13 @@ def send_login_otp(email: str, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    send_otp_email(user.email, otp, context="login")
+    try:
+        send_otp_email(user.email, otp, context="login")
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not send the OTP email. Please try again later.",
+        ) from exc
 
     return {"message": f"Login OTP sent to {user.email}"}
 
@@ -200,7 +221,13 @@ def resend_otp(email: str, db: Session) -> dict:
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
-    send_otp_email(user.email, otp)
+    try:
+        send_otp_email(user.email, otp)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Could not resend the OTP email. Please try again later.",
+        ) from exc
 
     return {"message": f"OTP resent to {user.email}"}
 

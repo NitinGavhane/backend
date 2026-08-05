@@ -24,6 +24,7 @@ _DEFAULT_PAYMENT_METHODS = [
     ("card", "Credit / Debit Card", "Visa, Mastercard, RuPay & more", "*", 1),
     ("netbanking", "Net Banking", "All major banks supported", "IN", 2),
     ("wallet", "Wallets", "Paytm, PhonePe, Amazon Pay & more", "IN", 3),
+    ("cod", "Cash on Delivery", "Pay in cash or UPI when your order arrives", "*", 4),
 ]
 
 
@@ -37,12 +38,13 @@ def _seed_payment_methods(db: Session):
     if db.execute(text("SELECT count(*) FROM payment_methods")).scalar():
         return
     for code, name, description, regions, sort_order in _DEFAULT_PAYMENT_METHODS:
+        gateway = "cod" if code == "cod" else "razorpay"
         db.execute(
             text("""
                 INSERT INTO payment_methods (id, code, name, description, gateway, regions, is_active, sort_order, created_at)
-                VALUES (gen_random_uuid(), :code, :name, :description, 'razorpay', :regions, true, :sort_order, NOW())
+                VALUES (gen_random_uuid(), :code, :name, :description, :gateway, :regions, true, :sort_order, NOW())
             """),
-            {"code": code, "name": name, "description": description, "regions": regions, "sort_order": sort_order},
+            {"code": code, "name": name, "description": description, "gateway": gateway, "regions": regions, "sort_order": sort_order},
         )
     print(f"Migration: seeded {len(_DEFAULT_PAYMENT_METHODS)} default payment methods")
 

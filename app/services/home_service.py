@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.core import storage
 from app.models.banner import Banner
 from app.models.product import Product
 
@@ -10,9 +11,11 @@ def _primary_image(product: Product) -> str | None:
     Matches product_service so the home feed, listings and the product page all
     show the same photo.
     """
-    return next(
-        (img.image_url for img in product.images if img.is_primary),
-        product.images[0].image_url if product.images else None,
+    return storage.serve_image_url(
+        next(
+            (img.image_url for img in product.images if img.is_primary),
+            product.images[0].image_url if product.images else None,
+        )
     )
 
 

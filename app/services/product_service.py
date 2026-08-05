@@ -48,7 +48,7 @@ def list_products(db: Session, category: str | None = None, search: str | None =
             "rating": 0.0,
             "review_count": 0,
             "stock": p.stock,
-            "image_url": primary_image,
+            "image_url": storage.serve_image_url(primary_image),
             "category_id": str(p.category_id),
             "category_name": p.category.name if p.category else None,
             "sizes": sizes,
@@ -119,7 +119,7 @@ def get_product(product_id: str, db: Session):
         "rating": 0.0,
         "review_count": 0,
         "stock": product.stock,
-        "image_url": primary_image,
+        "image_url": storage.serve_image_url(primary_image),
         "category_id": str(product.category_id),
         "category_name": product.category.name if product.category else None,
         "sizes": sizes,
@@ -134,7 +134,10 @@ def get_product(product_id: str, db: Session):
         "is_returnable": product.is_returnable,
         "gradient_colors": [],
         "variants": [_variant_to_dict(v) for v in product.variants],
-        "images": [_image_to_dict(img) for img in product.images],
+        "images": [
+            {**_image_to_dict(img), "image_url": storage.serve_image_url(img.image_url)}
+            for img in product.images
+        ],
         "created_at": product.created_at.isoformat() if product.created_at else None,
         "updated_at": product.updated_at.isoformat() if product.updated_at else None,
     }

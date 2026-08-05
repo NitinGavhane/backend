@@ -66,6 +66,42 @@ def create_payment(order_id: str, method_code: str | None, user_id: uuid.UUID, d
     if payment and payment.payment_status == "paid":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Order already paid")
 
+    # Cash on Delivery needs no gateway: the order stands and the money changes
+    # hands when the parcel arrives. Without this branch every COD attempt would
+    # still demand a Razorpay order, failing the checkout whenever the store
+    # has no gateway keys configured.
+    is_cod = method is not None and (method.code == "cod" or method.gateway == "cod")
+
+    if is_cod:
+        if not payment:
+            payment = Payment(
+                order_id=order.id,
+                amount=order.final_amount,
+                gateway="cod",
+                payment_method="cod",
+                payment_status="pending",
+            )
+            db.add(payment)
+        else:
+            payment.amount = order.final_amount
+            payment.gateway = "cod"
+            payment.payment_method = "cod"
+            payment.gateway_order_id = None
+            payment.payment_status = "pending"
+        db.commit()
+        db.refresh(payment)
+        return {
+            "id": str(payment.id),
+            "order_id": str(payment.order_id),
+            "amount": payment.amount,
+            "gateway": "cod",
+            "payment_method": "cod",
+            "payment_status": payment.payment_status,
+            "cod": True,
+            "currency": "INR",
+            "amount_paise": int(round(order.final_amount * 100)),
+        }
+
     client = _razorpay_client()
     amount_paise = int(round(order.final_amount * 100))
     rzp_order = client.order.create(
@@ -108,6 +144,7 @@ def create_payment(order_id: str, method_code: str | None, user_id: uuid.UUID, d
         "razorpay_key_id": settings.RAZORPAY_KEY_ID,
         "currency": "INR",
         "amount_paise": amount_paise,
+        "cod": False,
     }
 
 
