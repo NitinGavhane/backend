@@ -226,6 +226,7 @@ def _run_migrations(db: Session):
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS sgst_amount FLOAT DEFAULT 0.0"))
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS igst_amount FLOAT DEFAULT 0.0"))
     db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_fee FLOAT DEFAULT 0.0"))
+    db.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_state VARCHAR(100)"))
 
     if "coupons" not in tables:
         db.execute(text("""

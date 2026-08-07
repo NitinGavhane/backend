@@ -31,6 +31,9 @@ class Order(Base):
         default="pending",
     )
     shipping_address: Mapped[str] = mapped_column(Text, nullable=True)
+    # Customer's state, locked in at checkout from the selected address. Drives
+    # place-of-supply on the GST invoice (intra vs inter-state split).
+    shipping_state: Mapped[str] = mapped_column(String(100), nullable=True)
     return_reason: Mapped[str] = mapped_column(Text, nullable=True)
     return_status: Mapped[str] = mapped_column(String(20), nullable=True)
     # Return evidence images the customer uploads (JSON array of URLs).

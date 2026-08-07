@@ -1,3 +1,4 @@
+import logging
 import smtplib
 import ssl
 import uuid
@@ -7,12 +8,54 @@ from email.utils import formataddr, formatdate
 
 from app.core.config import settings
 
+logger = logging.getLogger(__name__)
+
 SENDING_DOMAIN = settings.SMTP_FROM_EMAIL.split("@")[1]
+SENDER_NAME = "Dristi Fashions"
 
 
-def send_email(recipient: str, subject: str, html_body: str, text_body: str = "") -> None:
+def _ses_client():
+    """Build a boto3 SES client using the configured credentials.
+
+    Picks up explicit keys from settings if supplied; otherwise falls back to
+    the standard boto3 credential chain (EC2 instance role / env vars), which is
+    the same path S3 uploads already rely on.
+    """
+    import boto3
+
+    kwargs = {"region_name": settings.SES_REGION}
+    if settings.SES_ACCESS_KEY_ID and settings.SES_SECRET_ACCESS_KEY:
+        kwargs.update(
+            aws_access_key_id=settings.SES_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.SES_SECRET_ACCESS_KEY,
+        )
+    return boto3.client("ses", **kwargs)
+
+
+def _send_via_ses_api(recipient: str, subject: str, html_body: str, text_body: str) -> None:
+    """Send through the AWS SES SendEmail API (boto3)."""
+    params = {
+        "Source": f"{SENDER_NAME} <{settings.SMTP_FROM_EMAIL}>",
+        "Destination": {"ToAddresses": [recipient]},
+        "Message": {
+            "Subject": {"Data": subject, "Charset": "UTF-8"},
+            "Body": {
+                "Html": {"Data": html_body, "Charset": "UTF-8"},
+                "Text": {"Data": text_body, "Charset": "UTF-8"},
+            },
+        },
+        "ReplyToAddresses": [settings.SMTP_FROM_EMAIL],
+    }
+    if settings.SES_CONFIGURATION_SET:
+        params["ConfigurationSetName"] = settings.SES_CONFIGURATION_SET
+
+    client = _ses_client()
+    client.send_email(**params)
+
+
+def _build_smtp_message(recipient: str, subject: str, html_body: str, text_body: str) -> str:
     msg = MIMEMultipart("alternative")
-    msg["From"] = formataddr(("Dristi Fashions", settings.SMTP_FROM_EMAIL))
+    msg["From"] = formataddr((SENDER_NAME, settings.SMTP_FROM_EMAIL))
     msg["Reply-To"] = settings.SMTP_FROM_EMAIL
     msg["To"] = recipient
     msg["Subject"] = subject
@@ -22,20 +65,47 @@ def send_email(recipient: str, subject: str, html_body: str, text_body: str = ""
     msg["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
     msg["Precedence"] = "bulk"
     msg["X-Mailer"] = "DristiFashions-Mailer/1.0"
+    msg.attach(MIMEText(text_body, "plain"))
+    msg.attach(MIMEText(html_body, "html"))
+    return msg.as_string()
+
+
+def _send_via_smtp(recipient: str, subject: str, html_body: str, text_body: str) -> None:
+    message = _build_smtp_message(recipient, subject, html_body, text_body)
+    ctx = ssl.create_default_context()
+    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+        server.starttls(context=ctx)
+        if settings.SMTP_USERNAME:
+            server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
+        server.sendmail(settings.SMTP_FROM_EMAIL, recipient, message)
+
+
+def send_email(recipient: str, subject: str, html_body: str, text_body: str = "") -> None:
+    if recipient is None or not recipient.strip():
+        raise ValueError("Cannot send an email with no recipient")
 
     if not text_body:
         text_body = f"Your OTP code is: {html_body}"
 
-    text_part = MIMEText(text_body, "plain")
-    html_part = MIMEText(html_body, "html")
-    msg.attach(text_part)
-    msg.attach(html_part)
+    primary = settings.EMAIL_BACKEND.lower()
+    order = ("ses", "smtp") if primary == "ses" else ("smtp", "ses")
 
-    ctx = ssl.create_default_context()
-    with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-        server.starttls(context=ctx)
-        server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
-        server.sendmail(settings.SMTP_FROM_EMAIL, recipient, msg.as_string())
+    errors = []
+    for backend in order:
+        try:
+            if backend == "ses":
+                _send_via_ses_api(recipient, subject, html_body, text_body)
+            else:
+                _send_via_smtp(recipient, subject, html_body, text_body)
+            return
+        except Exception as exc:  # noqa: BLE001 - cross-transport fallback is intentional
+            errors.append(f"{backend}: {exc}")
+            logger.warning("email backend '%s' failed (%s); trying fallback", backend, exc)
+
+    # raise the primary backend's error so callers surface the root cause
+    first_backend, _ = order
+    primary_error = errors[0] if errors else "no transports available"
+    raise RuntimeError(f"All email transports failed for {recipient} [{primary_error}]")
 
 
 def _build_otp_html(title: str, otp: str, subtitle: str, accent_color: str) -> str:

@@ -41,15 +41,29 @@ class Settings(BaseSettings):
     # with AppLinks.siteUrl in the user app.
     SITE_URL: str = "https://dristifashions.com"
 
-    # Amazon SES SMTP (email-smtp.<region>.amazonaws.com, 587 STARTTLS). The
-    # username is the SES SMTP user's IAM access key id; the password is the
-    # SigV4-derived SES SMTP password (not the IAM secret itself). From is the
-    # verified business address info@dristifashions.com.
+    # Email delivery via AWS SES. Two transports are supported:
+    #   "ses"  -> the SES SendEmail API through boto3. Preferred in production:
+    #             picks up credentials from the EC2 instance role (same as S3)
+    #             and needs no long-lived SMTP secret.
+    #   "smtp" -> sendmail over the SES SMTP relay (email-smtp.<region>.amazonaws.com).
+    # If the configured backend fails at runtime, email_service falls back to the
+    # other one automatically so a delivery path is never silently down.
+    EMAIL_BACKEND: str = "ses"
     SMTP_HOST: str = "email-smtp.ap-south-1.amazonaws.com"
     SMTP_PORT: int = 587
     SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
+    # The verified sender every user-facing email is sent From. Must be a
+    # verified identity (or inside the verified domain dristifashions.com) or
+    # SES will reject the send — also true in sandbox mode.
     SMTP_FROM_EMAIL: str = "info@dristifashions.com"
+    # SES API transport settings. Client uses instance-role / env credentials
+    # unless explicit ones are supplied here. SES_CONFIGURATION_SET is optional
+    # (enables bounce/complaint tracking and open/click when created in SES).
+    SES_REGION: str = "ap-south-1"
+    SES_ACCESS_KEY_ID: str = ""
+    SES_SECRET_ACCESS_KEY: str = ""
+    SES_CONFIGURATION_SET: str = ""
 
     # WhatsApp notifications — provider-agnostic seam. Leave WHATSAPP_PROVIDER
     # empty to keep WhatsApp as a logged no-op (email still delivers everything);
@@ -71,15 +85,26 @@ class Settings(BaseSettings):
     RAZORPAY_KEY_ID: str = ""
     RAZORPAY_KEY_SECRET: str = ""
 
-    # Seller identity printed on GST tax invoices. Overridable via env once the
-    # real GSTIN/registered address is available; the defaults keep invoices
-    # rendering sensibly in the meantime. The seller state drives the
-    # intra/inter-state GST label already computed at checkout (West Bengal).
-    SELLER_NAME: str = "Dristi Fashions"
-    SELLER_GSTIN: str = "19AAAAA0000A1Z5"
-    SELLER_ADDRESS: str = "West Bengal, India"
+    # Seller identity printed on GST tax invoices. Overridable via env; the
+    # defaults mirror the registered business details shown on the invoice
+    # sample. The seller state drives the intra/inter-state GST label already
+    # computed at checkout (West Bengal).
+    SELLER_NAME: str = "Dristi Dhimahi Vyapaar Pvt Ltd"
+    SELLER_COMPANY_ID: str = "U46109WB2023PTC265442"
+    SELLER_GSTIN: str = "19AAKCD3509Q1Z1"
+    SELLER_ADDRESS: str = "212 GIRISH GHOSH ROAD\nROOM NO -430 RANGOLI MALL\nHOWRAH West Bengal 711202\nIndia"
+    SELLER_PHONE: str = "7003871460"
     SELLER_STATE: str = "West Bengal"
-    SELLER_EMAIL: str = "support@dristifashions.com"
+    SELLER_EMAIL: str = "dristidhimahivyapaar@gmail.com"
+
+    # Default HSN/SAC printed on invoices. Products do not carry their own HSN,
+    # so every line item uses this garment HSN unless a per-product code is
+    # added later.
+    DEFAULT_HSN: str = "611300"
+
+    # Logo embedded in the invoice header. Resolved relative to the backend
+    # root (the file lives at backend/app/static/logo.png by default).
+    INVOICE_LOGO_PATH: str = "app/static/logo.png"
 
     # S3 image uploads (banners). Credentials come from the EC2 instance role,
     # so only the bucket/region are configured here. S3_PUBLIC_BASE_URL lets a

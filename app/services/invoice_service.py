@@ -1,4 +1,10 @@
-"""GST tax-invoice PDF generation.
+"""GST tax-invoice PDF generation matching the Dristi Fashions invoice template.
+
+The layout mirrors the reference INV-000001/INV-000002 samples: company
+header with the brand logo and "TAX INVOICE" title, invoice/buyer meta, a line
+item table that switches between an IGST column (inter-state) and CGST + SGST
+columns (intra-state), right-aligned totals with a Balance Due line, amount in
+words, notes and an authorized-signature block.
 
 The invoice is built on the fly from the order's stored figures (subtotal,
 CGST/SGST/IGST, total) so it always matches what the buyer was charged. The
@@ -8,11 +14,13 @@ using the same numbering the payment flow uses, so the number stays stable.
 """
 
 import io
+import os
 import uuid
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core import gst
 from app.core.config import settings
 from app.models.order import Order
 from app.models.payment import GstInvoice, Payment
@@ -20,16 +28,73 @@ from app.services.order_service import _order_gst_breakup
 
 # reportlab is a pure-Python dependency (see requirements.txt).
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import (
-    SimpleDocTemplate,
+    Image,
     Paragraph,
+    SimpleDocTemplate,
     Spacer,
     Table,
     TableStyle,
 )
+
+# ---------------------------------------------------------------------------
+# Fonts: use a TTF that carries the rupee glyph when one is available (Arial on
+# Windows/macOS, DejaVu on Linux) so "₹" renders; otherwise fall back to the
+# built-in Helvetica and spell the currency as "Rs.".
+# ---------------------------------------------------------------------------
+_FONT_REGULAR = "Helvetica"
+_FONT_BOLD = "Helvetica-Bold"
+_FONT_BASE = "InvoiceFont"
+_CURRENCY = "Rs."
+
+_FONT_CANDIDATES = [
+    ("C:/Windows/Fonts/arial.ttf", "C:/Windows/Fonts/arialbd.ttf"),
+    ("C:/Windows/Fonts/segoeui.ttf", "C:/Windows/Fonts/segoeuib.ttf"),
+    ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+    ("/usr/share/fonts/truetype/msttcorefonts/Arial.ttf",
+     "/usr/share/fonts/truetype/msttcorefonts/Arial_Bold.ttf"),
+    ("/Library/Fonts/Arial.ttf", "/Library/Fonts/Arial Bold.ttf"),
+]
+
+
+def _has_rupee_glyph(path: str) -> bool:
+    try:
+        from PIL import ImageFont
+        font = ImageFont.truetype(path, 20)
+        bbox = font.getbbox("₹")
+        return bool(bbox and bbox[2] > bbox[0])
+    except Exception:
+        return False
+
+
+def _setup_fonts() -> tuple[str, str, str]:
+    """Register a rupee-capable TTF if found; return (regular, bold, currency)."""
+    global _FONT_REGULAR, _FONT_BOLD, _CURRENCY
+    try:
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        for regular, bold in _FONT_CANDIDATES:
+            if not (os.path.exists(regular) and os.path.exists(bold)):
+                continue
+            if not (_has_rupee_glyph(regular) and _has_rupee_glyph(bold)):
+                continue
+            pdfmetrics.registerFont(TTFont(_FONT_BASE, regular))
+            pdfmetrics.registerFont(TTFont(_FONT_BASE + "-Bold", bold))
+            _FONT_REGULAR = _FONT_BASE
+            _FONT_BOLD = _FONT_BASE + "-Bold"
+            _CURRENCY = "₹"
+            break
+    except Exception:
+        pass
+    return _FONT_REGULAR, _FONT_BOLD, _CURRENCY
+
+
+_FONT_REGULAR, _FONT_BOLD, _CURRENCY = _setup_fonts()
 
 
 def _invoice_number_for(order: Order) -> str:
@@ -52,12 +117,85 @@ def get_or_create_invoice(order: Order, db: Session) -> GstInvoice:
     return invoice
 
 
-def _money(value: float) -> str:
-    return f"Rs. {value:,.2f}"
+def _plain(value: float) -> str:
+    return f"{value:,.2f}"
 
 
+def _inr(value: float) -> str:
+    return f"{_CURRENCY}{value:,.2f}"
+
+
+def _logo_path() -> str:
+    # backend/app/services/invoice_service.py -> backend root
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    candidate = os.path.join(root, settings.INVOICE_LOGO_PATH.replace("/", os.sep))
+    return candidate if os.path.exists(candidate) else None
+
+
+# ---------------------------------------------------------------------------
+# Amount in words (Indian numbering: crore/lakh/thousand).
+# ---------------------------------------------------------------------------
+_ONES = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight",
+         "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+         "Sixteen", "Seventeen", "Eighteen", "Nineteen"]
+_TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy",
+         "Eighty", "Ninety"]
+
+
+def _two_digits(n: int) -> str:
+    if n < 20:
+        return _ONES[n]
+    return (_TENS[n // 10] + (" " + _ONES[n % 10] if n % 10 else "")).strip()
+
+
+def _three_digits(n: int) -> str:
+    parts = []
+    if n >= 100:
+        parts.append(f"{_ONES[n // 100]} Hundred")
+        n %= 100
+    if n:
+        parts.append(_two_digits(n))
+    return " ".join(parts).strip()
+
+
+def _indian_words(n: int) -> str:
+    if n == 0:
+        return "Zero"
+    parts = []
+    crore = n // 10_000_000
+    n %= 10_000_000
+    lakh = n // 100_000
+    n %= 100_000
+    thousand = n // 1_000
+    n %= 1_000
+    if crore:
+        parts.append(f"{_indian_words(crore)} Crore")
+    if lakh:
+        parts.append(f"{_two_digits(lakh)} Lakh")
+    if thousand:
+        parts.append(f"{_two_digits(thousand)} Thousand")
+    if n:
+        parts.append(_three_digits(n))
+    return " ".join(parts).strip()
+
+
+def _amount_in_words(amount: float) -> str:
+    rupees = int(amount)
+    paise = round((amount - rupees) * 100)
+    if paise >= 100:
+        rupees += paise // 100
+        paise %= 100
+    words = f"Indian Rupee {_indian_words(rupees)}"
+    if paise:
+        words += f" and {_two_digits(paise)} Paise"
+    return words + " Only"
+
+
+# ---------------------------------------------------------------------------
+# PDF builder
+# ---------------------------------------------------------------------------
 def build_invoice_pdf(order: Order, invoice: GstInvoice, db: Session) -> bytes:
-    """Render the order as a GST tax-invoice PDF and return the bytes."""
+    """Render the order as a GST tax-invoice PDF matching the reference format."""
     breakup = _order_gst_breakup(order)
     cgst = breakup["cgst_amount"]
     sgst = breakup["sgst_amount"]
@@ -72,166 +210,297 @@ def build_invoice_pdf(order: Order, invoice: GstInvoice, db: Session) -> bytes:
     )
 
     styles = getSampleStyleSheet()
-    small = ParagraphStyle("small", parent=styles["Normal"], fontSize=9, leading=12)
-    right = ParagraphStyle("right", parent=small, alignment=2)
-    h_title = ParagraphStyle(
-        "h_title", parent=styles["Title"], fontSize=18, spaceAfter=2
-    )
+    base = ParagraphStyle("base", parent=styles["Normal"],
+                          fontName=_FONT_REGULAR, fontSize=8, leading=10.5)
+    bold = ParagraphStyle("bold", parent=base, fontName=_FONT_BOLD)
+    small_bold = ParagraphStyle("small_bold", parent=bold, fontSize=9, leading=12)
+    label = ParagraphStyle("label", parent=base)
+    value = ParagraphStyle("value", parent=bold)
 
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
         buf,
         pagesize=A4,
-        leftMargin=18 * mm,
-        rightMargin=18 * mm,
-        topMargin=18 * mm,
-        bottomMargin=18 * mm,
+        leftMargin=44,
+        rightMargin=40,
+        topMargin=48,
+        bottomMargin=48,
         title=invoice.invoice_number,
     )
     story = []
 
-    # Header: seller identity + "Tax Invoice" label.
-    header = Table(
-        [
-            [
-                Paragraph(f"<b>{settings.SELLER_NAME}</b><br/>"
-                          f"{settings.SELLER_ADDRESS}<br/>"
-                          f"GSTIN: {settings.SELLER_GSTIN}<br/>"
-                          f"{settings.SELLER_EMAIL}", small),
-                Paragraph("<b>TAX INVOICE</b>", ParagraphStyle(
-                    "inv", parent=h_title, alignment=2)),
-            ]
-        ],
-        colWidths=[95 * mm, 79 * mm],
+    # --- Header: logo + company block + TAX INVOICE title -------------------
+    company_lines = [
+        (f"<b>{settings.SELLER_NAME}</b>", 12),
+        (f"Company ID : {settings.SELLER_COMPANY_ID}", 8),
+        *[(line, 8) for line in settings.SELLER_ADDRESS.splitlines()],
+        (f"GSTIN {settings.SELLER_GSTIN}", 8),
+        (settings.SELLER_PHONE, 8),
+        (settings.SELLER_EMAIL, 8),
+    ]
+    company_html = "<br/>".join(
+        f"<font size=\"{size}\">{line}</font>" for line, size in company_lines
     )
-    header.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
-    story.append(header)
-    story.append(Spacer(1, 8))
+    company_style = ParagraphStyle(
+        "company", parent=base, fontSize=8, leading=10.5,
+    )
 
-    # Invoice / buyer meta.
-    created = order.created_at.strftime("%d %b %Y") if order.created_at else "-"
-    buyer_name = order.user.full_name if order.user else "-"
-    ship_to = (order.shipping_address or "-").replace("\n", "<br/>")
+    logo = _logo_path()
+    logo_cell = Image(logo, width=112, height=112) if logo else Paragraph("", company_style)
+
+    tax_title = ParagraphStyle(
+        "tax_title", parent=styles["Title"], fontName=_FONT_BOLD,
+        fontSize=22, leading=26, alignment=TA_RIGHT, textColor=colors.black,
+    )
+    header = Table(
+        [[logo_cell, Paragraph(company_html, company_style),
+          Paragraph("TAX INVOICE", tax_title)]],
+        colWidths=[124, 230, 157],
+    )
+    header.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(header)
+    story.append(Spacer(1, 14))
+
+    # --- Invoice / buyer meta ------------------------------------------------
+    created = order.created_at.strftime("%d/%m/%Y") if order.created_at else "-"
+    place_state = order.shipping_state or "West Bengal"
+    place_code = gst.state_gst_code(place_state)
+    place_of_supply = f"{place_state} ({place_code})" if place_code else place_state
+
     meta = Table(
         [
-            [
-                Paragraph(
-                    f"<b>Invoice No:</b> {invoice.invoice_number}<br/>"
-                    f"<b>Order No:</b> {order.order_number}<br/>"
-                    f"<b>Invoice Date:</b> {created}<br/>"
-                    f"<b>Payment Status:</b> {order.payment_status.upper()}",
-                    small,
-                ),
-                Paragraph(
-                    f"<b>Bill / Ship To:</b><br/>{buyer_name}<br/>{ship_to}",
-                    small,
-                ),
-            ]
+            [Paragraph("#", label), Paragraph(f": {invoice.invoice_number}", value),
+             Paragraph("Place Of Supply", label), Paragraph(f": {place_of_supply}", value)],
+            [Paragraph("Invoice Date", label), Paragraph(f": {created}", value),
+             Paragraph("", label), Paragraph("", value)],
+            [Paragraph("Terms", label), Paragraph(": Due on Receipt", value),
+             Paragraph("", label), Paragraph("", value)],
+            [Paragraph("Due Date", label), Paragraph(f": {created}", value),
+             Paragraph("", label), Paragraph("", value)],
         ],
-        colWidths=[87 * mm, 87 * mm],
+        colWidths=[70, 180, 130, 131],
     )
-    meta.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#cccccc")),
-                ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cccccc")),
-                ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-            ]
-        )
-    )
+    meta.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 2),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
     story.append(meta)
     story.append(Spacer(1, 12))
 
-    # Line items.
-    rows = [["#", "Item", "Qty", "Unit Price", "Amount"]]
-    for idx, item in enumerate(order.items, start=1):
-        line_total = (item.price or 0.0) * (item.quantity or 0)
-        rows.append(
-            [
-                str(idx),
-                Paragraph(item.product_name, small),
-                str(item.quantity),
-                _money(item.price or 0.0),
-                _money(line_total),
-            ]
-        )
-    items_table = Table(
-        rows, colWidths=[10 * mm, 88 * mm, 16 * mm, 30 * mm, 30 * mm]
+    # --- Bill To -------------------------------------------------------------
+    bill_lines = ["Bill To", order.user.full_name if order.user else "-"]
+    if order.shipping_address:
+        bill_lines.extend(order.shipping_address.splitlines())
+    bill = Table(
+        [[Paragraph("<br/>".join(bill_lines), ParagraphStyle(
+            "billto", parent=base, leading=11))]],
+        colWidths=[511],
     )
-    items_table.setStyle(
-        TableStyle(
-            [
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#7b1fa2")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, -1), 9),
-                ("ALIGN", (2, 0), (-1, -1), "RIGHT"),
-                ("ALIGN", (0, 0), (0, -1), "CENTER"),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1),
-                 [colors.white, colors.HexColor("#f6f2f8")]),
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#dddddd")),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-            ]
-        )
+    bill.setStyle(TableStyle([
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(bill)
+    story.append(Spacer(1, 16))
+
+    # --- Line items table -----------------------------------------------------
+    items = build_line_items_table(order, interstate)
+    story.append(items)
+    story.append(Spacer(1, 14))
+
+    # --- Totals ---------------------------------------------------------------
+    totals_rows = [["Sub Total", _plain(order.subtotal or 0.0)]]
+    if (order.discount_amount or 0.0) > 0:
+        totals_rows.append(["Discount", "- " + _plain(order.discount_amount)])
+    if (getattr(order, "delivery_fee", 0.0) or 0.0) > 0:
+        totals_rows.append(["Delivery", _plain(order.delivery_fee)])
+    if interstate:
+        totals_rows.append(
+            [f"IGST{gst.IGST_PERCENTAGE:g} ({gst.IGST_PERCENTAGE:g}%)", _plain(igst)])
+    else:
+        totals_rows.append(
+            [f"CGST{gst.CGST_PERCENTAGE:g} ({gst.CGST_PERCENTAGE:g}%)", _plain(cgst)])
+        totals_rows.append(
+            [f"SGST{gst.SGST_PERCENTAGE:g} ({gst.SGST_PERCENTAGE:g}%)", _plain(sgst)])
+    totals_rows.append(["Total", _inr(order.final_amount or 0.0)])
+    totals_rows.append(["Balance Due", _inr(order.final_amount or 0.0)])
+
+    totals = Table(
+        [[Paragraph(r[0], bold), Paragraph(r[1], bold)] for r in totals_rows],
+        colWidths=[120, 90],
+        hAlign="RIGHT",
     )
-    story.append(items_table)
+    last = len(totals_rows) - 1
+    balance = last - 1
+    totals.setStyle(TableStyle([
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+        ("LINEABOVE", (0, last), (-1, last), 0.6, colors.black),
+        ("FONTNAME", (0, last), (-1, last), _FONT_BOLD),
+        ("FONTSIZE", (0, balance), (-1, balance), 9),
+    ]))
+    story.append(totals)
+    story.append(Spacer(1, 20))
+
+    # --- Bottom: amount in words / notes  |  authorized signature ------------
+    words_style = ParagraphStyle("words", parent=base, leading=11)
+    notes_style = ParagraphStyle("notes", parent=base, leading=11)
+    signature_style = ParagraphStyle("signature", parent=base, alignment=TA_RIGHT)
+
+    bottom = Table(
+        [[
+            Paragraph(
+                "Total In Words<br/>"
+                f"<b>{_amount_in_words(order.final_amount or 0.0)}</b><br/><br/>"
+                "Notes<br/>Thanks for your business.",
+                ParagraphStyle("bottom_left", parent=base, leading=11),
+            ),
+            Paragraph("Authorized Signature", signature_style),
+        ]],
+        colWidths=[300, 211],
+    )
+    bottom.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(bottom)
     story.append(Spacer(1, 10))
 
-    # Totals block, right-aligned.
-    totals_rows = [["Subtotal", _money(order.subtotal or 0.0)]]
-    if (order.discount_amount or 0.0) > 0:
-        totals_rows.append(["Discount", "- " + _money(order.discount_amount)])
-    if interstate:
-        totals_rows.append(["IGST", _money(igst)])
-    else:
-        totals_rows.append(["CGST", _money(cgst)])
-        totals_rows.append(["SGST", _money(sgst)])
-    if (getattr(order, "delivery_fee", 0.0) or 0.0) > 0:
-        totals_rows.append(["Delivery", _money(order.delivery_fee)])
-    totals_rows.append(["Total", _money(order.final_amount or 0.0)])
-
-    totals = Table(totals_rows, colWidths=[40 * mm, 40 * mm], hAlign="RIGHT")
-    last = len(totals_rows) - 1
-    totals.setStyle(
-        TableStyle(
-            [
-                ("FONTSIZE", (0, 0), (-1, -1), 10),
-                ("ALIGN", (1, 0), (1, -1), "RIGHT"),
-                ("LINEABOVE", (0, last), (-1, last), 0.8, colors.HexColor("#7b1fa2")),
-                ("FONTNAME", (0, last), (-1, last), "Helvetica-Bold"),
-                ("TOPPADDING", (0, 0), (-1, -1), 4),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-            ]
-        )
-    )
-    story.append(totals)
-    story.append(Spacer(1, 18))
-
+    # Paid via / transaction id, kept as a small footer-style note (only when
+    # present on the payment record).
+    pay_note = []
     if payment and payment.payment_method:
-        story.append(
-            Paragraph(f"Paid via: {payment.payment_method.upper()}", small)
-        )
+        pay_note.append(f"Paid via: {payment.payment_method.upper()}")
     if payment and payment.transaction_id:
-        story.append(
-            Paragraph(f"Transaction ID: {payment.transaction_id}", small)
-        )
-    story.append(Spacer(1, 8))
-    story.append(
-        Paragraph(
-            "This is a computer-generated invoice and does not require a "
-            "signature.",
-            ParagraphStyle("footer", parent=small, textColor=colors.HexColor("#888888")),
-        )
-    )
+        pay_note.append(f"Transaction ID: {payment.transaction_id}")
+    if pay_note:
+        story.append(Paragraph("<br/>".join(pay_note), ParagraphStyle(
+            "paynote", parent=base, textColor=colors.HexColor("#888888"))))
 
-    doc.build(story)
+    doc.build(story, onFirstPage=_draw_header_footer,
+              onLaterPages=_draw_footer)
     return buf.getvalue()
+
+
+def _draw_header_footer(canvas, doc):
+    _draw_footer(canvas, doc)
+
+
+def _draw_footer(canvas, doc):
+    canvas.saveState()
+    canvas.setFont(_FONT_REGULAR, 8)
+    canvas.setFillColor(colors.HexColor("#888888"))
+    canvas.drawRightString(A4[0] - 40, 24, str(canvas.getPageNumber()))
+    canvas.drawString(44, 24, "POWERED BY")
+    canvas.restoreState()
+
+
+def build_line_items_table(order: Order, interstate: bool) -> Table:
+    """Line item table; tax columns switch between IGST and CGST + SGST."""
+    gst_rate = gst.IGST_PERCENTAGE if interstate else gst.CGST_PERCENTAGE
+
+    if interstate:
+        headers = [["#", "Item & Description", "HSN/SAC", "Qty", "Rate",
+                    "IGST", "", "Amount"],
+                   ["", "", "", "", "", "%", "Amt", ""]]
+        widths = [24, 160, 50, 45, 50, 32, 52, 98]
+    else:
+        headers = [["#", "Item & Description", "HSN/SAC", "Qty", "Rate",
+                    "CGST", "", "SGST", "", "Amount"],
+                   ["", "", "", "", "", "%", "Amt", "%", "Amt", ""]]
+        widths = [20, 108, 45, 40, 45, 34, 44, 34, 44, 97]
+
+    hdr = ParagraphStyle("hdr", fontName=_FONT_BOLD, fontSize=8, leading=9.5,
+                         alignment=1)
+    hdr_left = ParagraphStyle("hdr_left", parent=hdr, alignment=0)
+
+    rows = []
+    for r in range(2):
+        rows.append([Paragraph(c, hdr_left if i < 5 else hdr)
+                     for i, c in enumerate(headers[r])])
+
+    for idx, item in enumerate(order.items, start=1):
+        line_total = (item.price or 0.0) * (item.quantity or 0)
+        tax_amt = line_total * gst_rate / 100
+        if interstate:
+            data = [
+                str(idx),
+                Paragraph(item.product_name, ParagraphStyle(
+                    "cell", fontName=_FONT_REGULAR, fontSize=8, leading=9.5)),
+                settings.DEFAULT_HSN,
+                Paragraph(f"{item.quantity}.00<br/>NOS", ParagraphStyle(
+                    "qty", fontName=_FONT_REGULAR, fontSize=8, leading=8.5,
+                    alignment=1)),
+                _plain(item.price or 0.0),
+                f"{gst_rate:g}%",
+                _plain(tax_amt),
+                _plain(line_total),
+            ]
+        else:
+            cgst_amt = line_total * gst.CGST_PERCENTAGE / 100
+            sgst_amt = line_total * gst.SGST_PERCENTAGE / 100
+            data = [
+                str(idx),
+                Paragraph(item.product_name, ParagraphStyle(
+                    "cell", fontName=_FONT_REGULAR, fontSize=8, leading=9.5)),
+                settings.DEFAULT_HSN,
+                Paragraph(f"{item.quantity}.00<br/>NOS", ParagraphStyle(
+                    "qty", fontName=_FONT_REGULAR, fontSize=8, leading=8.5,
+                    alignment=1)),
+                _plain(item.price or 0.0),
+                f"{gst.CGST_PERCENTAGE:g}%",
+                _plain(cgst_amt),
+                f"{gst.SGST_PERCENTAGE:g}%",
+                _plain(sgst_amt),
+                _plain(line_total),
+            ]
+        rows.append(data)
+
+    table = Table(rows, colWidths=widths, repeatRows=2)
+    style_cmds = [
+        ("BACKGROUND", (0, 0), (-1, 1), colors.HexColor("#f2f0f7")),
+        ("TEXTCOLOR", (0, 0), (-1, 1), colors.black),
+        ("FONTNAME", (0, 0), (-1, 1), _FONT_BOLD),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#dddddd")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("ROWBACKGROUNDS", (0, 2), (-1, -1),
+         [colors.white, colors.HexColor("#fbf9fd")]),
+    ]
+    # SPAN commands so tax names cover their % / Amt sub-columns in the header.
+    for (r1, c1, r2, c2) in _header_spans(interstate):
+        style_cmds.append(("SPAN", (c1, r1), (c2, r2)))
+    table.setStyle(TableStyle(style_cmds))
+    return table
+
+
+def _header_spans(interstate: bool):
+    if interstate:
+        return [(0, 0, 0, 1), (1, 0, 1, 1), (2, 0, 2, 1), (3, 0, 3, 1),
+                (4, 0, 4, 1), (5, 0, 6, 0), (7, 0, 7, 1)]
+    return [(0, 0, 0, 1), (1, 0, 1, 1), (2, 0, 2, 1), (3, 0, 3, 1),
+            (4, 0, 4, 1), (5, 0, 6, 0), (7, 0, 8, 0), (9, 0, 9, 1)]
 
 
 def generate_invoice_pdf(order_id: str, user_id, db: Session) -> tuple[bytes, str]:

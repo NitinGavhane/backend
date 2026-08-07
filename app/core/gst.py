@@ -17,6 +17,57 @@ IGST_PERCENTAGE = 18.0
 # Accepted spellings/abbreviations for the seller's home state.
 _SELLER_STATE_ALIASES = {"west bengal", "westbengal", "wb", "bengal"}
 
+# GST two-digit state codes, keyed by state name (lower-cased). Used to render
+# the "Place of Supply : <State> (<code>)" line on the tax invoice. Unknown
+# states fall back to an empty code.
+GST_STATE_CODES = {
+    "jammu and kashmir": "01",
+    "himachal pradesh": "02",
+    "punjab": "03",
+    "chandigarh": "04",
+    "uttarakhand": "05",
+    "haryana": "06",
+    "delhi": "07",
+    "rajasthan": "08",
+    "uttar pradesh": "09",
+    "bihar": "10",
+    "sikkim": "11",
+    "arunachal pradesh": "12",
+    "nagaland": "13",
+    "manipur": "14",
+    "mizoram": "15",
+    "tripura": "16",
+    "meghalaya": "17",
+    "assam": "18",
+    "west bengal": "19",
+    "jharkhand": "20",
+    "odisha": "21",
+    "orissa": "21",
+    "chhattisgarh": "22",
+    "madhya pradesh": "23",
+    "gujarat": "24",
+    "dadra and nagar haveli and daman and diu": "26",
+    "daman and diu": "26",
+    "dadra and nagar haveli": "26",
+    "maharashtra": "27",
+    "andhra pradesh": "28",
+    "karnataka": "29",
+    "goa": "30",
+    "lakshadweep": "31",
+    "kerala": "32",
+    "tamil nadu": "33",
+    "puducherry": "34",
+    "andaman and nicobar islands": "35",
+    "telangana": "36",
+    "ladakh": "38",
+    "other territory": "97",
+}
+
+
+def state_gst_code(state: str | None) -> str:
+    """Two-digit GST state code for a state name, or '' when unknown."""
+    return GST_STATE_CODES.get((state or "").strip().lower(), "")
+
 
 def is_intra_state(customer_state: str | None) -> bool:
     """Return True for an intra-state sale (customer in the seller's state).

@@ -74,6 +74,7 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
         final_amount=round(final_amount, 2),
         order_status="placed",
         shipping_address=req.shipping_address,
+        shipping_state=req.shipping_state,
         estimated_delivery=estimated_delivery,
     )
     db.add(order)
@@ -167,6 +168,7 @@ def format_order(order: Order) -> dict:
         "order_status": order.order_status,
         "payment_status": order.payment_status,
         "shipping_address": order.shipping_address,
+        "shipping_state": order.shipping_state,
         "return_reason": order.return_reason,
         "return_status": order.return_status,
         "return_evidence": return_evidence,

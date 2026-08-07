@@ -204,7 +204,7 @@ def verify_payment(
         invoice_number = invoice.invoice_number
     else:
         invoice_number = f"INV-{order.order_number}-{str(order.id)[:8].upper()}"
-        db.add(GstInvoice(order_id=order.id, invoice_number=invoice_number, gst_number="GST1234567890"))
+        db.add(GstInvoice(order_id=order.id, invoice_number=invoice_number, gst_number=settings.SELLER_GSTIN))
 
     db.commit()
     return {
