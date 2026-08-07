@@ -5,7 +5,9 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.config import settings
 from app.models.order import Order
+from app.models.payment import GstInvoice, Payment
 from app.services import notifications
 
 OTP_TTL_MINUTES = 10
@@ -78,10 +80,41 @@ def verify_delivery_otp(order_id: str, otp: str, db: Session) -> dict:
     order.delivered_at = datetime.now(timezone.utc)
     order.dispatch_otp = None
     order.dispatch_otp_expires_at = None
+    _mark_cod_paid(order, db)
     db.commit()
     db.refresh(order)
     notifications.notify_order_delivered(order)
     return {"message": "Delivery confirmed", "order_status": "delivered"}
+
+
+def _mark_cod_paid(order: Order, db: Session) -> None:
+    """Close the money on a delivered Cash-on-Delivery order.
+
+    COD is paid at the doorstep, so the payment only becomes 'paid' when the
+    delivery is confirmed. This keeps GST invoices available to the customer
+    for every order that actually got paid (Razorpay orders already flip to
+    'paid' in verify_payment; COD needed the same treatment at delivery time).
+    Only COD orders are touched — an online order still awaiting payment stays
+    pending even if its status is set to delivered.
+    """
+    if order.payment_status == "paid":
+        return
+
+    payment = db.query(Payment).filter(Payment.order_id == order.id).first()
+    is_cod = payment is not None and (
+        payment.gateway == "cod" or payment.payment_method == "cod"
+    )
+    if not is_cod:
+        return
+
+    payment.payment_status = "paid"
+    order.payment_status = "paid"
+
+    # One GST invoice per order — reuse if a previous delivery already created it.
+    invoice = db.query(GstInvoice).filter(GstInvoice.order_id == order.id).first()
+    if not invoice:
+        invoice_number = f"INV-{order.order_number}-{str(order.id)[:8].upper()}"
+        db.add(GstInvoice(order_id=order.id, invoice_number=invoice_number, gst_number=settings.SELLER_GSTIN))
 
 
 # ── Returns ─────────────────────────────────────────────────────────────────
