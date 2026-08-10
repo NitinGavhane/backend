@@ -15,5 +15,7 @@ Pillow==11.1.0
 reportlab==4.2.5
 # Google OAuth token verification (uses Google's public keys, no SDK needed).
 google-auth==2.38.0
+# ShipRocket courier API client.
+httpx==0.28.1
 # razorpay 1.4.x imports pkg_resources, which is not bundled with Python 3.12.
 setuptools==75.8.0
