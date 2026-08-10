@@ -53,6 +53,14 @@ class Order(Base):
     return_requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     return_approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     return_picked_up_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    # ShipRocket courier fulfilment. Populated when the order is dispatched to a
+    # courier; the awb_code is the courier tracking number customers can follow.
+    shiprocket_order_id: Mapped[str] = mapped_column(String(50), nullable=True)
+    shipment_id: Mapped[str] = mapped_column(String(50), nullable=True)
+    awb_code: Mapped[str] = mapped_column(String(100), nullable=True)
+    courier_name: Mapped[str] = mapped_column(String(100), nullable=True)
+    shipment_status: Mapped[str] = mapped_column(String(50), nullable=True)
+    tracking_url: Mapped[str] = mapped_column(String(500), nullable=True)
     estimated_delivery: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

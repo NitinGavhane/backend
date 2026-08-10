@@ -179,6 +179,10 @@ def format_order(order: Order) -> dict:
         "return_requested_at": order.return_requested_at,
         "return_approved_at": order.return_approved_at,
         "return_picked_up_at": order.return_picked_up_at,
+        "awb_code": order.awb_code,
+        "courier_name": order.courier_name,
+        "shipment_status": order.shipment_status,
+        "tracking_url": order.tracking_url,
         "created_at": order.created_at,
         "items": [
             {

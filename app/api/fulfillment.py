@@ -33,6 +33,11 @@ def verify_delivery(order_id: str, req: OtpRequest, admin: User = Depends(get_cu
     return fulfillment_service.verify_delivery_otp(order_id, req.otp.strip(), db)
 
 
+@router.get("/delivery/{order_id}/tracking")
+def delivery_tracking(order_id: str, admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    return fulfillment_service.get_tracking(order_id, db)
+
+
 @router.get("/returns")
 def list_returns(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return fulfillment_service.list_return_orders(db)

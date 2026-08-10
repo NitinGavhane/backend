@@ -1,5 +1,6 @@
 import random
 import string
+import logging
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -9,8 +10,10 @@ from app.core.config import settings
 from app.models.order import Order
 from app.models.payment import GstInvoice, Payment
 from app.services import notifications
+from app.services import shiprocket_service
 
 OTP_TTL_MINUTES = 10
+logger = logging.getLogger(__name__)
 
 
 def _generate_otp() -> str:
@@ -57,17 +60,120 @@ def list_delivery_orders(db: Session) -> list[dict]:
 
 
 def dispatch_order(order_id: str, db: Session) -> dict:
-    """Mark an order dispatched and issue the delivery OTP to the customer."""
+    """Mark an order dispatched and issue the delivery OTP to the customer.
+
+    When ShipRocket is enabled AND configured, dispatching also creates the
+    courier shipment (create adhoc -> assign AWB -> generate pickup) and stores
+    the tracking details on the order. If that fails we still dispatch through
+    the in-house OTP flow so an order is never stuck; the caller can see the
+    courier error in the response and retry the courier step separately.
+    """
     order = _get_order_or_404(order_id, db)
     if order.order_status in ("delivered", "cancelled"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This order cannot be dispatched")
     order.order_status = "dispatched"
     order.dispatched_at = datetime.now(timezone.utc)
     _issue_otp(order, "dispatch_otp", "dispatch_otp_expires_at")
+
+    courier_note = None
+    if shiprocket_service.is_enabled():
+        try:
+            _create_shiprocket_shipment(order, db)
+        except shiprocket_service.ShipRocketError as e:
+            courier_note = f"Courier shipment failed: {e}"
+
     db.commit()
     db.refresh(order)
     notifications.notify_order_dispatched(order)
-    return {"message": "Order dispatched", "delivery_otp": order.dispatch_otp, "expires_in_minutes": OTP_TTL_MINUTES}
+    result = {
+        "message": "Order dispatched",
+        "delivery_otp": order.dispatch_otp,
+        "expires_in_minutes": OTP_TTL_MINUTES,
+    }
+    if courier_note:
+        result["courier_error"] = courier_note
+    else:
+        result["courier"] = {
+            "shipment_id": order.shipment_id,
+            "awb_code": order.awb_code,
+            "courier_name": order.courier_name,
+            "tracking_url": order.tracking_url,
+        }
+    return result
+
+
+def _create_shiprocket_shipment(order: Order, db: Session) -> None:
+    """Create the ShipRocket shipment for a dispatched order (idempotent).
+
+    If the order already has a shipment_id or awb_code from a previous attempt,
+    the shipment is left untouched — re-dispatch should not duplicate courier
+    orders. Sets the shipment + AWB + pickup and persists tracking fields.
+    """
+    if order.shipment_id or order.awb_code:
+        return
+
+    payment = db.query(Payment).filter(Payment.order_id == order.id).first()
+    payment_method = "prepaid"
+    if payment is not None:
+        gateway = (payment.gateway or payment.payment_method or "").lower()
+        if gateway == "cod":
+            payment_method = "cod"
+
+    items = [
+        {
+            "product_name": it.product_name,
+            "product_id": str(it.product_id),
+            "variant_id": str(it.variant_id) if it.variant_id else None,
+            "quantity": it.quantity,
+            "price": it.price,
+            "gst_amount": 0.0,
+            "discount": 0.0,
+        }
+        for it in order.items
+    ]
+
+    created = shiprocket_service.create_order(order, order.user, items, payment_method)
+    sr_order_id = created.get("order_id") or created.get("shipment_id")
+    shipment_id = created.get("shipment_id")
+    awb_code = created.get("awb_code")
+
+    # Adhoc create does not assign a courier; request the cheapest available
+    # courier unless the response already carried an AWB.
+    if not awb_code and sr_order_id:
+        try:
+            awb_resp = shiprocket_service.assign_awb(sr_order_id)
+        except shiprocket_service.ShipRocketError:
+            awb_resp = {}
+        shipment_id = shipment_id or awb_resp.get("shipment_id")
+        awb_code = awb_code or awb_resp.get("awb_code")
+        courier_name = awb_resp.get("courier_name") or awb_resp.get("courier_id")
+
+    if awb_code and shipment_id:
+        try:
+            pickup_resp = shiprocket_service.generate_pickup(shipment_id)
+        except shiprocket_service.ShipRocketError:
+            pickup_resp = {}
+        if pickup_resp.get("pickup_scheduled_at") is None and pickup_resp.get("status") not in (True, 1, "1"):
+            logger.warning(
+                "ShipRocket pickup for order %s not scheduled: %s",
+                order.id, pickup_resp,
+            )
+
+    if sr_order_id:
+        order.shiprocket_order_id = str(sr_order_id)
+    if shipment_id:
+        order.shipment_id = str(shipment_id)
+    if awb_code:
+        order.awb_code = str(awb_code)
+    if courier_name:
+        order.courier_name = str(courier_name)
+    if awb_code:
+        order.tracking_url = f"https://shiprocket.co/tracking/{awb_code}"
+        order.shipment_status = "Pickup Scheduled"
+    logger.info(
+        "ShipRocket shipment for order %s: sr_order=%s shipment=%s awb=%s",
+        order.id, sr_order_id, shipment_id, awb_code,
+    )
 
 
 def verify_delivery_otp(order_id: str, otp: str, db: Session) -> dict:
@@ -205,6 +311,10 @@ def format_fulfillment_order(order: Order) -> dict:
         "return_requested_at": order.return_requested_at,
         "return_approved_at": order.return_approved_at,
         "return_picked_up_at": order.return_picked_up_at,
+        "awb_code": order.awb_code,
+        "courier_name": order.courier_name,
+        "shipment_status": order.shipment_status,
+        "tracking_url": order.tracking_url,
         "items": [
             {
                 "id": str(item.id),
@@ -215,4 +325,31 @@ def format_fulfillment_order(order: Order) -> dict:
             for item in order.items
         ],
     }
+    return data
+
+
+def get_tracking(order_id: str, db: Session) -> dict:
+    """Return the stored ShipRocket tracking for an order.
+
+    When a courier has been assigned this surfaces the latest status held in
+    the app, and attempts a live refresh from ShipRocket when an AWB exists.
+    """
+    order = _get_order_or_404(order_id, db)
+    data = {
+        "order_id": str(order.id),
+        "awb_code": order.awb_code,
+        "courier_name": order.courier_name,
+        "shipment_status": order.shipment_status,
+        "tracking_url": order.tracking_url,
+    }
+    if order.awb_code and shiprocket_service.is_enabled():
+        try:
+            live = shiprocket_service.track(order.awb_code)
+            data["shiprocket"] = live
+            if live.get("tracking_data") and live["tracking_data"].get("ship_status"):
+                data["shipment_status"] = live["tracking_data"]["ship_status"]
+            order.shipment_status = data["shipment_status"]
+            db.commit()
+        except shiprocket_service.ShipRocketError as e:
+            data["shiprocket_error"] = str(e)
     return data

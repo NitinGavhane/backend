@@ -113,6 +113,27 @@ class Settings(BaseSettings):
     S3_UPLOAD_BUCKET: str = ""
     S3_PUBLIC_BASE_URL: str = ""
 
+    # ShipRocket (courier shipment fulfilment). When disabled, outbound orders
+    # still go through the in-house dispatch/OTP flow; when enabled, dispatching
+    # an order creates a real ShipRocket shipment and stores courier tracking.
+    SHIPROCKET_ENABLED: bool = False
+    SHIPROCKET_API_BASE: str = "https://apiv2.shiprocket.in/v1/external"
+    # ShipRocket API user credentials (Settings -> API -> Create API User).
+    # The token is the API user's password/API key used to obtain a JWT from
+    # the /auth/login endpoint; the email is the API user's email address.
+    # The resulting JWT is cached and used as the Bearer token for all calls.
+    SHIPROCKET_EMAIL: str = ""
+    SHIPROCKET_TOKEN: str = ""
+    # Pickup location name exactly as named in the ShipRocket account (Settings
+    # -> Pickup Locations). Requests fail with 422 if this does not match.
+    SHIPROCKET_PICKUP_LOCATION: str = ""
+    # Defaults used when sending an order (weight in kg, dims in cm). Products
+    # do not carry dimensions, so a single store default keeps the payload valid.
+    SHIPROCKET_DEFAULT_WEIGHT: float = 0.5
+    SHIPROCKET_DEFAULT_LENGTH: float = 20.0
+    SHIPROCKET_DEFAULT_BREADTH: float = 15.0
+    SHIPROCKET_DEFAULT_HEIGHT: float = 10.0
+
     class Config:
         env_file = ".env"
         case_sensitive = True

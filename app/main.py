@@ -182,6 +182,20 @@ def _run_migrations(db: Session):
             db.execute(text(_ddl))
             print(f"Migration: added {_col} column to orders")
 
+    # ShipRocket courier fulfilment columns — populated when a dispatched order
+    # is sent to ShipRocket. The AWB is the courier tracking number.
+    for _col, _ddl in [
+        ("shiprocket_order_id", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS shiprocket_order_id VARCHAR(50)"),
+        ("shipment_id", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipment_id VARCHAR(50)"),
+        ("awb_code", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS awb_code VARCHAR(100)"),
+        ("courier_name", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS courier_name VARCHAR(100)"),
+        ("shipment_status", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipment_status VARCHAR(50)"),
+        ("tracking_url", "ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_url VARCHAR(500)"),
+    ]:
+        if _col not in order_columns:
+            db.execute(text(_ddl))
+            print(f"Migration: added {_col} column to orders")
+
     order_columns = [c["name"] for c in inspector.get_columns("orders")]
 
     tables = inspector.get_table_names()

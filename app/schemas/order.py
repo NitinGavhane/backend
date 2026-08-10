@@ -62,6 +62,11 @@ class OrderResponse(BaseModel):
     return_requested_at: datetime | None = None
     return_approved_at: datetime | None = None
     return_picked_up_at: datetime | None = None
+    # ShipRocket courier tracking (populated when the order is dispatched).
+    awb_code: str | None = None
+    courier_name: str | None = None
+    shipment_status: str | None = None
+    tracking_url: str | None = None
     created_at: datetime
     items: list[OrderItemResponse] = []
 

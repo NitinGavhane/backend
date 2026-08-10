@@ -5,7 +5,7 @@ from app.core.database import get_db
 from app.core.deps import get_current_user, get_current_admin
 from app.models.user import User
 from app.schemas.order import OrderCreateRequest, OrderResponse, OrderStatusUpdate, ReturnRequest
-from app.services import invoice_service, order_service
+from app.services import invoice_service, order_service, fulfillment_service
 
 router = APIRouter(prefix="/api/v1/orders", tags=["Orders"])
 
@@ -34,6 +34,12 @@ def download_invoice(order_id: str, user: User = Depends(get_current_user), db: 
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+@router.get("/{order_id}/tracking")
+def order_tracking(order_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Courier tracking for a shipped order (AWB, courier, live status)."""
+    return fulfillment_service.get_tracking(order_id, db)
 
 
 @router.post("/{order_id}/return")
