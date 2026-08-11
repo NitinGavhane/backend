@@ -132,6 +132,13 @@ def _logo_path() -> str:
     return candidate if os.path.exists(candidate) else None
 
 
+def _signature_path() -> str:
+    # Same resolution as the logo: backend/app/static/signature.png by default.
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    candidate = os.path.join(root, settings.INVOICE_SIGNATURE_PATH.replace("/", os.sep))
+    return candidate if os.path.exists(candidate) else None
+
+
 # ---------------------------------------------------------------------------
 # Amount in words (Indian numbering: crore/lakh/thousand).
 # ---------------------------------------------------------------------------
@@ -362,6 +369,13 @@ def build_invoice_pdf(order: Order, invoice: GstInvoice, db: Session) -> bytes:
     notes_style = ParagraphStyle("notes", parent=base, leading=11)
     signature_style = ParagraphStyle("signature", parent=base, alignment=TA_RIGHT)
 
+    signature_path = _signature_path()
+    signature_cell = []
+    if signature_path:
+        signature_cell.append(Image(signature_path, width=118, height=29))
+        signature_cell.append(Spacer(1, 4))
+    signature_cell.append(Paragraph("Authorized Signature", signature_style))
+
     bottom = Table(
         [[
             Paragraph(
@@ -370,7 +384,7 @@ def build_invoice_pdf(order: Order, invoice: GstInvoice, db: Session) -> bytes:
                 "Notes<br/>Thanks for your business.",
                 ParagraphStyle("bottom_left", parent=base, leading=11),
             ),
-            Paragraph("Authorized Signature", signature_style),
+            signature_cell,
         ]],
         colWidths=[300, 211],
     )

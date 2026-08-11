@@ -106,6 +106,12 @@ class Settings(BaseSettings):
     # root (the file lives at backend/app/static/logo.png by default).
     INVOICE_LOGO_PATH: str = "app/static/logo.png"
 
+    # Authorized-signature image stamped on the invoice. Resolved relative to
+    # the backend root (the file lives at backend/app/static/signature.png by
+    # default). A copy also ships in the user/admin app and website assets so
+    # any of them can reference it for display.
+    INVOICE_SIGNATURE_PATH: str = "app/static/signature.png"
+
     # S3 image uploads (banners). Credentials come from the EC2 instance role,
     # so only the bucket/region are configured here. S3_PUBLIC_BASE_URL lets a
     # CDN front the bucket; when empty the direct S3 object URL is used.
