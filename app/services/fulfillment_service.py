@@ -89,37 +89,40 @@ def dispatch_order(order_id: str, db: Session) -> dict:
         "message": "Order dispatched",
         "delivery_otp": order.dispatch_otp,
         "expires_in_minutes": OTP_TTL_MINUTES,
+        "courier": {
+            "shipment_id": order.shipment_id,
+"awb_code": order.awb_code,
+        "courier_name": order.courier_name,
+        "shipment_status": order.shipment_status,
+        "tracking_url": order.tracking_url,
+        # True when a ShipRocket courier order exists for this order (created
+        # at checkout); lets the operator spot orders that never reached the
+        # courier panel.
+        "shiprocket_synced": bool(order.shiprocket_order_id),
+        },
     }
     if courier_note:
         result["courier_error"] = courier_note
-    else:
-        result["courier"] = {
-            "shipment_id": order.shipment_id,
-            "awb_code": order.awb_code,
-            "courier_name": order.courier_name,
-            "tracking_url": order.tracking_url,
-        }
     return result
 
 
-def _create_shiprocket_shipment(order: Order, db: Session) -> None:
-    """Create the ShipRocket shipment for a dispatched order (idempotent).
+def _resolve_payment_method(order: Order, db: Session) -> str:
+    """Return 'cod' or 'prepaid' for the ShipRocket payload.
 
-    If the order already has a shipment_id or awb_code from a previous attempt,
-    the shipment is left untouched — re-dispatch should not duplicate courier
-    orders. Sets the shipment + AWB + pickup and persists tracking fields.
+    COD is decided by the buyer choosing Cash on Delivery at checkout; the
+    payment gateway/payment_method on the Payment row records it. Everything
+    else — Razorpay paid or still pending — ships as prepaid.
     """
-    if order.shipment_id or order.awb_code:
-        return
-
     payment = db.query(Payment).filter(Payment.order_id == order.id).first()
-    payment_method = "prepaid"
     if payment is not None:
         gateway = (payment.gateway or payment.payment_method or "").lower()
         if gateway == "cod":
-            payment_method = "cod"
+            return "cod"
+    return "prepaid"
 
-    items = [
+
+def _shiprocket_items(order: Order) -> list[dict]:
+    return [
         {
             "product_name": it.product_name,
             "product_id": str(it.product_id),
@@ -132,16 +135,73 @@ def _create_shiprocket_shipment(order: Order, db: Session) -> None:
         for it in order.items
     ]
 
-    created = shiprocket_service.create_order(order, order.user, items, payment_method)
+
+def sync_order_to_shiprocket(order: Order, db: Session) -> str | None:
+    """Push a placed order to ShipRocket as a courier order (idempotent).
+
+    Called as soon as the order is financially committed (COD chosen at
+    checkout, or prepaid payment verified) so it shows up in the ShipRocket
+    panel immediately — no admin action required. Also called again at dispatch
+    if it never succeeded, or re-dispatch must not duplicate the courier order.
+
+    Returns None on success / skip, or an error string that the caller can
+    surface to the operator.
+    """
+    if not shiprocket_service.is_enabled() or order.shiprocket_order_id:
+        return None
+
+    try:
+        created = shiprocket_service.create_order(
+            order, order.user, _shiprocket_items(order), _resolve_payment_method(order, db)
+        )
+    except shiprocket_service.ShipRocketError as e:
+        logger.warning("ShipRocket order create failed for order %s: %s", order.id, e)
+        return f"Courier order not created: {e}"
+
     sr_order_id = created.get("order_id") or created.get("shipment_id")
     shipment_id = created.get("shipment_id")
     awb_code = created.get("awb_code")
+    if sr_order_id:
+        order.shiprocket_order_id = str(sr_order_id)
+    if shipment_id:
+        order.shipment_id = str(shipment_id)
+    if awb_code:
+        order.awb_code = str(awb_code)
+    db.commit()
+    logger.info(
+        "ShipRocket order created for order %s: sr_order=%s shipment=%s awb=%s",
+        order.id, sr_order_id, shipment_id, awb_code,
+    )
+    return None
+
+
+def _create_shiprocket_shipment(order: Order, db: Session) -> None:
+    """Finish the courier step at dispatch — AWB + pickup (idempotent).
+
+    The ShipRocket order itself is normally created at checkout; dispatching
+    only assigns the courier (AWB) against the existing order and schedules a
+    pickup. When the order never reached ShipRocket (e.g. it predates the
+    checkout hook) the adhoc order is created here first. Orders that already
+    carry an AWB are left untouched so re-dispatch never duplicates shipments.
+    """
+    if order.awb_code:
+        return
+
+    if not order.shiprocket_order_id:
+        error = sync_order_to_shiprocket(order, db)
+        if error or not order.shiprocket_order_id:
+            raise shiprocket_service.ShipRocketError(error or "Courier order was not created")
+
+    sr_order_id = order.shiprocket_order_id
+    shipment_id = order.shipment_id
+    awb_code = order.awb_code
+    courier_name = None
 
     # Adhoc create does not assign a courier; request the cheapest available
-    # courier unless the response already carried an AWB.
-    if not awb_code and sr_order_id:
+    # courier unless the create response already carried an AWB.
+    if not awb_code and (shipment_id or sr_order_id):
         try:
-            awb_resp = shiprocket_service.assign_awb(sr_order_id)
+            awb_resp = shiprocket_service.assign_awb(shipment_id or sr_order_id)
         except shiprocket_service.ShipRocketError:
             awb_resp = {}
         shipment_id = shipment_id or awb_resp.get("shipment_id")

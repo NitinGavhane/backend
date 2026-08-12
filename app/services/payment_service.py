@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.models.order import Order
 from app.models.payment import GstInvoice, Payment
 from app.models.payment_method import PaymentMethod
+from app.services import fulfillment_service
 
 
 def _razorpay_client() -> razorpay.Client:
@@ -90,6 +91,10 @@ def create_payment(order_id: str, method_code: str | None, user_id: uuid.UUID, d
             payment.payment_status = "pending"
         db.commit()
         db.refresh(payment)
+        try:
+            fulfillment_service.sync_order_to_shiprocket(order, db)
+        except Exception:
+            pass
         return {
             "id": str(payment.id),
             "order_id": str(payment.order_id),
@@ -207,6 +212,10 @@ def verify_payment(
         db.add(GstInvoice(order_id=order.id, invoice_number=invoice_number, gst_number=settings.SELLER_GSTIN))
 
     db.commit()
+    try:
+        fulfillment_service.sync_order_to_shiprocket(order, db)
+    except Exception:
+        pass
     return {
         "message": "Payment verified successfully",
         "invoice_number": invoice_number,

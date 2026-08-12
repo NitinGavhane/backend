@@ -128,18 +128,31 @@ def _looks_like_pincode(v: str) -> bool:
     return bool(re.fullmatch(r"\d{6}", v))
 
 
+def _extract_phone(token: str) -> str:
+    """Return a 10-digit Indian mobile from a token like '9876543210' or '+91 9876543210'."""
+    digits = re.sub(r"\D", "", token)
+    if len(digits) >= 10 and digits[-10:][0] in "6789":
+        return digits[-10:]
+    return ""
+
+
+_ISO2_COUNTRY = re.compile(r"[A-Za-z]{2}")
+_COUNTRY_CODES = {"IN", "US", "UK", "AE", "AU", "CA", "DE", "FR", "SG", "PK", "SA", "ZA", "MY"}
+_COUNTRY_NAMES = {"india", "bharat", "usa", "united states", "uk", "united kingdom", "uae", "united arab emirates"}
+
+
 def parse_shipping_address(line: str | None) -> dict[str, str]:
     """
     Convert the one-line shipping address the storefront stores into the
     structured billing fields ShipRocket expects.
 
-    The storefront builds the line as:
+    Both storefronts build the line as:
         fullName, phone, street, city, state, pincode, country
-    joined with ", " and empty values dropped, so tokens are positional but may
-    be missing. We parse from the right (pincode + state + country) because
-    those are stable, and treat everything before city as the street + the
-    full-name/phone baked at the start. Returns a dict of billing_* fields the
-    caller uppercases as needed.
+    joined with ", " and empty values dropped. The country is usually "IN" and
+    the pincode may be glued onto the state ("West Bengal - 700001"). We parse
+    from the right (country + pincode + state + city are stable) and treat the
+    remaining leading tokens as name + phone + street. Returns a dict of
+    billing_* fields the caller uppercases as needed.
     """
     if not line:
         return {
@@ -149,26 +162,51 @@ def parse_shipping_address(line: str | None) -> dict[str, str]:
             "billing_state": "",
             "billing_pincode": "",
             "billing_country": "India",
+            "billing_phone": "",
         }
     parts = [p.strip() for p in line.split(",") if p and p.strip()]
     country = "India"
-    if parts and parts[-1] and _looks_like_pincode(parts[-1]) is False and len(parts[-1]) > 3:
-        # Last token is a country name (e.g. "India").
-        country = parts.pop(-1)
-    pincode = parts.pop(-1) if parts and _looks_like_pincode(parts[-1]) else ""
-    state = parts.pop(-1) if parts else ""
-    city = parts.pop(-1) if parts else ""
-    rest = ", ".join(parts)
-    # The frontend prepends "fullName, phone," — strip the leading phone if we
-    # can find a plausible 10-digit mobile at the tail of those leading tokens.
-    address = rest
+    if parts:
+        last = parts[-1]
+        # The trailing token is a country when it is a known name or a
+        # recognised 2-letter code ("IN", "US"). A bare 2-letter abbreviation
+        # like a state code ("WB") is deliberately NOT treated as a country.
+        if _ISO2_COUNTRY.fullmatch(last) and last.upper() in _COUNTRY_CODES or last.lower() in _COUNTRY_NAMES:
+            country = parts.pop(-1)
+
+    # Pincode is usually its own token, but can be glued onto the state
+    # ("West Bengal - 700001") or the country token.
+    pincode = ""
+    if parts:
+        m = re.search(r"(\d{6})", parts[-1])
+        if m:
+            pincode = m.group(1)
+            parts[-1] = parts[-1][: m.start()].rstrip(" -")
+            if not parts[-1].strip():
+                parts.pop(-1)
+    state = parts.pop(-1).strip() if parts else ""
+    city = parts.pop(-1).strip() if parts else ""
+
+    # Led tokens: [fullName, phone, street...]. Pull the name and any phone
+    # from the start, leaving the remaining text as the street / address.
+    name = ""
+    phone = ""
+    if parts:
+        name = parts.pop(0)
+        if parts:
+            phoned = _extract_phone(parts[0])
+            if phoned:
+                phone = phoned
+                parts.pop(0)
+    address = ", ".join(parts)
     return {
-        "billing_name": "",
+        "billing_name": name,
         "billing_address": address,
         "billing_city": city,
         "billing_state": state,
         "billing_pincode": pincode,
         "billing_country": country or "India",
+        "billing_phone": phone,
     }
 
 
@@ -184,8 +222,14 @@ def create_order(
         )
 
     addr = parse_shipping_address(order.shipping_address)
-    name = addr["billing_name"] or (getattr(user, "full_name", None) or "Customer")
-    phone = getattr(user, "phone", None) or ""
+    name = (
+        addr["billing_name"]
+        or (getattr(user, "full_name", None) or "Customer")
+    )[:70]
+    phone = (
+        addr["billing_phone"]
+        or (getattr(user, "phone", None) or "")
+    )
     if not phone:
         m = re.search(r"(?<!\d)(\d{10})(?!\d)", addr["billing_address"])
         if m:
