@@ -213,6 +213,7 @@ def create_order(
         "billing_phone": phone,
         "shipping_is_billing": True,
         "payment_method": (payment_method or "prepaid").upper(),
+        "sub_total": float(getattr(order, "subtotal", 0) or 0),
         "length": settings.SHIPROCKET_DEFAULT_LENGTH,
         "breadth": settings.SHIPROCKET_DEFAULT_BREADTH,
         "height": settings.SHIPROCKET_DEFAULT_HEIGHT,
