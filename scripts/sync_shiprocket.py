@@ -5,9 +5,10 @@ that predate the checkout auto-sync.
 Run from the backend directory:
     venv\\Scripts\\python scripts\\sync_shiprocket.py
 
-Syncs every order that has no ShipRocket courier order yet but should: placed /
-processing / dispatched, and either already paid (prepaid) or booked as COD.
-Cancelled and delivered orders are skipped. Results are printed per order.
+Syncs every order that has no ShipRocket courier order yet but should: any
+active status (placed / processing / dispatched / out_for_delivery) that is
+either already paid (prepaid) or booked as COD. Cancelled and delivered orders
+are skipped. Results are printed per order.
 
 This is a one-off maintenance tool — new orders are pushed automatically at
 checkout (COD chosen or prepaid payment verified) so this only matters for
@@ -67,7 +68,11 @@ def main() -> None:
             .options(joinedload(Order.items))
             .filter(
                 Order.shiprocket_order_id.is_(None),
-                Order.order_status.in_(["placed", "processing", "dispatched"]),
+                # Every active status — cancelled and delivered orders are
+                # excluded because they must not reach the courier.
+                Order.order_status.in_(
+                    ["placed", "processing", "dispatched", "out_for_delivery"]
+                ),
                 or_(
                     Order.payment_status == "paid",
                     Order.id.in_(cod_order_ids),

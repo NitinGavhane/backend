@@ -187,17 +187,18 @@ def parse_shipping_address(line: str | None) -> dict[str, str]:
     state = parts.pop(-1).strip() if parts else ""
     city = parts.pop(-1).strip() if parts else ""
 
-    # Led tokens: [fullName, phone, street...]. Pull the name and any phone
-    # from the start, leaving the remaining text as the street / address.
+    # Leading tokens: [fullName, phone, street...]. When the second token is a
+    # phone the first is the customer name and everything after is the street;
+    # with no phone present, every leftover is treated as the address so a
+    # lone street token ("12 Test Lane") is never swallowed as a name.
     name = ""
     phone = ""
     if parts:
-        name = parts.pop(0)
-        if parts:
-            phoned = _extract_phone(parts[0])
-            if phoned:
-                phone = phoned
-                parts.pop(0)
+        if len(parts) >= 2 and _extract_phone(parts[1]):
+            name = parts.pop(0)
+            phone = _extract_phone(parts.pop(0))
+        elif _extract_phone(parts[0]):
+            phone = _extract_phone(parts.pop(0))
     address = ", ".join(parts)
     return {
         "billing_name": name,
