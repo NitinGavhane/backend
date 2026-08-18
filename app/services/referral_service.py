@@ -161,18 +161,30 @@ def record_first_order_referral(user: User, order, subtotal: float, product_id, 
     # A code that no longer exists, or someone's own code, earns nothing.
     if not referrer or referrer.id == user.id:
         return
-    # First order only. The new order is already flushed, so look for any other.
+    # First *paid* order only. The new order is already flushed, so look for any
+    # other financially-committed order — an awaiting-payment or cancelled order
+    # that was never paid does not consume the referral.
     previous_orders = (
         db.query(Order)
-        .filter(Order.user_id == user.id, Order.id != order.id)
+        .filter(
+            Order.user_id == user.id,
+            Order.id != order.id,
+            Order.order_status != "pending_payment",
+            Order.order_status != "cancelled",
+        )
         .count()
     )
     if previous_orders:
         return
     # Belt and braces: never record two earnings for the same referred customer.
+    # A rejected earning (e.g. because that order was cancelled) is not a real
+    # referral — it must not block the next order from earning.
     already = (
         db.query(ReferralEarning)
-        .filter(ReferralEarning.referred_user_id == user.id)
+        .filter(
+            ReferralEarning.referred_user_id == user.id,
+            ReferralEarning.status != "rejected",
+        )
         .count()
     )
     if already:

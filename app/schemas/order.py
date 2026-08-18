@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class OrderItemInput(BaseModel):
@@ -18,6 +18,19 @@ class OrderCreateRequest(BaseModel):
     # clients keep working (treated as intra-state when absent).
     shipping_state: str | None = None
     items: list[OrderItemInput]
+
+    @field_validator("shipping_address")
+    @classmethod
+    def shipping_address_must_be_real(cls, value: str) -> str:
+        stripped = (value or "").strip()
+        # Reject blank lines and the Dart default Object.toString() artifact old
+        # mobile builds sent ("Instance of 'Address'"), which carry no
+        # deliverable information. Both make the order un-shippable.
+        if not stripped or "Instance of '" in stripped:
+            raise ValueError(
+                "A valid shipping address is required. Please add and select a delivery address."
+            )
+        return value
 
 
 class OrderItemResponse(BaseModel):

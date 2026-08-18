@@ -9,9 +9,9 @@ class PaymentCreateRequest(BaseModel):
 
 class PaymentVerifyRequest(BaseModel):
     order_id: str
-    razorpay_order_id: str
-    razorpay_payment_id: str
-    razorpay_signature: str
+    # Merchant order id returned by /payments/create (the `cashfree_order_id`).
+    # The client echoes it back after the customer returns from the checkout.
+    cashfree_order_id: str
 
 
 class PaymentResponse(BaseModel):
@@ -22,9 +22,9 @@ class PaymentResponse(BaseModel):
     payment_method: str | None = None
     amount: float
     payment_status: str
-    # Present on create — used by the client to open the Razorpay checkout.
-    razorpay_order_id: str | None = None
-    razorpay_key_id: str | None = None
+    # Present on create — used by the client to open the Cashfree checkout.
+    payment_session_id: str | None = None
+    cashfree_order_id: str | None = None
     currency: str | None = None
     amount_paise: int | None = None
     # True when the order was placed against Cash on Delivery, in which case

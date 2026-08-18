@@ -2,6 +2,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import inspect, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core import storage
@@ -55,6 +56,7 @@ def admin_login(req: LoginRequest, db: Session = Depends(get_db)):
 
 @router.get("/dashboard", response_model=AdminDashboardStats)
 def get_dashboard(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    order_service.expire_stale_pending_orders(db)
     total_users = db.query(User).count()
     total_products = db.query(Product).count()
     total_orders = db.query(Order).count()
@@ -92,6 +94,7 @@ def list_users(admin: User = Depends(get_current_admin), db: Session = Depends(g
 
 @router.get("/orders", response_model=list[OrderResponse])
 def list_all_orders(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+    order_service.expire_stale_pending_orders(db)
     orders = db.query(Order).order_by(Order.created_at.desc()).all()
     return [order_service.format_order(o) for o in orders]
 
@@ -369,7 +372,14 @@ def create_category(req: CategoryCreate, admin: User = Depends(get_current_admin
         **storage.image_metadata(req.image_url),
     )
     db.add(category)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A category named '{req.name}' already exists. Pick a different name.",
+        )
     db.refresh(category)
     return _category_dict(category)
 
@@ -640,6 +650,33 @@ def run_migration(admin: User = Depends(get_current_admin), db: Session = Depend
     db.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS gender VARCHAR(20) DEFAULT 'unisex'"))
     db.execute(text("ALTER TABLE categories ADD COLUMN IF NOT EXISTS parent_id UUID REFERENCES categories(id) ON DELETE CASCADE"))
     db.commit()
+    # pending_payment lets an order sit "awaiting payment" until it is paid (or
+    # auto-cancelled after 30 minutes) instead of being born as a real "placed"
+    # order. ALTER TYPE ADD VALUE runs in its own committed transaction because
+    # it aborts the transaction when the label already exists.
+    try:
+        db.execute(text("ALTER TYPE order_status ADD VALUE IF NOT EXISTS 'pending_payment'"))
+        db.commit()
+    except Exception:
+        db.rollback()
+    # Legacy unpaid "placed" orders (born before pending_payment existed) are
+    # rewritten so the 30-minute expiry sweep can cancel them. COD orders stay
+    # "placed" — they are legitimately in flight with payment at the doorstep.
+    try:
+        db.execute(text("""
+            UPDATE orders o
+            SET order_status = 'pending_payment'
+            WHERE o.order_status = 'placed'
+              AND o.payment_status = 'pending'
+              AND NOT EXISTS (
+                  SELECT 1 FROM payments p
+                  WHERE p.order_id = o.id
+                    AND (p.gateway = 'cod' OR p.payment_method = 'cod')
+              )
+        """))
+        db.commit()
+    except Exception:
+        db.rollback()
     product_columns = [c["name"] for c in inspect(engine).get_columns("products")] if "products" in tables else []
     return {"message": "Migration completed successfully", "tables": tables, "user_columns": user_columns, "order_columns": order_columns, "product_columns": product_columns}
 

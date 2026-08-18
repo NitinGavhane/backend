@@ -23,8 +23,17 @@ class Order(Base):
     delivery_fee: Mapped[float] = mapped_column(Float, default=0.0)
     final_amount: Mapped[float] = mapped_column(Float, default=0.0)
     order_status: Mapped[str] = mapped_column(
-        Enum("placed", "processing", "dispatched", "out_for_delivery", "delivered", "cancelled", name="order_status"),
-        default="placed",
+        Enum(
+            "pending_payment",
+            "placed",
+            "processing",
+            "dispatched",
+            "out_for_delivery",
+            "delivered",
+            "cancelled",
+            name="order_status",
+        ),
+        default="pending_payment",
     )
     payment_status: Mapped[str] = mapped_column(
         Enum("pending", "paid", "failed", "refunded", name="payment_status"),

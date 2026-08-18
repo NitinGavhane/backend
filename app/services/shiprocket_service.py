@@ -216,13 +216,20 @@ def create_order(
     user,
     items: list[dict[str, Any]],
     payment_method: str,
+    shipping_line: str | None = None,
 ) -> dict[str, Any]:
     if not is_enabled():
         raise ShipRocketNotEnabledError(
             "ShipRocket not configured (ENABLED, EMAIL, TOKEN or PICKUP_LOCATION missing)"
         )
 
-    addr = parse_shipping_address(order.shipping_address)
+    # `shipping_line` lets the caller pass a repaired fallback (a saved default
+    # address) when the order's stored one-line address is empty or corrupt —
+    # e.g. legacy mobile builds that stored `str(address)` as "Instance of
+    # 'Address'". Falling back here keeps those orders from being rejected by
+    # ShipRocket with 422 on required billing fields.
+    raw_line = shipping_line if shipping_line else getattr(order, "shipping_address", None)
+    addr = parse_shipping_address(raw_line)
     name = (
         addr["billing_name"]
         or (getattr(user, "full_name", None) or "Customer")

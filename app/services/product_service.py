@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.core import gst, storage
@@ -15,7 +16,15 @@ def list_products(db: Session, category: str | None = None, search: str | None =
     if category:
         query = query.filter(Product.category_id == _parse_uuid(category, "category_id"))
     if search:
-        query = query.filter(Product.title.ilike(f"%{search}%"))
+        pattern = f"%{search.strip()}%"
+        query = query.filter(
+            or_(
+                Product.title.ilike(pattern),
+                Product.brand.ilike(pattern),
+                Product.description.ilike(pattern),
+                Product.category.has(Category.name.ilike(pattern)),
+            )
+        )
     if featured is not None:
         query = query.filter(Product.featured == featured)
     if gender:

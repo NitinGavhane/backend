@@ -367,14 +367,31 @@ def build_invoice_pdf(order: Order, invoice: GstInvoice, db: Session) -> bytes:
     # --- Bottom: amount in words / notes  |  authorized signature ------------
     words_style = ParagraphStyle("words", parent=base, leading=11)
     notes_style = ParagraphStyle("notes", parent=base, leading=11)
-    signature_style = ParagraphStyle("signature", parent=base, alignment=TA_RIGHT)
+    signature_style = ParagraphStyle(
+        "signature", parent=base, alignment=TA_RIGHT, fontName=_FONT_BOLD,
+        fontSize=10, leading=12,
+    )
 
     signature_path = _signature_path()
-    signature_cell = []
+    # Right column of the bottom row: the signature image sits directly above
+    # the "Authorized Signature" label, both flush right to match the amounts
+    # column above. Each element gets its own table row so the ALIGN RIGHT rule
+    # right-aligns the Image itself (reportlab won't right-align a bare Image in
+    # a cell list), which reads far more professionally than a left-aligned image.
+    sig_rows = []
     if signature_path:
-        signature_cell.append(Image(signature_path, width=118, height=29))
-        signature_cell.append(Spacer(1, 4))
-    signature_cell.append(Paragraph("Authorized Signature", signature_style))
+        sig_rows.append([Image(signature_path, width=118, height=29)])
+    sig_rows.append([Paragraph("Authorized Signature", signature_style)])
+    signature_block = Table(sig_rows, colWidths=[211], hAlign="RIGHT")
+    signature_block.setStyle(TableStyle([
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    signature_cell = [signature_block]
 
     bottom = Table(
         [[

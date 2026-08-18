@@ -24,9 +24,9 @@ class PaymentMethod(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String(255), nullable=True)
     icon_url: Mapped[str] = mapped_column(String(500), nullable=True)
-    # Which gateway processes this method. Only "razorpay" exists today; the
+    # Which gateway processes this method. Only "cashfree" exists today; the
     # column is what lets a second gateway arrive without a schema change.
-    gateway: Mapped[str] = mapped_column(String(50), default="razorpay", nullable=False)
+    gateway: Mapped[str] = mapped_column(String(50), default="cashfree", nullable=False)
     # Comma-separated ISO-3166-1 alpha-2 codes ("IN" or "IN,AE"), or "*" for
     # every region. UPI is India-only; cards are not.
     regions: Mapped[str] = mapped_column(String(255), default=ALL_REGIONS, nullable=False)

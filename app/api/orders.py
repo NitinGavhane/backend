@@ -29,10 +29,15 @@ def get_order(order_id: str, user: User = Depends(get_current_user), db: Session
 def download_invoice(order_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Return the GST tax invoice for a paid order as a downloadable PDF."""
     pdf, filename = invoice_service.generate_invoice_pdf(order_id, user.id, db)
+    # no-store so CloudFront never serves a stale cached PDF — invoices embed the
+    # authorized signature and are regenerated from current order data each call.
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
     )
 
 
@@ -45,6 +50,12 @@ def order_tracking(order_id: str, user: User = Depends(get_current_user), db: Se
 @router.post("/{order_id}/return")
 def return_order(order_id: str, req: ReturnRequest, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return order_service.request_return(str(user.id), order_id, req.model_dump(), db)
+
+
+@router.post("/{order_id}/cancel")
+def cancel_order(order_id: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Cancel an order that has not been dispatched; paid orders are refunded."""
+    return order_service.cancel_order(str(user.id), order_id, db)
 
 
 @router.post("/{order_id}/replace")

@@ -80,10 +80,21 @@ class Settings(BaseSettings):
     # Google OAuth — client ID for verifying ID tokens server-side.
     GOOGLE_CLIENT_ID: str = ""
 
-    # Razorpay — the only supported payment gateway. Keys are supplied via env
-    # (test keys start with rzp_test_, live keys with rzp_live_).
-    RAZORPAY_KEY_ID: str = ""
-    RAZORPAY_KEY_SECRET: str = ""
+    # Cashfree Payments — the payment gateway for every online method. Keys
+    # are supplied via env. "sandbox" routes to the test API (no real money);
+    # "production" is the live gateway. Test keys start with TEST/cfsk_ma_test_.
+    CASHFREE_CLIENT_ID: str = ""
+    CASHFREE_CLIENT_SECRET: str = ""
+    CASHFREE_ENV: str = "sandbox"
+    # Where the customer returns after paying on Cashfree's hosted page.
+    # `{order_id}` is Cashfree's substitution token (use the literal braces).
+    CASHFREE_RETURN_URL: str = ""
+
+    @property
+    def cashfree_base_url(self) -> str:
+        if self.CASHFREE_ENV.lower() == "production":
+            return "https://api.cashfree.com/pg"
+        return "https://sandbox.cashfree.com/pg"
 
     # Seller identity printed on GST tax invoices. Overridable via env; the
     # defaults mirror the registered business details shown on the invoice

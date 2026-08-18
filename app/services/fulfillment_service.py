@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
+from app.models.address import Address
 from app.models.order import Order
 from app.models.payment import GstInvoice, Payment
 from app.services import notifications
@@ -49,6 +50,10 @@ def _verify_otp(order: Order, otp_field: str, expires_field: str, submitted: str
 
 def list_delivery_orders(db: Session) -> list[dict]:
     """Orders that still need dispatch or are in transit (not delivered/cancelled)."""
+    # Lazy import keeps the graph acyclic: this module is imported by
+    # payment_service, which order_service lazily imports.
+    from app.services import order_service
+    order_service.expire_stale_pending_orders(db)
     orders = (
         db.query(Order)
         .options(joinedload(Order.user))
@@ -71,6 +76,19 @@ def dispatch_order(order_id: str, db: Session) -> dict:
     order = _get_order_or_404(order_id, db)
     if order.order_status in ("delivered", "cancelled"):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This order cannot be dispatched")
+    if order.order_status == "pending_payment":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This order is still awaiting payment and cannot be dispatched",
+        )
+    if order.payment_status == "pending":
+        payment = db.query(Payment).filter(Payment.order_id == order.id).first()
+        is_cod = payment is not None and (payment.gateway == "cod" or payment.payment_method == "cod")
+        if not is_cod:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This order has not been paid and cannot be dispatched",
+            )
     order.order_status = "dispatched"
     order.dispatched_at = datetime.now(timezone.utc)
     _issue_otp(order, "dispatch_otp", "dispatch_otp_expires_at")
@@ -136,6 +154,33 @@ def _shiprocket_items(order: Order) -> list[dict]:
     ]
 
 
+def _resolve_shipping_line(order: Order, db: Session) -> str:
+    """Return a usable one-line shipping address for ShipRocket.
+
+    Prefers the address the order actually recorded. When that is missing,
+    empty, or a corrupt legacy value (older mobile builds stored `str(address)`
+    as `"Instance of 'Address'"`), fall back to the customer's saved default
+    address so the courier payload carries real name / phone / street / pincode
+    instead of being rejected by ShipRocket with 422 on required fields.
+    """
+    line = (order.shipping_address or "").strip()
+    legacy_corrupt = not line or line.startswith("Instance of ")
+    if not legacy_corrupt:
+        return line
+
+    addr = (
+        db.query(Address)
+        .filter(Address.user_id == order.user_id)
+        .order_by(Address.is_default.desc(), Address.created_at.desc())
+        .first()
+    )
+    if addr is None:
+        return ""
+
+    parts = [addr.full_name, addr.phone, addr.street, addr.city, addr.state, addr.pincode, addr.country]
+    return ", ".join(p for p in parts if p and p.strip())
+
+
 def sync_order_to_shiprocket(order: Order, db: Session) -> str | None:
     """Push a placed order to ShipRocket as a courier order (idempotent).
 
@@ -152,7 +197,11 @@ def sync_order_to_shiprocket(order: Order, db: Session) -> str | None:
 
     try:
         created = shiprocket_service.create_order(
-            order, order.user, _shiprocket_items(order), _resolve_payment_method(order, db)
+            order,
+            order.user,
+            _shiprocket_items(order),
+            _resolve_payment_method(order, db),
+            shipping_line=_resolve_shipping_line(order, db),
         )
     except shiprocket_service.ShipRocketError as e:
         logger.warning("ShipRocket order create failed for order %s: %s", order.id, e)

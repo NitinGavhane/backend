@@ -109,6 +109,15 @@ def notify_order_delivered(order) -> None:
     send_whatsapp_message(order.user.phone, "order_delivered", {"1": order.order_number})
 
 
+def notify_order_cancelled(order, reason: str) -> None:
+    """Order cancelled — customer-initiated, store-initiated, or auto-expired."""
+    try:
+        email_service.send_order_cancelled_email(order.user.email, order.order_number, reason)
+    except Exception:
+        logger.exception("failed to email cancellation notice for %s", order.order_number)
+    send_whatsapp_message(order.user.phone, "order_cancelled", {"1": order.order_number})
+
+
 def notify_return_requested(order) -> None:
     """Confirmation that a return/replace request is under review."""
     try:

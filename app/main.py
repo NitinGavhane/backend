@@ -38,7 +38,7 @@ def _seed_payment_methods(db: Session):
     if db.execute(text("SELECT count(*) FROM payment_methods")).scalar():
         return
     for code, name, description, regions, sort_order in _DEFAULT_PAYMENT_METHODS:
-        gateway = "cod" if code == "cod" else "razorpay"
+        gateway = "cod" if code == "cod" else "cashfree"
         db.execute(
             text("""
                 INSERT INTO payment_methods (id, code, name, description, gateway, regions, is_active, sort_order, created_at)
@@ -223,6 +223,40 @@ def _run_migrations(db: Session):
             except Exception:
                 db.rollback()
 
+    # pending_payment is the new "waiting for payment" state an order is born in.
+    # Unpaid orders used to be created as "placed" immediately, so an abandoned
+    # checkout looked like a real order. Same committed-transaction rule applies
+    # (ALTER TYPE errors poison the transaction when the label already exists).
+    db.commit()
+    try:
+        db.execute(text("ALTER TYPE order_status ADD VALUE IF NOT EXISTS 'pending_payment'"))
+        db.commit()
+        print("Migration: added pending_payment to order_status enum")
+    except Exception:
+        db.rollback()
+
+    # Rewrite legacy unpaid orders born as "placed" into awaiting-payment so the
+    # 30-minute expiry sweep can cancel them and release the reserved stock. COD
+    # orders are excluded — they are legitimately in flight with payment at the
+    # doorstep, so their status stays "placed".
+    db.commit()
+    try:
+        migrated = db.execute(text("""
+            UPDATE orders o
+            SET order_status = 'pending_payment'
+            WHERE o.order_status = 'placed'
+              AND o.payment_status = 'pending'
+              AND NOT EXISTS (
+                  SELECT 1 FROM payments p
+                  WHERE p.order_id = o.id
+                    AND (p.gateway = 'cod' OR p.payment_method = 'cod')
+              )
+        """))
+        db.commit()
+        print(f"Migration: rewrote {migrated.rowcount} unpaid placed orders as pending_payment")
+    except Exception:
+        db.rollback()
+
     product_columns = [c["name"] for c in inspector.get_columns("products")] if "products" in tables else []
     if "is_replaceable" not in product_columns:
         db.execute(text("ALTER TABLE products ADD COLUMN is_replaceable BOOLEAN DEFAULT FALSE"))
@@ -277,6 +311,10 @@ def _run_migrations(db: Session):
     # any non-Indian customer, so they are India.
     db.execute(text("ALTER TABLE addresses ADD COLUMN IF NOT EXISTS country VARCHAR(2) DEFAULT 'IN'"))
     db.execute(text("UPDATE addresses SET country = 'IN' WHERE country IS NULL"))
+    # Cashfree replaced Razorpay as the gateway: existing rows created under the
+    # old default are rewritten so the Admin app and the checkout agree on which
+    # gateway charges the order.
+    db.execute(text("UPDATE payment_methods SET gateway = 'cashfree' WHERE gateway IS NOT DISTINCT FROM 'razorpay'"))
     db.commit()
     _seed_payment_methods(db)
 

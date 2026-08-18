@@ -227,6 +227,18 @@ def send_order_delivered_email(recipient: str, order_number: str) -> None:
     send_email(recipient, subject, html, text)
 
 
+def send_order_cancelled_email(recipient: str, order_number: str, reason: str) -> None:
+    subject = f"Order Cancelled – {order_number}"
+    body = f"""
+<p style="margin:0 0 12px;font-size:14px;color:#46464f;line-height:1.6">Order <strong>{order_number}</strong> has been cancelled.</p>
+<p style="margin:0;font-size:14px;color:#46464f;line-height:1.6;background:#f8f9fa;border-radius:8px;padding:12px">{reason}</p>
+<p style="margin:16px 0 0;font-size:14px;color:#46464f;line-height:1.6">If you paid for this order, your refund is on its way to the original payment method. Need help? Reply to this email or reach us at {settings.SELLER_EMAIL}.</p>
+"""
+    html = _wrap_otp_into_card("Order Cancelled", f"Order {order_number}", body, "#ba1a1a")
+    text = f"Order {order_number} has been cancelled. {reason}"
+    send_email(recipient, subject, html, text)
+
+
 def send_return_requested_email(recipient: str, order_number: str) -> None:
     subject = f"Return Request Received – {order_number}"
     body = f"""

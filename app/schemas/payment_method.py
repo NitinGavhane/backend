@@ -28,7 +28,7 @@ class PaymentMethodCreate(BaseModel):
     name: str
     description: str | None = None
     icon_url: str | None = None
-    gateway: str = "razorpay"
+    gateway: str = "cashfree"
     regions: str = "*"
     is_active: bool = True
     sort_order: int = 0

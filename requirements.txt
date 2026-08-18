@@ -8,14 +8,11 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 python-multipart==0.0.19
-razorpay==1.4.2
 boto3==1.35.99
 Pillow==11.1.0
 # GST invoice PDF generation. Pure-Python, no system libraries required.
 reportlab==4.2.5
 # Google OAuth token verification (uses Google's public keys, no SDK needed).
 google-auth==2.38.0
-# ShipRocket courier API client.
+# ShipRocket courier + Cashfree payment gateway API clients.
 httpx==0.28.1
-# razorpay 1.4.x imports pkg_resources, which is not bundled with Python 3.12.
-setuptools==75.8.0

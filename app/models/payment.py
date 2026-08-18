@@ -15,7 +15,7 @@ class Payment(Base):
     order_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False)
     transaction_id: Mapped[str] = mapped_column(String(255), nullable=True)
     gateway_order_id: Mapped[str] = mapped_column(String(255), nullable=True)
-    gateway: Mapped[str] = mapped_column(String(50), default="razorpay")
+    gateway: Mapped[str] = mapped_column(String(50), default="cashfree")
     payment_method: Mapped[str] = mapped_column(String(50), nullable=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     payment_status: Mapped[str] = mapped_column(Enum("pending", "paid", "failed", "refunded", name="payment_status_enum"), default="pending")
