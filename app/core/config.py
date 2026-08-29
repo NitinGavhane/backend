@@ -106,7 +106,7 @@ class Settings(BaseSettings):
     SELLER_ADDRESS: str = "212 GIRISH GHOSH ROAD\nROOM NO -430 RANGOLI MALL\nHOWRAH West Bengal 711202\nIndia"
     SELLER_PHONE: str = "7003871460"
     SELLER_STATE: str = "West Bengal"
-    SELLER_EMAIL: str = "dristidhimahivyapaar@gmail.com"
+    SELLER_EMAIL: str = "info@dristifashions.com"
 
     # Default HSN/SAC printed on invoices. Products do not carry their own HSN,
     # so every line item uses this garment HSN unless a per-product code is
