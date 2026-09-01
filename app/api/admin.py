@@ -57,7 +57,7 @@ def admin_login(req: LoginRequest, db: Session = Depends(get_db)):
 @router.get("/dashboard", response_model=AdminDashboardStats)
 def get_dashboard(admin: User = Depends(get_current_admin), db: Session = Depends(get_db)):
     order_service.expire_stale_pending_orders(db)
-    total_users = db.query(User).count()
+    total_users = db.query(User).filter(User.role != "admin").count()
     total_products = db.query(Product).count()
     total_orders = db.query(Order).count()
     total_revenue = db.query(Order).filter(Order.payment_status == "paid").with_entities(Order.final_amount).all()
