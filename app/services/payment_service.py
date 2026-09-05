@@ -201,7 +201,7 @@ def create_payment(order_id: str, method_code: str | None, user_id: uuid.UUID, d
     }
     try:
         resp = httpx.post(
-            f"{settings.cashfree_base_url}/v1/orders",
+            f"{settings.cashfree_base_url}/orders",
             headers=_cashfree_headers(),
             json=payload,
             timeout=30,
@@ -307,7 +307,7 @@ def verify_payment(
 
     try:
         resp = httpx.get(
-            f"{settings.cashfree_base_url}/v1/orders/{cashfree_order_id}/payments",
+            f"{settings.cashfree_base_url}/orders/{cashfree_order_id}/payments",
             headers=_cashfree_headers(),
             timeout=30,
         )
@@ -398,7 +398,7 @@ def refund_payment(order: Order, db: Session) -> str | None:
     }
     try:
         resp = httpx.post(
-            f"{settings.cashfree_base_url}/v1/orders/{cf_order_id}/refunds",
+            f"{settings.cashfree_base_url}/orders/{cf_order_id}/refunds",
             headers=_cashfree_headers(),
             json=payload,
             timeout=30,
