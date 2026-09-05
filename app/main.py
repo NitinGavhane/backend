@@ -318,6 +318,23 @@ def _run_migrations(db: Session):
     db.commit()
     _seed_payment_methods(db)
 
+    # State-based delivery: delivery_settings gains a per-state fee map so
+    # delivery is priced by distance instead of one flat rate. Existing stores
+    # keep the current flat fee as the default for unlisted states and are given
+    # a sensible per-state map once (the Admin app owns it from then on).
+    delivery_columns = [c["name"] for c in inspector.get_columns("delivery_settings")]
+    if "state_fees" not in delivery_columns:
+        db.execute(text("ALTER TABLE delivery_settings ADD COLUMN state_fees JSONB"))
+        from app.services.delivery_service import DEFAULT_STATE_FEES
+        rows = db.execute(text("SELECT id FROM delivery_settings")).fetchall()
+        for (row_id,) in rows:
+            db.execute(
+                text("UPDATE delivery_settings SET state_fees = :state_fees WHERE id = :id"),
+                {"state_fees": DEFAULT_STATE_FEES, "id": row_id},
+            )
+        db.commit()
+        print("Migration: added state_fees to delivery_settings with default state map")
+
     db.commit()
 
 

@@ -60,9 +60,9 @@ def create_order(user_id: str, req: OrderCreateRequest, db: Session):
     # shipping-address state — the seller (West Bengal) is fixed.
     subtotal = round(subtotal, 2)
     breakup = gst.gst_breakup(subtotal, req.shipping_state)
-    # Delivery charge from the store-wide settings (free unless the seller has
+    # Delivery charge priced by destination state (free unless the seller has
     # configured a fee; waived above the free-over threshold).
-    delivery_fee = delivery_service.compute_fee(subtotal, delivery_settings)
+    delivery_fee = delivery_service.compute_fee(subtotal, delivery_settings, req.shipping_state)
     final_amount = subtotal + breakup["gst_amount"] + delivery_fee
     estimated_delivery = datetime.now(timezone.utc) + timedelta(days=7)
 
